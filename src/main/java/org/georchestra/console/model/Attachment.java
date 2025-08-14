@@ -1,0 +1,100 @@
+/*
+ * Copyright (C) 2009-2025 by the geOrchestra PSC
+ *
+ * This file is part of geOrchestra.
+ *
+ * geOrchestra is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ *
+ * geOrchestra is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * geOrchestra. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+package org.georchestra.console.model;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Lob;
+import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.Table;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+@Entity
+@Table(schema = "console", name = "admin_attachments")
+public class Attachment {
+
+    @Id
+    @SequenceGenerator(name = "admin_attachments_id_seq", schema = "console", sequenceName = "admin_attachments_id_seq", initialValue = 1, allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "admin_attachments_id_seq")
+    private long id;
+    private String name;
+    @Lob
+    private byte[] content;
+    private String mimeType;
+
+    public Attachment() {
+    }
+
+    public Attachment(String name, String mimeType, byte[] content) {
+        this.name = name;
+        this.mimeType = mimeType;
+        this.content = content;
+    }
+
+    public JSONObject toJSON() throws JSONException {
+        JSONObject res = new JSONObject();
+        res.put("id", this.getId());
+        res.put("name", this.getName());
+        res.put("mimeType", this.getMimeType());
+        res.put("size", this.content.length);
+        return res;
+    }
+
+    /*
+     * Generic getter, setter
+     */
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public byte[] getContent() {
+        return content;
+    }
+
+    public void setContent(byte[] content) {
+        this.content = content;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getMimeType() {
+        return mimeType;
+    }
+
+    public void setMimeType(String mimeType) {
+        this.mimeType = mimeType;
+    }
+
+}

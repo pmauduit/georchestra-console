@@ -1,0 +1,85 @@
+/*
+ * Copyright (C) 2009-2025 by the geOrchestra PSC
+ *
+ * This file is part of geOrchestra.
+ *
+ * geOrchestra is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ *
+ * geOrchestra is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * geOrchestra. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+package org.georchestra.console.model;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.Table;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+@Entity
+@Table(schema = "console", name = "email_template")
+public class EmailTemplate {
+
+    @Id
+    @SequenceGenerator(name = "email_template_id_seq", schema = "console", sequenceName = "email_template_id_seq", initialValue = 1, allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "email_template_id_seq")
+    private long id;
+    private String name;
+    @Column(columnDefinition = "TEXT")
+    private String content;
+
+    public EmailTemplate() {
+    }
+
+    public EmailTemplate(long id, String name, String content) {
+        this.id = id;
+        this.name = name;
+        this.content = content;
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public JSONObject toJSON() throws JSONException {
+        JSONObject res = new JSONObject();
+        res.put("id", this.getId());
+        res.put("name", this.getName());
+        res.put("content", this.getContent());
+        return res;
+    }
+}
