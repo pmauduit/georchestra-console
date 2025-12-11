@@ -9,3 +9,10 @@ spring:
     username: georchestra
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
+  ldap:
+    urls: ${ldapScheme}://${ldapHost}:${ldapPort}
+    base: dc=georchestra,dc=org
+
+server:
+  servlet:
+    context-path: /console

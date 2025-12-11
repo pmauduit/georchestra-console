@@ -43,6 +43,7 @@ import org.georchestra.security.api.UsersApi;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.ldap.core.LdapTemplate;
+import org.springframework.ldap.core.support.LdapContextSource;
 
 import javax.sql.DataSource;
 
@@ -148,7 +149,16 @@ public class ConsoleConfig {
     }
 
     public @Bean LdapDaoProperties ldapDaoProperties() {
-        return new LdapDaoProperties();
+        // TODO: 1. it's redundant with spring's LdapTemplate / LdapContextSource ?
+        // 2. should be configurable in console.yaml
+        return new LdapDaoProperties()
+                .setBasePath("dc=georchestra,dc=org")
+                .setOrgSearchBaseDN("ou=orgs")
+                .setOrgTypeValues("georchestraOrg")
+                .setPendingOrgSearchBaseDN("ou=pendingorgs")
+                .setRoleSearchBaseDN("ou=roles")
+                .setPendingUserSearchBaseDN("ou=pendingusers")
+                .setUserSearchBaseDN("ou=users");
     }
 
     public @Bean AccountDaoImpl accountDao(LdapTemplate ldapTemplate) {

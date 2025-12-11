@@ -1,5 +1,5 @@
 ldapScheme: ldap
 ldapHost: localhost
-ldapPort: 389
+ldapPort: 3389
 domainName: localhost
 administratorEmail: psc@georchestra.org
