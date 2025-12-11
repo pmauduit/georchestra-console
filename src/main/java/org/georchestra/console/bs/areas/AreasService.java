@@ -64,8 +64,9 @@ public class AreasService {
     /**
      * Required to resolve relative paths when {@link #areasURI} is set relative to
      * georchestra's data directory
+     * TODO: remove
      */
-    private final @NonNull GeorchestraConfiguration georConfig;
+    private final GeorchestraConfiguration georConfig;
 
     /**
      * Location of the GeoJSON FeatureCollection defining allowed areas. Maybe
@@ -90,13 +91,20 @@ public class AreasService {
         initialize();
     }
 
+    // TODO: remove, use configuration instead
     public URL resolveAreasLocation() throws MalformedURLException {
         URI uri = URI.create(areasURI);
+
         if (null == uri.getScheme()) {
-            if (!georConfig.activated()) {
+            if ((georConfig != null) && ! georConfig.activated()) {
                 throw new IllegalStateException("Georchestra datadirectory is not configured");
             }
-            uri = URI.create("file://" + georConfig.getContextDataDir() + File.separator + areasURI);
+            if (georConfig != null) {
+                uri = URI.create("file://" + georConfig.getContextDataDir() + File.separator + areasURI);
+            } else {
+                // by convention ...
+                uri = URI.create("file:///etc/georchestra" + File.separator + areasURI);
+            }
         }
         return uri.toURL();
     }

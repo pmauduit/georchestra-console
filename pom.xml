@@ -204,7 +204,7 @@
 						<arg>-Xmaxerrs</arg>
 						<arg>500</arg>
 					</compilerArgs>
-				</configuration>
+                </configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>

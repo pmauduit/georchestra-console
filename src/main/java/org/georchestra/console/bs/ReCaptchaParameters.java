@@ -19,7 +19,8 @@
 
 package org.georchestra.console.bs;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 /**
  * ReCaptchaParameters attribute
@@ -28,38 +29,10 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @author Sylvain Lesage
  *
  */
+@RequiredArgsConstructor
+@Getter
 public final class ReCaptchaParameters {
-
-    private String privateKey;
-
-    private String publicKey;
-
-    private String verifyUrl;
-
-    public String getPublicKey() {
-        return publicKey;
-    }
-
-    @Autowired
-    public void setPublicKey(String publicKey) {
-        this.publicKey = publicKey;
-    }
-
-    public String getPrivateKey() {
-        return privateKey;
-    }
-
-    @Autowired
-    public void setPrivateKey(String privateKey) {
-        this.privateKey = privateKey;
-    }
-
-    public String getVerifyUrl() {
-        return verifyUrl;
-    }
-
-    @Autowired
-    public void setVerifyUrl(String verifyUrl) {
-        this.verifyUrl = verifyUrl;
-    }
+    private final String publicKey;
+    private final String privateKey;
+    private final String verifyUrl;
 }

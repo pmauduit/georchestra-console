@@ -56,8 +56,7 @@ public class NewPasswordFormController {
     private final AccountDao accountDao;
     private final UserTokenDao userTokenDao;
 
-    @Autowired
-    private boolean reCaptchaActivated;
+    private boolean reCaptchaActivated = false;
 
     public NewPasswordFormController(AccountDao accountDao, UserTokenDao userTokenDao) {
         this.accountDao = accountDao;

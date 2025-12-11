@@ -22,6 +22,7 @@ package org.georchestra.console.ws;
 import static org.georchestra.commons.security.SecurityHeaders.SEC_ROLES;
 import static org.junit.Assert.assertTrue;
 
+import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletResponse;
 
 import org.georchestra.console.bs.ExpiredTokenCleanTask;
@@ -45,7 +46,7 @@ public class HomeControllerTest {
     @Before
     public void setUp() {
         expiredTokenMgmt.setDelayInDays(1);
-        ctrl = new HomeController(expiredTokenMgmt);
+        ctrl = new HomeController(expiredTokenMgmt, Mockito.mock(ServletContext.class));
         ctrl.setPublicContextPath("/console");
     }
 

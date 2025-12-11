@@ -25,6 +25,7 @@ import org.geotools.api.feature.simple.SimpleFeature;
 import org.geotools.api.filter.Filter;
 import org.geotools.api.filter.FilterFactory;
 import org.geotools.data.geojson.store.GeoJSONDataStore;
+import org.geotools.data.geojson.store.GeoJSONFeatureSource;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.factory.CommonFactoryFinder;
@@ -48,7 +49,13 @@ class AreasDataStore {
     public AreasDataStore(URL geoJson) throws IOException {
         this.geoJsonLocation = geoJson;
         GeoJSONDataStore dataStore = new GeoJSONDataStore(geoJson);
-        this.featureSource = dataStore.getFeatureSource();
+        try {
+            this.featureSource = dataStore.getFeatureSource();
+        } catch (IOException e) {
+            // TODO should leave it exploding instead
+            this.featureSource = null;
+        }
+
     }
 
     public List<Geometry> findAreasById(List<String> ids) throws IOException {

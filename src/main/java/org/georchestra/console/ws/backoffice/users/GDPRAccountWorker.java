@@ -81,14 +81,15 @@ import lombok.extern.slf4j.Slf4j;
  *
  */
 @Slf4j
+@RequiredArgsConstructor
 public class GDPRAccountWorker {
 
     private static final DateTimeFormatter FILENAME_DATE_FORMAT = DateTimeFormatter.ISO_LOCAL_DATE;
     private static final DateTimeFormatter CONTENT_DATE_FORMAT = DateTimeFormatter.ISO_DATE_TIME;
 
-    private @Autowired @Setter(AccessLevel.PACKAGE) AccountGDPRDao accountGDPRDao;
-    private @Autowired @Setter(AccessLevel.PACKAGE) UserInfoExporter userInfoExporter;
-    private @Autowired @Setter(AccessLevel.PACKAGE) AccountDao accountDao;
+    private final AccountGDPRDao accountGDPRDao;
+    private final UserInfoExporter userInfoExporter;
+    private final AccountDao accountDao;
 
     public static @Value @Builder class DeletedAccountSummary {
         private String accountId;

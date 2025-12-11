@@ -28,6 +28,7 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.georchestra.ds.DataServiceException;
@@ -42,12 +43,12 @@ import org.springframework.util.ObjectUtils;
  *
  * @author Mauricio Pazos
  */
+@RequiredArgsConstructor
 public class UserTokenDao {
 
     private static final Log LOG = LogFactory.getLog(UserTokenDao.class.getName());
 
-    @Autowired
-    private DataSource dataSource;
+    private final DataSource dataSource;
 
     /**
      * Inserts the new association uid-token.
@@ -161,10 +162,6 @@ public class UserTokenDao {
         executeCmd(cmd, "UserTokenDao.delete");
     }
 
-    public void setDataSource(DataSource dataSource) {
-        this.dataSource = dataSource;
-    }
-
     private void executeCmd(DataCommand cmd, String logMsg) throws DataServiceException {
         try {
             cmd.setDataSource(dataSource);
@@ -174,4 +171,5 @@ public class UserTokenDao {
             throw new DataServiceException(e);
         }
     }
+
 }

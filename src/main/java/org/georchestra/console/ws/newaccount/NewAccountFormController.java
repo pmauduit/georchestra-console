@@ -22,7 +22,9 @@ package org.georchestra.console.ws.newaccount;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -107,30 +109,28 @@ public final class NewAccountFormController {
     @Autowired
     protected PasswordUtils passwordUtils;
 
-    @Autowired
     private boolean moderatedSignup = true;
 
-    @Autowired
-    protected boolean reCaptchaActivated;
+    // TODO
+    protected boolean reCaptchaActivated = false;
     private ReCaptchaParameters reCaptchaParameters;
 
-    @Autowired
-    protected boolean privacyPolicyAgreementActivated;
+    // TODO
+    protected boolean privacyPolicyAgreementActivated = false;
 
-    @Autowired
+    // TODO
     protected String privacyPolicyAgreementUrl;
 
-    @Autowired
-    protected boolean consentAgreementActivated;
+    // TODO
+    protected boolean consentAgreementActivated = false;
 
-    @Autowired
+    // TODO
     protected String consentAgreementUrl;
 
     @Autowired
     protected LogUtils logUtils;
 
-    @Autowired
-    protected Clock clock;
+    protected Clock clock = Clock.systemDefaultZone();
 
     private Validation validation;
 

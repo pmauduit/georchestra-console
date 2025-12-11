@@ -55,7 +55,7 @@ public class PasswordRecoveryFormControllerTest {
     private RoleDao gdao = Mockito.mock(RoleDao.class);
     private EmailFactory efi = Mockito.mock(EmailFactory.class);
     private ReCaptchaV2 rec = Mockito.mock(ReCaptchaV2.class);
-    private ReCaptchaParameters rep = new ReCaptchaParameters();
+    private ReCaptchaParameters rep = new ReCaptchaParameters("","","");
     private UserTokenDao utd = Mockito.mock(UserTokenDao.class);
     private Model model = Mockito.mock(Model.class);
     private HttpServletRequest request = new MockHttpServletRequest();

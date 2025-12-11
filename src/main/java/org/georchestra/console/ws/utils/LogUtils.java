@@ -25,6 +25,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.georchestra.console.dao.AdminLogDao;
@@ -41,16 +42,12 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+@RequiredArgsConstructor
 public class LogUtils {
-    @Autowired
-    private AdminLogDao logDao;
 
-    @Autowired
-    private RoleProtected roles;
+    private final AdminLogDao logDao;
 
-    public void setLogDao(AdminLogDao logDao) {
-        this.logDao = logDao;
-    }
+    private final RoleProtected roles;
 
     private static final Log LOG = LogFactory.getLog(LogUtils.class.getName());
 

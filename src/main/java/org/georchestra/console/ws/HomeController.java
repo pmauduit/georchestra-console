@@ -29,6 +29,7 @@ import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.georchestra.commons.security.SecurityHeaders;
@@ -46,25 +47,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
  *
  */
 @Controller
+@RequiredArgsConstructor
 public class HomeController {
 
     private static final Log LOG = LogFactory.getLog(HomeController.class.getName());
-    private ExpiredTokenManagement tokenManagement;
+    private final ExpiredTokenManagement tokenManagement;
 
     @Value("${publicContextPath:/console}")
     private String publicContextPath;
 
-    @Autowired
-    private ServletContext context;
-
-    public HomeController(ExpiredTokenManagement tokenManagment) {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("home controller initialization");
-        }
-
-        this.tokenManagement = tokenManagment;
-        this.tokenManagement.start();
-    }
+    private final ServletContext context;
 
     @RequestMapping(value = "/")
     public void root(HttpServletRequest request, HttpServletResponse response) throws IOException {

@@ -47,7 +47,7 @@ public class LogUtilsTest {
     @Test
     public void createLogNoAuth() {
         SecurityContextHolder.clearContext();
-        LogUtils logUtils = new LogUtils();
+        LogUtils logUtils = new LogUtils(null, null);
         log = logUtils.createLog("csc", AdminLogType.ORG_CREATED, null);
         assertEquals(null, log);
     }
@@ -60,7 +60,7 @@ public class LogUtilsTest {
         Authentication auth = new PreAuthenticatedAuthenticationToken("testadmin", null, role);
         SecurityContextHolder.getContext().setAuthentication(auth);
 
-        LogUtils logUtils = new LogUtils();
+        LogUtils logUtils = new LogUtils(null, null);
         JSONObject json = logUtils.getLogDetails("name", "monkey1", "monkey2", AdminLogType.ORG_CREATED);
 
         log = logUtils.createLog("csc", AdminLogType.ORG_CREATED, json.toString());
@@ -77,7 +77,7 @@ public class LogUtilsTest {
         Authentication auth = new PreAuthenticatedAuthenticationToken("testadmin", null, role);
         SecurityContextHolder.getContext().setAuthentication(auth);
 
-        LogUtils logUtils = new LogUtils();
+        LogUtils logUtils = new LogUtils(null, null);
 
         log = logUtils.createLog("csc", AdminLogType.ORG_CREATED, null);
 
@@ -88,7 +88,7 @@ public class LogUtilsTest {
 
     @Test
     public void getLogDetailsWithoutNull() {
-        LogUtils logUtils = new LogUtils();
+        LogUtils logUtils = new LogUtils(null, null);
         JSONObject json = logUtils.getLogDetails("name", "monkey1", "monkey2", AdminLogType.ORG_CREATED);
 
         assertEquals("name", json.get("field"));
@@ -99,7 +99,7 @@ public class LogUtilsTest {
 
     @Test
     public void getLogDetailsWithAllAsNull() {
-        LogUtils logUtils = new LogUtils();
+        LogUtils logUtils = new LogUtils(null, null);
         JSONObject json = logUtils.getLogDetails(null, null, null, null);
 
         assertEquals("", json.get("field"));

@@ -52,8 +52,7 @@ public class UserTokenDaoTest {
 
     @Before
     public void setUp() throws Exception {
-        userTokenDao = new UserTokenDao();
-        userTokenDao.setDataSource(dataSource);
+        userTokenDao = new UserTokenDao(dataSource);
         when(dataSource.getConnection()).thenReturn(connection);
         when(connection.prepareStatement(Mockito.anyString())).thenReturn(preparedStatement);
     }

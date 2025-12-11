@@ -23,8 +23,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.stereotype.Component;
 
 /**
  *
@@ -39,6 +41,8 @@ import org.apache.commons.logging.LogFactory;
  * @author Mauricio Pazos
  *
  */
+@Component
+@RequiredArgsConstructor
 public final class ExpiredTokenManagement {
 
     private static final Log LOG = LogFactory.getLog(ExpiredTokenManagement.class.getName());
@@ -48,11 +52,8 @@ public final class ExpiredTokenManagement {
     /** delay in days to execute the cleaning task */
     private int delayInDays = -1;
 
-    private ExpiredTokenCleanTask expiredTokenCleanTask;
+    private final ExpiredTokenCleanTask expiredTokenCleanTask;
 
-    public ExpiredTokenManagement(ExpiredTokenCleanTask expiredTokenCleanTask) {
-        this.expiredTokenCleanTask = expiredTokenCleanTask;
-    }
 
     public int getDelayInDays() {
         return delayInDays;

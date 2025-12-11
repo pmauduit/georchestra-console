@@ -1,0 +1,11 @@
+spring:
+  config:
+    import: classpath:/console.yaml,optional:file:${georchestra.datadir}/default.properties,optional:file:${georchestra.datadir}/console/console.yaml
+  application:
+    name: console
+  datasource:
+    url: "jdbc:postgresql://localhost/georchestra?currentSchema=console"
+    password: georchestra
+    username: georchestra
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect

@@ -121,9 +121,8 @@ public class GDPRAccountWorkerTest {
         stub.ogcstatsRecords.putAll(uid2, ogcstatsRecords(uid2, 4));
 
         UserInfoExporter ldifExporter = Mockito.mock(UserInfoExporterImpl.class);
-        worker = new GDPRAccountWorker();
-        worker.setAccountGDPRDao(daoStub);
-        worker.setUserInfoExporter(ldifExporter);
+        worker = new GDPRAccountWorker(daoStub, ldifExporter, null);
+
     }
 
     private Iterable<? extends OgcStatisticsRecord> ogcstatsRecords(String uid, int count) {

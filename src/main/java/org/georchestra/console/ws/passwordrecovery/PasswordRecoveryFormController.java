@@ -82,8 +82,8 @@ public class PasswordRecoveryFormController {
     private final UserTokenDao userTokenDao;
     private final ReCaptchaParameters reCaptchaParameters;
 
-    @Autowired
-    private boolean reCaptchaActivated;
+    // TODO
+    private boolean reCaptchaActivated = false;
 
     @Autowired
     protected LogUtils logUtils;

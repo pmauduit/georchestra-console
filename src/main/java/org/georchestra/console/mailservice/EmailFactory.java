@@ -45,7 +45,8 @@ public class EmailFactory {
     private String subjectEncoding;
     private String templateEncoding;
 
-    @Autowired
+    // TODO: revisit
+    @Autowired(required = false)
     private GeorchestraConfiguration georConfig;
 
     private String accountWasCreatedEmailFile;
