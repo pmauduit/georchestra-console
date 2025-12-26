@@ -8,6 +8,7 @@ A rewrite of geOrchestra's console webapp using updated versions of the dependen
 * rewrite tests to remove IT / Tests ? `integration` package ?
 * Upgrade dependencies in pom.
 * Get rid of Junit4 & rewrite testsuite to Junit5
+* Add a maven formatter plugin
 
 # (B)log
 

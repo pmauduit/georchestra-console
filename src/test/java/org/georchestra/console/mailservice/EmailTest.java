@@ -77,19 +77,19 @@ public class EmailTest {
         this.replaceTemplate = "replace-template.txt";
         this.replaceTemplateResult = "replace-template-result.txt";
         this.servletContext = Mockito.mock(ServletContext.class);
-        this.georchestraConfiguration = Mockito.mock(GeorchestraConfiguration.class);
+        this.georchestraConfiguration = new GeorchestraConfiguration("/console");
         this.publicUrl = "http://localhost:8080";
         this.instanceName = "geOrchestra";
         Mockito.when(this.servletContext.getRealPath("/WEB-INF/templates/" + this.simpleTemplate))
-                .thenReturn(this.getClass().getClassLoader().getResource(this.simpleTemplate).getPath());
+                .thenReturn(this.getClass().getResource(this.simpleTemplate).getPath());
         Mockito.when(this.servletContext.getRealPath("/WEB-INF/templates/" + this.htmlTemplate))
-                .thenReturn(this.getClass().getClassLoader().getResource(this.htmlTemplate).getPath());
+                .thenReturn(this.getClass().getResource(this.htmlTemplate).getPath());
         Mockito.when(this.servletContext.getRealPath("/WEB-INF/templates/" + this.utf8Template))
-                .thenReturn(this.getClass().getClassLoader().getResource(this.utf8Template).getPath());
+                .thenReturn(this.getClass().getResource(this.utf8Template).getPath());
         Mockito.when(this.servletContext.getRealPath("/WEB-INF/templates/" + this.isoTemplate))
-                .thenReturn(this.getClass().getClassLoader().getResource(this.isoTemplate).getPath());
+                .thenReturn(this.getClass().getResource(this.isoTemplate).getPath());
         Mockito.when(this.servletContext.getRealPath("/WEB-INF/templates/" + this.replaceTemplate))
-                .thenReturn(this.getClass().getClassLoader().getResource(this.replaceTemplate).getPath());
+                .thenReturn(this.getClass().getResource(this.replaceTemplate).getPath());
     }
 
     @Test
@@ -120,7 +120,7 @@ public class EmailTest {
 
         // Check email body
         String expectedBody = FileUtils.readFileToString(
-                new File(this.getClass().getClassLoader().getResource(this.simpleTemplate).getPath()), "ascii");
+                new File(this.getClass().getResource(this.simpleTemplate).getPath()), "ascii");
         expectedBody = expectedBody.replaceAll("\\{publicUrl\\}", this.publicUrl);
         assertEquals(expectedBody, message.getContent());
 
@@ -139,7 +139,7 @@ public class EmailTest {
 
         // Check email body
         String expectedBody = FileUtils.readFileToString(
-                new File(this.getClass().getClassLoader().getResource(this.htmlTemplate).getPath()), "ascii");
+                new File(this.getClass().getResource(this.htmlTemplate).getPath()), "ascii");
         expectedBody = expectedBody.replaceAll("\\{publicUrl\\}", this.publicUrl);
         assertEquals(expectedBody, message.getContent());
     }
@@ -155,7 +155,7 @@ public class EmailTest {
 
         // Check email body
         String expectedBody = FileUtils.readFileToString(
-                new File(this.getClass().getClassLoader().getResource(this.utf8Template).getPath()), "UTF-8");
+                new File(this.getClass().getResource(this.utf8Template).getPath()), "UTF-8");
         expectedBody = expectedBody.replaceAll("\\{publicUrl\\}", this.publicUrl);
         assertEquals(expectedBody, message.getContent());
     }
@@ -171,7 +171,7 @@ public class EmailTest {
 
         // Check email body
         String expectedBody = FileUtils.readFileToString(
-                new File(this.getClass().getClassLoader().getResource(this.isoTemplate).getPath()), "ISO-8859-15");
+                new File(this.getClass().getResource(this.isoTemplate).getPath()), "ISO-8859-15");
         expectedBody = expectedBody.replaceAll("\\{publicUrl\\}", this.publicUrl);
         assertEquals(expectedBody, message.getContent());
     }
@@ -187,7 +187,7 @@ public class EmailTest {
         Message message = email.send(false);
 
         String expectedBody = FileUtils.readFileToString(
-                new File(this.getClass().getClassLoader().getResource(this.replaceTemplateResult).getPath()), "ascii");
+                new File(this.getClass().getResource(this.replaceTemplateResult).getPath()), "ascii");
         assertEquals(expectedBody, message.getContent());
     }
 

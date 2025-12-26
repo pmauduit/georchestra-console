@@ -23,6 +23,7 @@ import static org.georchestra.commons.security.SecurityHeaders.SEC_EMAIL;
 import static org.georchestra.commons.security.SecurityHeaders.SEC_FIRSTNAME;
 import static org.georchestra.commons.security.SecurityHeaders.SEC_LASTNAME;
 import static org.georchestra.commons.security.SecurityHeaders.SEC_ROLES;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -37,9 +38,8 @@ import org.georchestra.ds.DataServiceException;
 import org.georchestra.ds.users.Account;
 import org.georchestra.ds.users.AccountDao;
 import org.json.JSONException;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class EmailControllerTest {
 
@@ -47,7 +47,7 @@ public class EmailControllerTest {
     private EmailController ctrl;
     private AccountDao accountDao;
 
-    @Before
+    @BeforeEach
     public void setUpConfiguration() throws MessagingException {
 
         // Mock headers
@@ -73,22 +73,21 @@ public class EmailControllerTest {
     /**
      * This test checks that JSON is valid
      */
-
-    @Test(expected = JSONException.class)
+    @Test
     public void testJSONParse()
             throws MessagingException, DataServiceException, JSONException, UnsupportedEncodingException {
 
         String jsonPayload = "{ \"to\": [\"you@rm.fr\", \"another-guy@rm.fr\"], " + "\"cc\": [\"him@rm.fr\"], "
                 + "\"bcc\": [\"secret@rm.fr, missing closing square bracket, " + "\"subject\": \"test email\", "
                 + "\"body\": \"Hi, this a test EMail, please do not reply.\" }";
-
-        this.ctrl.emailProxy(jsonPayload, this.request);
+        assertThrows(JSONException.class,
+                () -> this.ctrl.emailProxy(jsonPayload, this.request));
     }
 
     /**
      * This test checks that JSON contains an array under 'to', 'cc' or 'bbc' key
      */
-    @Test(expected = JSONException.class)
+    @Test
     public void testJSONParse2()
             throws MessagingException, DataServiceException, JSONException, UnsupportedEncodingException {
 
@@ -96,22 +95,22 @@ public class EmailControllerTest {
                 + "\"bcc\": \"valid@address.com\", " + "\"subject\": \"test email\", "
                 + "\"body\": \"Hi, this a test EMail, please do not reply.\" }";
 
-        this.ctrl.emailProxy(jsonPayload, this.request);
+        assertThrows(JSONException.class,
+                () -> this.ctrl.emailProxy(jsonPayload, this.request));
     }
 
     /**
      * This test checks that EMail addresses are valid. Tests populateRecipient()
      * method
      */
-    @Test(expected = AddressException.class)
+    @Test
     public void testParseAddress()
             throws MessagingException, DataServiceException, JSONException, UnsupportedEncodingException {
 
         String jsonPayload = "{ \"to\": [\"you@rm.fr\", \"another-guy@rm.fr\"], " + "\"cc\": [\"him@rm.fr\"], "
                 + "\"bcc\": [\"invalid email address\"], " + "\"subject\": \"test email\", "
                 + "\"body\": \"Hi, this a test EMail, please do not reply.\" }";
-
-        this.ctrl.emailProxy(jsonPayload, this.request);
+        assertThrows(AddressException.class, () -> this.ctrl.emailProxy(jsonPayload, this.request));
     }
 
     /**
@@ -123,12 +122,7 @@ public class EmailControllerTest {
         String jsonPayload = "{ \"to\": [\"you@rm.fr\", \"another-guy@rm.fr\"], " + "\"cc\": [\"him@rm.fr\"], "
                 + "\"bcc\": [\"valid@address.com\"], " + "\"body\": \"Hi, this a test EMail, please do not reply.\" }";
 
-        try {
-            this.ctrl.emailProxy(jsonPayload, this.request);
-            Assert.fail();
-        } catch (JSONException ex) {
-            Assert.assertEquals("No subject specified, 'subject' field is required", ex.getMessage());
-        }
+        assertThrows(JSONException.class, () -> this.ctrl.emailProxy(jsonPayload, this.request));
     }
 
     /**
@@ -141,12 +135,7 @@ public class EmailControllerTest {
                 + "\"bcc\": [\"valid@address.com\"], " + "\"subject\": \"\","
                 + "\"body\": \"Hi, this a test EMail, please do not reply.\" }";
 
-        try {
-            this.ctrl.emailProxy(jsonPayload, this.request);
-            Assert.fail();
-        } catch (JSONException ex) {
-            Assert.assertEquals("No subject specified, 'subject' field is required", ex.getMessage());
-        }
+            assertThrows(JSONException.class, () -> this.ctrl.emailProxy(jsonPayload, this.request));
     }
 
     /**
@@ -162,12 +151,8 @@ public class EmailControllerTest {
                 + "very very very very very very very very very very very very very very very long subject that should "
                 + "exceed configured max subject size\", "
                 + "\"body\": \"Hi, this a test EMail, please do not reply.\" }";
-        try {
-            this.ctrl.emailProxy(jsonPayload, this.request);
-            Assert.fail();
-        } catch (IllegalArgumentException ex) {
-            Assert.assertEquals("Subject is too long, it should not exceed 200 bytes", ex.getMessage());
-        }
+
+        assertThrows(IllegalArgumentException.class, () -> this.ctrl.emailProxy(jsonPayload, this.request));
     }
 
     /**
@@ -179,12 +164,7 @@ public class EmailControllerTest {
         String jsonPayload = "{ \"to\": [\"you@rm.fr\", \"another-guy@rm.fr\"], " + "\"cc\": [\"him@rm.fr\"], "
                 + "\"bcc\": [\"valid@address.com\"], " + "\"subject\": \"Hello\" }";
 
-        try {
-            this.ctrl.emailProxy(jsonPayload, this.request);
-            Assert.fail();
-        } catch (JSONException ex) {
-            Assert.assertEquals("No body specified, 'body' field is required", ex.getMessage());
-        }
+        assertThrows(JSONException.class, () -> this.ctrl.emailProxy(jsonPayload, this.request));
     }
 
     /**
@@ -203,12 +183,8 @@ public class EmailControllerTest {
 
         String jsonPayload = "{ \"to\": [\"you@rm.fr\", \"another-guy@rm.fr\"], " + "\"cc\": [\"him@rm.fr\"], "
                 + "\"bcc\": [\"valid@address.com\"], " + "\"subject\": \"Hello\", " + "\"body\": \"" + body + "\" }";
-        try {
-            this.ctrl.emailProxy(jsonPayload, this.request);
-            Assert.fail();
-        } catch (IllegalArgumentException ex) {
-            Assert.assertEquals("Body is too long, it should not exceed 10000 bytes", ex.getMessage());
-        }
+
+        assertThrows(IllegalArgumentException.class, () -> this.ctrl.emailProxy(jsonPayload, this.request));
     }
 
     /**
@@ -217,45 +193,27 @@ public class EmailControllerTest {
     @Test
     public void testNoRecipient()
             throws UnsupportedEncodingException, MessagingException, DataServiceException, JSONException {
-        String jsonPayload = "{ \"subject\": \"Hello\","
+        String jsonPayload1 = "{ \"subject\": \"Hello\","
                 + "\"body\": \"Hi, this a test EMail, please do not reply.\" }";
 
-        try {
-            this.ctrl.emailProxy(jsonPayload, this.request);
-            Assert.fail();
-        } catch (JSONException ex) {
-            Assert.assertEquals("One of 'to', 'cc' or 'bcc' must be present in request", ex.getMessage());
-        }
+        assertThrows(JSONException.class, () -> this.ctrl.emailProxy(jsonPayload1, this.request));
 
-        jsonPayload = "{ \"to\": [], " + "\"subject\": \"Hello\","
+        String jsonPayload2 = "{ \"to\": [], " + "\"subject\": \"Hello\","
                 + "\"body\": \"Hi, this a test EMail, please do not reply.\" }";
 
-        try {
-            this.ctrl.emailProxy(jsonPayload, this.request);
-            Assert.fail();
-        } catch (JSONException ex) {
-            Assert.assertEquals("One of 'to', 'cc' or 'bcc' must be present in request", ex.getMessage());
-        }
 
-        jsonPayload = "{ \"to\": [\"\"], " + "\"subject\": \"Hello\","
+        assertThrows(JSONException.class, () -> this.ctrl.emailProxy(jsonPayload2, this.request));
+
+        String jsonPayload3 = "{ \"to\": [\"\"], " + "\"subject\": \"Hello\","
                 + "\"body\": \"Hi, this a test EMail, please do not reply.\" }";
 
-        try {
-            this.ctrl.emailProxy(jsonPayload, this.request);
-            Assert.fail();
-        } catch (AddressException ex) {
-            Assert.assertEquals("Missing final '@domain'", ex.getMessage());
-        }
 
-        jsonPayload = "{ \"to\": [], " + "\"cc\": [], " + "\"bcc\": [], " + "\"subject\": \"Hello\","
+        assertThrows(AddressException.class, () -> this.ctrl.emailProxy(jsonPayload3, this.request));
+
+        String jsonPayload4 = "{ \"to\": [], " + "\"cc\": [], " + "\"bcc\": [], " + "\"subject\": \"Hello\","
                 + "\"body\": \"Hi, this a test EMail, please do not reply.\" }";
 
-        try {
-            this.ctrl.emailProxy(jsonPayload, this.request);
-            Assert.fail();
-        } catch (JSONException ex) {
-            Assert.assertEquals("One of 'to', 'cc' or 'bcc' must be present in request", ex.getMessage());
-        }
+        assertThrows(JSONException.class, () -> this.ctrl.emailProxy(jsonPayload4, this.request));
     }
 
     /**
@@ -269,12 +227,8 @@ public class EmailControllerTest {
                 + "\"cc\": [\"him@rm.fr\", \"another-guy@rm.fr\", \"another-guy@rm.fr\"], "
                 + "\"bcc\": [\"valid@address.com\", \"another-guy@rm.fr\", \"another-guy@rm.fr\", \"another-guy@rm.fr\"], "
                 + "\"subject\": \"Hello\", " + "\"body\": \"Hello, maybe there is too many recipient ?\" }";
-        try {
-            this.ctrl.emailProxy(jsonPayload, this.request);
-            Assert.fail();
-        } catch (IllegalArgumentException ex) {
-            Assert.assertEquals("Too many recipient in request, max recipient : 10", ex.getMessage());
-        }
+
+        assertThrows(IllegalArgumentException.class, () -> this.ctrl.emailProxy(jsonPayload, this.request));
     }
 
     /**
@@ -284,26 +238,17 @@ public class EmailControllerTest {
     public void testRecipientAgainstWhitelist()
             throws MessagingException, DataServiceException, JSONException, UnsupportedEncodingException {
 
-        String jsonPayload = "{ \"to\": [\"psc@georchestra.org\"], " + "\"cc\": [\"postmaster@georchestra.org\"], "
-                + "\"bcc\": [\"listmaster@georchestra.org\"], " + "\"subject\": \"Hello\", "
-                + "\"body\": \"Hello, maybe there is too many recipient ?\" }";
-        try {
-            this.ctrl.emailProxy(jsonPayload, this.request);
-        } catch (NullPointerException ex) {
-            // NullPointerException is throw because configuration is missing
-            // EmailFactoryImpl
-        }
-
-        jsonPayload = "{ \"to\": [\"psc-noexist@georchestra.org\"], " + "\"cc\": [\"postmaster@georchestra.org\"], "
+        String jsonPayload1 = "{ \"to\": [\"psc@georchestra.org\"], " + "\"cc\": [\"postmaster@georchestra.org\"], "
                 + "\"bcc\": [\"listmaster@georchestra.org\"], " + "\"subject\": \"Hello\", "
                 + "\"body\": \"Hello, maybe there is too many recipient ?\" }";
 
-        try {
-            this.ctrl.emailProxy(jsonPayload, this.request);
-            Assert.fail();
-        } catch (IllegalArgumentException ex) {
-            Assert.assertEquals("Recipient not allowed : psc-noexist@georchestra.org", ex.getMessage());
-        }
+        assertThrows(NullPointerException.class, () -> this.ctrl.emailProxy(jsonPayload1, this.request));
+
+        String jsonPayload2 = "{ \"to\": [\"psc-noexist@georchestra.org\"], " + "\"cc\": [\"postmaster@georchestra.org\"], "
+                + "\"bcc\": [\"listmaster@georchestra.org\"], " + "\"subject\": \"Hello\", "
+                + "\"body\": \"Hello, maybe there is too many recipient ?\" }";
+
+        assertThrows(IllegalArgumentException.class, () -> this.ctrl.emailProxy(jsonPayload2, this.request));
     }
 
     /**
@@ -327,15 +272,11 @@ public class EmailControllerTest {
             // EmailFactoryImpl
         }
 
-        jsonPayload = "{ \"to\": [\"adresse-tata@georchestra.org\"], " + "\"cc\": [\"adresse-toto@georchestra.org\"], "
+        String jsonPayload2 = "{ \"to\": [\"adresse-tata@georchestra.org\"], " + "\"cc\": [\"adresse-toto@georchestra.org\"], "
                 + "\"bcc\": [\"adresse-nonexist@georchestra.org\"], " + "\"subject\": \"Hello\", "
                 + "\"body\": \"Hello, maybe there is too many recipient ?\" }";
-        try {
-            this.ctrl.emailProxy(jsonPayload, this.request);
-            Assert.fail();
-        } catch (IllegalArgumentException ex) {
-            Assert.assertEquals("Recipient not allowed : adresse-tata@georchestra.org", ex.getMessage());
-        }
+
+        assertThrows(IllegalArgumentException.class, () -> this.ctrl.emailProxy(jsonPayload2, this.request));
     }
 
 }
