@@ -19,12 +19,15 @@
 
 package org.georchestra.console.ws.changepassword;
 
+import lombok.Data;
+
 import java.io.Serializable;
 
 /**
  * @author Mauricio Pazos
  *
  */
+@Data
 public class ChangePasswordFormBean implements Serializable {
 
     /**
@@ -38,21 +41,4 @@ public class ChangePasswordFormBean implements Serializable {
     public String toString() {
         return "ChangePasswordFormBean [confirmPassword=" + confirmPassword + ", password=" + password + "]";
     }
-
-    public String getConfirmPassword() {
-        return confirmPassword;
-    }
-
-    public void setConfirmPassword(String confirmPassword) {
-        this.confirmPassword = confirmPassword;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
 }

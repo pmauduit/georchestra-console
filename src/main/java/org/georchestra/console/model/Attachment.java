@@ -19,6 +19,7 @@
 
 package org.georchestra.console.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -27,11 +28,13 @@ import jakarta.persistence.Lob;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 
+import lombok.Data;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 @Entity
 @Table(schema = "console", name = "admin_attachments")
+@Data
 public class Attachment {
 
     @Id
@@ -41,6 +44,7 @@ public class Attachment {
     private String name;
     @Lob
     private byte[] content;
+    @Column(name = "mimetype")
     private String mimeType;
 
     public Attachment() {
@@ -59,42 +63,6 @@ public class Attachment {
         res.put("mimeType", this.getMimeType());
         res.put("size", this.content.length);
         return res;
-    }
-
-    /*
-     * Generic getter, setter
-     */
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public byte[] getContent() {
-        return content;
-    }
-
-    public void setContent(byte[] content) {
-        this.content = content;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getMimeType() {
-        return mimeType;
-    }
-
-    public void setMimeType(String mimeType) {
-        this.mimeType = mimeType;
     }
 
 }

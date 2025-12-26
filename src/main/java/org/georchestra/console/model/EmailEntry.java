@@ -27,20 +27,24 @@ import java.util.List;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 
+import lombok.Data;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 @Entity
 @Table(schema = "console", name = "admin_emails")
+@Data
 public class EmailEntry {
 
     @Id
@@ -56,7 +60,7 @@ public class EmailEntry {
     private String body;
 
     @ManyToMany(targetEntity = Attachment.class, fetch = FetchType.EAGER)
-    @JoinTable(schema = "console", name = "admin_emails_attachments")
+    @JoinTable(schema = "console", name = "admin_emails_attachments", joinColumns = @JoinColumn(name = "emailentry_id"))
     private List<Attachment> attachments;
 
     public EmailEntry() {
@@ -88,64 +92,4 @@ public class EmailEntry {
         res.put("attachments", array);
         return res;
     }
-
-    /*
-     * Generic getter, setter
-     */
-    public long getId() {
-        return this.id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public String getSender() {
-        return this.sender;
-    }
-
-    public String getRecipient() {
-        return this.recipient;
-    }
-
-    public String getSubject() {
-        return this.subject;
-    }
-
-    public String getBody() {
-        return this.body;
-    }
-
-    public List<Attachment> getAttachments() {
-        return this.attachments;
-    }
-
-    public void setSender(String sender) {
-        this.sender = sender;
-    }
-
-    public void setRecipient(String recipient) {
-        this.recipient = recipient;
-    }
-
-    public void setSubject(String subject) {
-        this.subject = subject;
-    }
-
-    public void setBody(String body) {
-        this.body = body;
-    }
-
-    public void setAttachments(List<Attachment> attachments) {
-        this.attachments = attachments;
-    }
-
-    public Date getDate() {
-        return date;
-    }
-
-    public void setDate(Date date) {
-        this.date = date;
-    }
-
 }

@@ -52,7 +52,7 @@ import java.io.IOException;
 import java.util.UUID;
 
 /**
- * This controller is responsible of manage the user interactions required for
+ * This controller is responsible for managing the user interactions required for
  * changing the user account's password.
  * <p>
  * This controller is associated to the changePasswordForm.jsp view and
@@ -140,8 +140,7 @@ public class ChangeEmailFormController {
                     new String[] { String.format("%s%s", publicContextPath, "/account/changeEmail") },
                     "there is a user with this e-mail");
             return "changeEmailForm";
-        } catch (NameNotFoundException e) {
-        }
+        } catch (NameNotFoundException e) {}
 
         Account account = getAccount();
         String uid = account.getUid();

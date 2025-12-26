@@ -27,11 +27,16 @@ import static org.georchestra.commons.security.SecurityHeaders.SEC_USERNAME;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import jakarta.activation.DataHandler;
 import jakarta.mail.Address;
@@ -131,15 +136,6 @@ public class EmailController {
     @Value("${emailProxyRecipientWhitelist:${administratorEmail}}")
     private String emailProxyRecipientWhitelist;
 
-    /*
-     * produces = MediaType.APPLICATION_JSON_VALUE generate : content type :
-     * application/json; charset=UTF-8 WRONG !
-     *
-     * produces = "application/json; charset=utf-8" generate : content type :
-     * application/json;charset=utf-8 RIGHT !
-     *
-     */
-
     /**
      * Return a JSON list of Emails sent to specified user
      *
@@ -149,15 +145,15 @@ public class EmailController {
      */
     @GetMapping(value = "/{recipient}/emails", produces = "application/json; charset=UTF-8")
     @ResponseBody
-    public String emailsList(@PathVariable String recipient) throws JSONException {
+    public Map<String, Object> emailsList(@PathVariable String recipient) {
         this.checkAuthorisation(recipient);
-        JSONArray emails = new JSONArray();
-        for (EmailEntry email : this.emailRepository.findByRecipientOrderByDateDesc(recipient))
-            emails.put(email.toJSON());
-        JSONObject res = new JSONObject();
-        res.put("emails", emails);
 
-        return res.toString();
+        List<EmailEntry> mails = this.emailRepository.findByRecipientOrderByDateDesc(recipient);
+
+        Map<String, Object> res = new HashMap<>();
+        res.put("emails", mails);
+
+        return res;
     }
 
     /**

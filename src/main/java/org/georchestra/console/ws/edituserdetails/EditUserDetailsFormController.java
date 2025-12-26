@@ -163,12 +163,12 @@ public class EditUserDetailsFormController {
         formBean.setFacsimile(account.getFacsimile());
         formBean.setDescription(account.getDescription());
         formBean.setPostalAddress(account.getPostalAddress());
-        formBean.setIsExternalAuth(account.getIsExternalAuth());
+        formBean.setExternalAuth(account.getIsExternalAuth());
         String org = account.getOrg();
         if (!org.equals("")) {
             formBean.setOrg(orgsDao.findByCommonName(org).getName());
         }
-        formBean.setIsOAuth2(account.getOAuth2Provider() != null);
+        formBean.setOAuth2(account.getOAuth2Provider() != null);
 
         return formBean;
     }

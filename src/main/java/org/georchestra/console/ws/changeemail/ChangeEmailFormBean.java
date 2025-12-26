@@ -19,8 +19,11 @@
 
 package org.georchestra.console.ws.changeemail;
 
+import lombok.Data;
+
 import java.io.Serializable;
 
+@Data
 public class ChangeEmailFormBean implements Serializable {
 
     private static final long serialVersionUID = -153576513543313510L;
@@ -29,13 +32,5 @@ public class ChangeEmailFormBean implements Serializable {
     @Override
     public String toString() {
         return "ChangeEmailFormBean [newEmail=" + newEmail + "]";
-    }
-
-    public String getNewEmail() {
-        return newEmail;
-    }
-
-    public void setNewEmail(String newEmail) {
-        this.newEmail = newEmail;
     }
 }
