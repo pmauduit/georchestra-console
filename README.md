@@ -2,6 +2,11 @@
 
 A rewrite of geOrchestra's console webapp using updated versions of the dependencies, and ported to spring boot.
 
+# TODOs
+
+* Get rid of `@Autowired` annotations and xml-based configurations
+* rewrite tests to remove IT / Tests ? `integration` package ?
+* Upgrade dependencies in pom.
 
 # (B)log
 
@@ -51,3 +56,16 @@ Fixed all compilation errors, but obviously the testsuite is broken:
 ```
 [ERROR] Tests run: 219, Failures: 3, Errors: 19, Skipped: 4
 ```
+
+## December, 11th 2025
+
+The console is able to boot with `./mvnw spring-boot:run`. It is even able to provide
+the `/internal/` webservices being used by GeoNetwork synchronization.
+Unfortunately, performances are quite poor on huge LDAP tree, tested on the one from
+Rennes-Métropole, I was hoping that it would perform faster than the former console.
+
+## December,26th 2025
+
+Trying to  write some tests to target the `/internal/` webservices, figuring out that
+the spring-boot version being used is already outdated, and will require to upgrade to `4.0.x`
+so that I could have the `WebTestClient` framework.

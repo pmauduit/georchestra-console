@@ -12,6 +12,8 @@ spring:
   ldap:
     urls: ${ldapScheme}://${ldapHost}:${ldapPort}
     base: dc=georchestra,dc=org
+    username: cn=admin,dc=georchestra,dc=org
+    password: secret
 
 server:
   servlet:

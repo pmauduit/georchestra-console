@@ -161,8 +161,12 @@ public class ConsoleConfig {
                 .setUserSearchBaseDN("ou=users");
     }
 
-    public @Bean AccountDaoImpl accountDao(LdapTemplate ldapTemplate) {
-        return new AccountDaoImpl(ldapTemplate);
+    public @Bean AccountDaoImpl accountDao(LdapTemplate ldapTemplate, LdapDaoProperties daoProperties) {
+
+        AccountDaoImpl accountDao = new AccountDaoImpl(ldapTemplate);
+        accountDao.setLdapDaoProperties(daoProperties);
+        accountDao.init();
+        return accountDao;
     }
 
     public @Bean RoleDao roleDao() {

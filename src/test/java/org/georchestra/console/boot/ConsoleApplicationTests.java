@@ -12,14 +12,10 @@ import java.text.MessageFormat;
 
 @SpringBootTest
 @Testcontainers
-class ConsoleApplicationTests {
+public class ConsoleApplicationTests {
 
-	@Test
-	void contextLoads() {
-	}
-
-	static GeorchestraDatabaseContainer databaseContainer = new GeorchestraDatabaseContainer();
-	static GeorchestraLdapContainer ldapContainer = new GeorchestraLdapContainer();
+	private static GeorchestraDatabaseContainer databaseContainer = new GeorchestraDatabaseContainer();
+	private static GeorchestraLdapContainer ldapContainer = new GeorchestraLdapContainer();
 
 	@DynamicPropertySource
 	static void georchestraProperties(DynamicPropertyRegistry registry) {
@@ -37,6 +33,12 @@ class ConsoleApplicationTests {
 		registry.add("spring.datasource.username", () -> "georchestra");
 		registry.add("spring.datasource.password", () -> "georchestra");
 		registry.add("spring.jpa.properties.hibernate.dialect", () -> "org.hibernate.dialect.PostgreSQLDialect");
-	}
+        registry.add("ldapPort", () -> ldapContainer.getMappedLdapPort());
+        registry.add("pgsqlPort", () -> databaseContainer.getMappedDatabasePort());
+        registry.add("pgsqlUser", () -> "georchestra");
+        registry.add("pgsqlPassword", () -> "georchestra");
+    }
 
+    @Test
+    void contextLoads() {}
 }
