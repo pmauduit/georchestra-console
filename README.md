@@ -7,6 +7,7 @@ A rewrite of geOrchestra's console webapp using updated versions of the dependen
 * Get rid of `@Autowired` annotations and xml-based configurations
 * rewrite tests to remove IT / Tests ? `integration` package ?
 * Upgrade dependencies in pom.
+* Get rid of Junit4 & rewrite testsuite to Junit5
 
 # (B)log
 

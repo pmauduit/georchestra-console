@@ -21,9 +21,11 @@ package org.georchestra.console.ws.backoffice.roles;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -61,8 +63,8 @@ import org.georchestra.ds.users.UserRule;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.ldap.NameNotFoundException;
 import org.springframework.ldap.core.support.LdapContextSource;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -91,7 +93,7 @@ public class RolesControllerTest {
 
     private String roleSearchBaseDN = "ou=roles";
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         contextSource = mock(LdapContextSource.class);
         mockLogUtils = mock(LogUtils.class);
@@ -140,21 +142,29 @@ public class RolesControllerTest {
         SecurityContextHolder.getContext().setAuthentication(auth);
     }
 
-    @Test(expected = DataServiceException.class)
+    @Test
     public void findAllWithException() throws Exception {
         doThrow(DataServiceException.class).when(roleDao).findAll();
-        roleCtrl.findAll();
+
+        assertThrows(DataServiceException.class,
+                () -> roleCtrl.findAll());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testFindByCNEmpty() throws Exception {
-        roleCtrl.findByCN("");
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> roleCtrl.findByCN("")
+        );
     }
 
-    @Test(expected = DataServiceException.class)
+    @Test
     public void testFindByCNDataServiceException() throws Exception {
         doThrow(DataServiceException.class).when(roleDao).findByCommonName(anyString());
-        roleCtrl.findByCN("NOTEXISTINGROLE");
+
+        assertThrows(DataServiceException.class,
+                () -> roleCtrl.findByCN("NOTEXISTINGROLE")
+        );
     }
 
     @Test
@@ -302,17 +312,24 @@ public class RolesControllerTest {
 
     @Test
     public void testDeleteException() throws Exception {
+        doThrow(DataServiceException.class).when(roleDao).delete(eq("ADMINISTRATOR"));
 
-        doThrow(Exception.class).when(roleDao).delete(eq("ADMINISTRATOR"));
+        roleCtrl.delete(response, "ADMINISTRATOR");
 
-        try {
-            roleCtrl.delete(response, "ADMINISTRATOR");
-        } catch (Throwable e) {
-            JSONObject ret = new JSONObject(response.getContentAsString());
-            assertTrue(response.getStatus() == HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            assertTrue(ret.getBoolean("success") == false);
-            assertTrue(e instanceof IOException);
-        }
+        JSONObject ret = new JSONObject(response.getContentAsString());
+        assertTrue(response.getStatus() == HttpServletResponse.SC_BAD_REQUEST);
+        assertTrue(ret.getBoolean("success") == false);
+    }
+
+    @Test
+    public void testDeleteExceptionNotFound() throws Exception {
+        doThrow(NameNotFoundException.class).when(roleDao).delete(eq("ADMINISTRATOR"));
+
+        roleCtrl.delete(response, "ADMINISTRATOR");
+
+        JSONObject ret = new JSONObject(response.getContentAsString());
+        assertTrue(response.getStatus() == HttpServletResponse.SC_NOT_FOUND);
+        assertTrue(ret.getBoolean("success") == false);
     }
 
     @Test
@@ -417,7 +434,7 @@ public class RolesControllerTest {
 
     }
 
-    @Test(expected = NameNotFoundException.class)
+    @Test
     public void testUpdateUsersNotFoundException() throws Exception {
         JSONObject toSend = new JSONObject().put("users", new JSONArray().put("testadmin").put("testuser"))
                 .put("PUT", new JSONArray().put("ADMINISTRATOR")).put("DELETE", new JSONArray().put("USERS"));
@@ -426,10 +443,11 @@ public class RolesControllerTest {
 
         doThrow(NameNotFoundException.class).when(accountDao).findByUID(anyString());
 
-        roleCtrl.updateUsers(request, response);
+        assertThrows(NameNotFoundException.class,
+                () -> roleCtrl.updateUsers(request, response));
     }
 
-    @Test(expected = JSONException.class)
+    @Test
     public void testUpdateUsersJsonException() throws Exception {
         JSONObject toSend = new JSONObject().put("users", new JSONArray().put("testadmin").put("testuser"))
                 .put("PUT", new JSONArray().put("ADMINISTRATOR")).put("DELETE", new JSONArray().put("USERS"));
@@ -437,10 +455,11 @@ public class RolesControllerTest {
         request.setContent(toSend.toString().substring(1).getBytes());
         request.setRequestURI("/console/roles_users");
 
-        roleCtrl.updateUsers(request, response);
+        assertThrows(JSONException.class,
+                () -> roleCtrl.updateUsers(request, response));
     }
 
-    @Test(expected = DataServiceException.class)
+    @Test
     public void testUpdateUsersDataServiceException() throws Exception {
         JSONObject toSend = new JSONObject().put("users", new JSONArray().put("testadmin").put("testuser"))
                 .put("PUT", new JSONArray().put("ADMINISTRATOR")).put("DELETE", new JSONArray().put("USERS"));
@@ -453,7 +472,8 @@ public class RolesControllerTest {
 
         doThrow(DataServiceException.class).when(roleDao).addUsersInRoles(any(), any());
 
-        roleCtrl.updateUsers(request, response);
+        assertThrows(DataServiceException.class,
+                () -> roleCtrl.updateUsers(request, response));
     }
 
     @Test
@@ -537,21 +557,33 @@ public class RolesControllerTest {
                 List.of("GN_EDITOR"));
     }
 
-    @Test(expected = AccessDeniedException.class)
+    @Test
     public void testCheckAuthorizationIllegalUser() {
-        roleCtrl.checkAuthorization("testuser", List.of("testuser", "testreviewer"), List.of("GN_REVIEWER"),
-                List.of("GN_EDITOR"));
+        assertThrows(AccessDeniedException.class,
+                () -> roleCtrl.checkAuthorization("testuser",
+                        List.of("testuser", "testreviewer"),
+                        List.of("GN_REVIEWER"),
+                        List.of("GN_EDITOR"))
+        );
     }
 
-    @Test(expected = AccessDeniedException.class)
+    @Test
     public void testCheckAuthorizationIllegalRolePut() {
-        roleCtrl.checkAuthorization("testuser", List.of("testeditor", "testreviewer"), List.of("GN_ADMIN"),
-                List.of("GN_EDITOR"));
+        assertThrows(AccessDeniedException.class,
+                () -> roleCtrl.checkAuthorization("testuser",
+                        List.of("testeditor", "testreviewer"),
+                        List.of("GN_ADMIN"),
+                        List.of("GN_EDITOR"))
+        );
     }
 
-    @Test(expected = AccessDeniedException.class)
+    @Test
     public void testCheckAuthorizationIllegalRoleDelete() {
-        roleCtrl.checkAuthorization("testuser", List.of("testeditor", "testreviewer"), List.of("GN_REVIEWER"),
-                List.of("GN_ADMIN"));
+        assertThrows(AccessDeniedException.class,
+                () -> roleCtrl.checkAuthorization("testuser",
+                        List.of("testeditor", "testreviewer"),
+                        List.of("GN_REVIEWER"),
+                        List.of("GN_ADMIN"))
+                );
     }
 }

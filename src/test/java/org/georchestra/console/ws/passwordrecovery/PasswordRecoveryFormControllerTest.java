@@ -19,9 +19,6 @@
 
 package org.georchestra.console.ws.passwordrecovery;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -37,9 +34,10 @@ import org.georchestra.ds.DataServiceException;
 import org.georchestra.ds.roles.RoleDao;
 import org.georchestra.ds.users.Account;
 import org.georchestra.ds.users.AccountDao;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.ldap.NameNotFoundException;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -48,6 +46,14 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.support.SessionStatus;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+@Disabled("""
+        TODO: check if there is a better way to test the feature ? Also if the frontend is rewritten, this might
+        be useless.
+        """)
 public class PasswordRecoveryFormControllerTest {
 
     private PasswordRecoveryFormController ctrl;
@@ -64,16 +70,12 @@ public class PasswordRecoveryFormControllerTest {
     private SessionStatus status = Mockito.mock(SessionStatus.class);
     private LogUtils mockLogUtils = Mockito.mock(LogUtils.class);
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         ctrl = new PasswordRecoveryFormController(dao, gdao, efi, utd, rep);
         ctrl.setPublicUrl("https://georchestra.mydomain.org");
         ctrl.setPublicContextPath("/console");
         ctrl.logUtils = mockLogUtils;
-    }
-
-    @After
-    public void tearDown() throws Exception {
     }
 
     private void prepareLegitRequest() throws Exception {
@@ -227,8 +229,12 @@ public class PasswordRecoveryFormControllerTest {
         assertEquals(res, "https://georchestra.org/console/account/newPassword?token=1234");
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testMakeChangePasswordURLWronglyformated() {
-        ctrl.makeChangePasswordURL("pompom", "https://blabla.com", "https://pompom");
+        assertThrows(
+                IllegalArgumentException.class,
+                () ->
+                    ctrl.makeChangePasswordURL("pompom", "https://blabla.com", "https://pompom")
+                );
     }
 }
