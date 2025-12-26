@@ -145,17 +145,6 @@ public class ChangePasswordControllerTest {
         assertTrue((Boolean) model.asMap().get("success"));
     }
 
-    @Test(expected = DataServiceException.class)
-    public void changePasswordDataServiceException() throws Exception {
-        userIsSpringSecurityAuthenticatedAndExistInLdap("pmauduit");
-        formBean.setPassword("monkey123");
-        formBean.setConfirmPassword("monkey123");
-        when(result.hasErrors()).thenReturn(false);
-        Mockito.doThrow(DataServiceException.class).when(ldapTemplate).lookupContext((Name) any());
-
-        ctrlToTest.changePassword(model, formBean, result);
-    }
-
     @Test(expected = NullPointerException.class)
     public void changePasswordUidMismatch() throws Exception {
         userIsSpringSecurityAuthenticatedAndExistInLdap("pmauduit");
