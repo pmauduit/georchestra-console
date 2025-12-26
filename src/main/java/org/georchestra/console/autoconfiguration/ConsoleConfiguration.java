@@ -1,6 +1,5 @@
-package org.georchestra.console;
+package org.georchestra.console.autoconfiguration;
 
-import org.georchestra.commons.configuration.GeorchestraConfiguration;
 import org.georchestra.console.bs.ExpiredTokenCleanTask;
 import org.georchestra.console.bs.ExpiredTokenManagement;
 import org.georchestra.console.bs.ReCaptchaParameters;
@@ -43,12 +42,11 @@ import org.georchestra.security.api.UsersApi;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.ldap.core.LdapTemplate;
-import org.springframework.ldap.core.support.LdapContextSource;
 
 import javax.sql.DataSource;
 
 @Configuration
-public class ConsoleConfig {
+public class ConsoleConfiguration {
 
     public @Bean UserMapper userMapper() {
         return new UserMapperImpl();

@@ -156,7 +156,7 @@ public class OrgsController {
     }
 
     /**
-     * Retreive full information about one org as JSON document. Following keys will
+     * Retrieve full information about one org as JSON document. Following keys will
      * be available :
      *
      * * 'id' (not used) * 'name' * 'shortName' * 'cities' as json array ex:
@@ -338,20 +338,16 @@ public class OrgsController {
         ResponseUtil.writeSuccess(response);
     }
 
-    @GetMapping(PUBLIC_REQUEST_MAPPING + "/requiredFields")
-    public void getRequiredFieldsForOrgCreation(HttpServletResponse response) throws IOException, JSONException {
-        JSONArray fields = new JSONArray();
-        validation.getRequiredOrgFields().forEach(fields::put);
-        ResponseUtil.buildResponse(response, fields.toString(4), HttpServletResponse.SC_OK);
+    @GetMapping(value=PUBLIC_REQUEST_MAPPING + "/requiredFields", produces="application/json; charset=utf-8")
+    @ResponseBody
+    public Set<String> getRequiredFieldsForOrgCreation() {
+        return validation.getRequiredOrgFields();
     }
 
-    @GetMapping(PUBLIC_REQUEST_MAPPING + "/orgTypeValues")
-    public void getOrganisationTypePossibleValues(HttpServletResponse response) throws IOException, JSONException {
-        JSONArray fields = new JSONArray();
-        for (String field : this.orgDao.getOrgTypeValues()) {
-            fields.put(field);
-        }
-        ResponseUtil.buildResponse(response, fields.toString(4), HttpServletResponse.SC_OK);
+    @GetMapping(value=PUBLIC_REQUEST_MAPPING + "/orgTypeValues", produces="application/json; charset=utf-8")
+    @ResponseBody
+    public List<String> getOrganisationTypePossibleValues() {
+        return Arrays.asList(this.orgDao.getOrgTypeValues());
     }
 
     /**
@@ -367,28 +363,31 @@ public class OrgsController {
      * "value": "commune_name", "group": "department_name"} }
      */
 
-    @GetMapping(PUBLIC_REQUEST_MAPPING + "/areaConfig.json")
-    public void getAreaConfig(HttpServletResponse response) throws IOException, JSONException {
-        JSONObject res = new JSONObject();
-        JSONObject map = new JSONObject();
+    @GetMapping(value=PUBLIC_REQUEST_MAPPING + "/areaConfig.json", produces="application/json; charset=utf-8")
+    @ResponseBody
+    public Map<String, Object> getAreaConfig() {
+        Map<String, Object> res = new HashMap<>();
+        Map<String, Object> map = new HashMap<>();
+
         // Parse center
         try {
             String[] rawCenter = areaMapCenter.split("\\s*,\\s*");
-            JSONArray center = new JSONArray();
-            center.put(Double.parseDouble(rawCenter[0]));
-            center.put(Double.parseDouble(rawCenter[1]));
+            List<Double> center = new ArrayList<>();
+            center.add(Double.parseDouble(rawCenter[0]));
+            center.add(Double.parseDouble(rawCenter[1]));
             map.put("center", center);
             map.put("zoom", areaMapZoom);
             res.put("map", map);
         } catch (Exception e) {
             LOG.info("Could not parse value", e);
         }
-        JSONObject areas = new JSONObject();
+        Map<String, Object> areas = new HashMap<>();
         areas.put("key", areasKey);
         areas.put("value", areasValue);
         areas.put("group", areasGroup);
         res.put("areas", areas);
-        ResponseUtil.buildResponse(response, res.toString(4), HttpServletResponse.SC_OK);
+
+        return res;
     }
 
     /**

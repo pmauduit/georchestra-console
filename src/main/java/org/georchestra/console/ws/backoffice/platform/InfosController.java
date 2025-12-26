@@ -28,6 +28,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.util.HashMap;
+
 @Controller
 public class InfosController {
     /**
@@ -80,8 +82,8 @@ public class InfosController {
     @GetMapping(value = BASE_MAPPING + "/platform/infos", produces = "application/json; charset=utf-8")
     @PreAuthorize(value = "hasAnyRole('SUPERUSER', 'ORGADMIN')")
     @ResponseBody
-    public String getPlatformInfos() {
-        JSONObject ret = new JSONObject();
+    public HashMap<String, Object> getPlatformInfos() {
+        HashMap ret = new HashMap<String, Object>();
         ret.put("saslEnabled", saslEnabled);
         ret.put("saslServer", saslServer);
         ret.put("analyticsEnabled", analyticsEnabled);
@@ -94,6 +96,6 @@ public class InfosController {
         ret.put("logoUrl", logoUrl);
         ret.put("headerConfigFile", headerConfigFile);
         ret.put("georchestraStylesheet", georchestraStylesheet);
-        return ret.toString();
+        return ret;
     }
 }

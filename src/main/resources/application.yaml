@@ -4,9 +4,10 @@ spring:
   application:
     name: console
   datasource:
-    url: "jdbc:postgresql://localhost/georchestra?currentSchema=console"
-    password: georchestra
-    username: georchestra
+    url: jdbc:postgresql://${pgsqlHost}:${pgsqlPort}/${pgsqlDatabase}?currentSchema=console
+    username: ${pgsqlUser}
+    password: ${pgsqlPassword}
+
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
   ldap:

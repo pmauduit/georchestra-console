@@ -96,6 +96,7 @@ public class LogController {
     @ResponseBody
     public List<AdminLogEntry> find(@PathVariable String target, @PathVariable int limit, @PathVariable int page) {
 
+        // TODO pass the authentication as method parameter instead ?
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
         // Filter logs by orgs users if user is not SUPERUSER

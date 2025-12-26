@@ -4,6 +4,7 @@ A rewrite of geOrchestra's console webapp using updated versions of the dependen
 
 # TODOs
 
+* Get rid of the `org.georchestra.console.ws.backoffice.utils.ResponseUtil` class
 * Get rid of `@Autowired` annotations and xml-based configurations
 * rewrite tests to remove IT / Tests ? `integration` package ?
 * Upgrade dependencies in pom.
@@ -74,3 +75,8 @@ so that I could have the `WebTestClient` framework.
 
 WIPPing a bit on the testsuite today, deactivating a test class, and the CICD turned green !
 
+Wondering what is next though: shall I try to port some parts of the frontend and some JSP views
+to thymeleaf ? How far should I go to make sure we are isofunctional ? Either improve test
+coverage of each controller, or trying to get a frontend part somehow ?
+
+The rabbitMq part is still broken though, but not my priority.

@@ -96,7 +96,6 @@ public class RolesController {
 
     private static final String DUPLICATED_COMMON_NAME = "duplicated_common_name";
     private static final String NOT_FOUND = "not_found";
-    private static final String USER_NOT_FOUND = "user_not_found";
     private static final String ILLEGAL_CHARACTER = "illegal_character";
 
     private static final String VIRTUAL_TEMPORARY_ROLE_NAME = "TEMPORARY";
@@ -143,7 +142,7 @@ public class RolesController {
     }
 
     /**
-     * Returns all roles. Each roles will contains its list of users.
+     * Returns all roles. Each roles will contain its list of users.
      *
      * @throws IOException
      */
