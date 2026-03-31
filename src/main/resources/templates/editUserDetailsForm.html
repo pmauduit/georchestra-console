@@ -74,7 +74,7 @@
                      th:placeholder="#{phone.placeholder}"
                      inputmode="tel"
                      autocomplete="tel"
-                     pattern="(?:\\d|\\+|\\(|\\)|\\.|-| )*"
+                     pattern="(?:[0-9]|\+|\(|\)|\.|-| )*"
                      th:attr="data-invalid-message=#{phone.error.invalidFormat}">
               <p id="phone-error" class="field-error" aria-live="polite"></p>
             </div>
@@ -88,7 +88,7 @@
                      th:placeholder="#{facsimile.placeholder}"
                      inputmode="tel"
                      autocomplete="tel"
-                     pattern="(?:\\d|\\+|\\(|\\)|\\.|-| )*"
+                     pattern="(?:[0-9]|\+|\(|\)|\.|-| )*"
                      th:attr="data-invalid-message=#{facsimile.error.invalidFormat}">
               <p id="facsimile-error" class="field-error" aria-live="polite"></p>
             </div>
