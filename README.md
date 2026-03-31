@@ -2,6 +2,8 @@
 
 A rewrite of geOrchestra's console webapp using updated versions of the dependencies, and ported to spring boot.
 
+Current runtime target: Java 21.
+
 # TODOs
 
 * Get rid of the `org.georchestra.console.ws.backoffice.utils.ResponseUtil` class
