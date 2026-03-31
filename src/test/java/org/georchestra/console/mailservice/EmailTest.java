@@ -20,9 +20,11 @@
 package org.georchestra.console.mailservice;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -81,15 +83,21 @@ public class EmailTest {
         this.publicUrl = "http://localhost:8080";
         this.instanceName = "geOrchestra";
         Mockito.when(this.servletContext.getRealPath("/WEB-INF/templates/" + this.simpleTemplate))
-                .thenReturn(this.getClass().getResource(this.simpleTemplate).getPath());
+                .thenReturn(resolveTemplatePath(this.simpleTemplate));
         Mockito.when(this.servletContext.getRealPath("/WEB-INF/templates/" + this.htmlTemplate))
-                .thenReturn(this.getClass().getResource(this.htmlTemplate).getPath());
+                .thenReturn(resolveTemplatePath(this.htmlTemplate));
         Mockito.when(this.servletContext.getRealPath("/WEB-INF/templates/" + this.utf8Template))
-                .thenReturn(this.getClass().getResource(this.utf8Template).getPath());
+                .thenReturn(resolveTemplatePath(this.utf8Template));
         Mockito.when(this.servletContext.getRealPath("/WEB-INF/templates/" + this.isoTemplate))
-                .thenReturn(this.getClass().getResource(this.isoTemplate).getPath());
+                .thenReturn(resolveTemplatePath(this.isoTemplate));
         Mockito.when(this.servletContext.getRealPath("/WEB-INF/templates/" + this.replaceTemplate))
-                .thenReturn(this.getClass().getResource(this.replaceTemplate).getPath());
+                .thenReturn(resolveTemplatePath(this.replaceTemplate));
+    }
+
+    private String resolveTemplatePath(String templateName) {
+        URL resource = this.getClass().getResource("/org/georchestra/console/mailservice/" + templateName);
+        assertNotNull("missing test resource " + templateName, resource);
+        return resource.getPath();
     }
 
     @Test
