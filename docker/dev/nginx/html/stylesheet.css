@@ -1,0 +1,6 @@
+body {
+  --georchestra-primary: #d75edb;
+  --georchestra-secondary: rgb(85, 211, 13);
+  --georchestra-primary-light: rgb(247, 240, 200);
+  --georchestra-secondary-light: #140b68;
+}
