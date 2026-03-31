@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+  <property name="LOG_DIR" value="/tmp"/>
+  <property name="LOG_FILE" value="${LOG_DIR}/console.log"/>
+  <property name="LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss} %logger{1} [%level] %msg%n"/>
+
+  <appender name="ROLLING" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>${LOG_FILE}</file>
+    <append>true</append>
+    <encoder>
+      <pattern>${LOG_PATTERN}</pattern>
+    </encoder>
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <fileNamePattern>${LOG_DIR}/console.%d{yyyy-MM-dd}.log.gz</fileNamePattern>
+      <maxHistory>30</maxHistory>
+    </rollingPolicy>
+  </appender>
+
+  <logger name="org.georchestra.console" level="WARN" additivity="false">
+    <appender-ref ref="ROLLING"/>
+  </logger>
+
+  <logger name="org.georchestra.console.ws.utils" level="INFO" additivity="false">
+    <appender-ref ref="ROLLING"/>
+  </logger>
+
+  <root level="WARN">
+    <appender-ref ref="ROLLING"/>
+  </root>
+</configuration>
