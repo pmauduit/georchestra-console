@@ -22,7 +22,8 @@ Added a dedicated development environment:
 * `spring-boot-devtools` for local development
 * a dedicated Docker stack in `docker/dev/docker-compose-dev.yaml`
 * a dedicated development datadir in `docker/dev/datadir`
-* a first Thymeleaf template
+* a some Thymleaf template for userdetail and changingemail
+* New feature add localisation for mail body
 
 To run the app in dev:
 
