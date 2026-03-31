@@ -22,7 +22,7 @@ package org.georchestra.console.ws.edituserdetails;
 import static org.georchestra.commons.security.SecurityHeaders.SEC_EXTERNAL_AUTHENTICATION;
 import static org.georchestra.commons.security.SecurityHeaders.SEC_USERNAME;
 
-import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -46,6 +46,7 @@ import org.georchestra.ds.users.AccountImpl;
 import org.georchestra.ds.users.DuplicatedEmailException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -108,11 +109,10 @@ public class EditUserDetailsFormController {
      *
      * @param model
      * @return the edit form view
-     * @throws IOException
      */
     @GetMapping("/account/userdetails")
     @PreAuthorize("isAuthenticated()")
-    public String setupForm(HttpServletRequest request, HttpServletResponse response, Model model) throws IOException {
+    public String setupForm(HttpServletRequest request, HttpServletResponse response, Model model) {
         try {
             String username = SecurityHeaders.decode(request.getHeader(SEC_USERNAME));
             boolean isExternalAuth = Objects.nonNull(request.getHeader(SEC_EXTERNAL_AUTHENTICATION))
@@ -120,10 +120,8 @@ public class EditUserDetailsFormController {
             Account userAccount = this.accountDao.findByUID(username);
             userAccount.setIsExternalAuth(isExternalAuth);
             model.addAttribute(createForm(userAccount));
-            Org org = orgsDao.findByUser(userAccount);
-            model.addAttribute("org", orgToJson(org));
-            model.addAttribute("isReferentOrSuperUser", isReferentOrSuperUser(userAccount));
-            model.addAttribute("gdprAllowAccountDeletion", gdprAllowAccountDeletion);
+            populateViewModel(model, userAccount);
+            model.addAttribute("hasErrors", false);
 
             HttpSession session = request.getSession();
             for (String f : fields) {
@@ -134,9 +132,8 @@ public class EditUserDetailsFormController {
 
             return "editUserDetailsForm";
 
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new IOException(e);
+        } catch (DataServiceException e) {
+            throw new IllegalStateException("Unable to load user details view model", e);
         }
     }
 
@@ -181,22 +178,25 @@ public class EditUserDetailsFormController {
      * @param resultErrors  will be updated with the list of found errors.
      * @param sessionStatus
      * @return the next view
-     * @throws IOException
      */
     @PostMapping("/account/userdetails")
     public String edit(HttpServletRequest request, HttpServletResponse response, Model model,
-            @ModelAttribute EditUserDetailsFormBean formBean, BindingResult resultErrors, SessionStatus sessionStatus)
-            throws IOException {
+            @ModelAttribute EditUserDetailsFormBean formBean, BindingResult resultErrors, SessionStatus sessionStatus) {
         String uid = formBean.getUid();
         try {
             String username = SecurityHeaders.decode(request.getHeader(SEC_USERNAME));
-            if (!username.equals(uid))
-                response.sendError(HttpServletResponse.SC_FORBIDDEN);
+            if (!username.equals(uid)) {
+                throw new AccessDeniedException("Authenticated user does not match requested account");
+            }
+            Account currentAccount = this.accountDao.findByUID(username);
+            populateViewModel(model, currentAccount);
         } catch (NullPointerException e) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+            throw new AccessDeniedException("Missing authenticated user information", e);
+        } catch (DataServiceException e) {
+            throw new IllegalStateException("Unable to load user details view model", e);
         }
 
-        model.addAttribute("gdprAllowAccountDeletion", gdprAllowAccountDeletion);
+        model.addAttribute("hasErrors", false);
 
         // Validate first name and surname
         validation.validateUserFieldWithSpecificMsg("firstName", formBean.getFirstName(), resultErrors);
@@ -208,8 +208,10 @@ public class EditUserDetailsFormController {
         validation.validateUserField("description", formBean.getDescription(), resultErrors);
         validation.validateUserField("postalAddress", formBean.getPostalAddress(), resultErrors);
 
-        if (resultErrors.hasErrors())
+        if (resultErrors.hasErrors()) {
+            model.addAttribute("hasErrors", true);
             return "editUserDetailsForm";
+        }
 
         // updates the account details
         try {
@@ -221,10 +223,9 @@ public class EditUserDetailsFormController {
             accountDao.update(account);
 
             model.addAttribute("success", true);
+            model.addAttribute("hasErrors", false);
             model.addAttribute("pwdUtils", passwordUtils);
-            Org org = orgsDao.findByUser(account);
-            model.addAttribute("org", orgToJson(org));
-            model.addAttribute("isReferentOrSuperUser", isReferentOrSuperUser(account));
+            populateViewModel(model, account);
 
             // create log for each account modification
             if (logUtils != null) {
@@ -240,8 +241,7 @@ public class EditUserDetailsFormController {
             return "createAccountForm";
 
         } catch (DataServiceException e) {
-
-            throw new IOException(e);
+            throw new IllegalStateException("Unable to update user details", e);
         }
 
     }
@@ -268,6 +268,32 @@ public class EditUserDetailsFormController {
     @ModelAttribute("editUserDetailsFormBean")
     public EditUserDetailsFormBean getEditUserDetailsFormBean() {
         return new EditUserDetailsFormBean();
+    }
+
+    private void populateViewModel(Model model, Account account) throws DataServiceException {
+        Org org = orgsDao.findByUser(account);
+        model.addAttribute("organization", org);
+        model.addAttribute("organizationMembers", resolveOrganizationMembers(org));
+        model.addAttribute("org", orgToJson(org));
+        model.addAttribute("isReferentOrSuperUser", isReferentOrSuperUser(account));
+        model.addAttribute("gdprAllowAccountDeletion", gdprAllowAccountDeletion);
+    }
+
+    private List<Account> resolveOrganizationMembers(Org org) {
+        if (org == null || !displayMembersList || org.getMembers() == null) {
+            return List.of();
+        }
+        List<Account> members = new ArrayList<>();
+        for (String uid : org.getMembers()) {
+            try {
+                members.add(this.accountDao.findByUID(uid));
+            } catch (Exception e) {
+                Account fallback = new AccountImpl();
+                fallback.setUid(uid);
+                members.add(fallback);
+            }
+        }
+        return members;
     }
 
     private ObjectNode orgToJson(Org org) {

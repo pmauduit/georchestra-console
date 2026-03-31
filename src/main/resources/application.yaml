@@ -3,6 +3,10 @@ spring:
     import: classpath:/console.yaml,optional:file:${georchestra.datadir}/default.properties,optional:file:${georchestra.datadir}/console/console.yaml
   application:
     name: console
+  messages:
+    basename: application
+  thymeleaf:
+    cache: false #Only for development, to be able to see changes in templates without restarting the application
   datasource:
     url: jdbc:postgresql://${pgsqlHost}:${pgsqlPort}/${pgsqlDatabase}?currentSchema=console
     username: ${pgsqlUser}

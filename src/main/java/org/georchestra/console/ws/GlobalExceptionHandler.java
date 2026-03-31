@@ -19,17 +19,18 @@
 
 package org.georchestra.console.ws;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.georchestra.console.ws.backoffice.utils.Response;
 import org.georchestra.console.ws.backoffice.utils.ResponseUtil;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.ldap.NameNotFoundException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.servlet.ModelAndView;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -37,26 +38,48 @@ public class GlobalExceptionHandler {
     private static final Log LOG = LogFactory.getLog(GlobalExceptionHandler.class.getName());
 
     @ExceptionHandler(NameNotFoundException.class)
-    @ResponseStatus(value = HttpStatus.NOT_FOUND)
-    @ResponseBody
-    public Response handleNameNotFoundException(NameNotFoundException e) {
+    public Object handleNameNotFoundException(NameNotFoundException e, HttpServletRequest request) {
         LOG.info(e.getMessage());
-        return ResponseUtil.failure(e.getMessage());
+        return respond(request, HttpStatus.NOT_FOUND, "Resource not found", e.getMessage());
     }
 
     @ExceptionHandler(AccessDeniedException.class)
-    @ResponseStatus(value = HttpStatus.FORBIDDEN)
-    @ResponseBody
-    public Response handleAccessDeniedException(AccessDeniedException e) {
+    public Object handleAccessDeniedException(AccessDeniedException e, HttpServletRequest request) {
         LOG.debug(e.getMessage());
-        return ResponseUtil.failure(e.getMessage());
+        return respond(request, HttpStatus.FORBIDDEN, "Forbidden", e.getMessage());
     }
 
     @ExceptionHandler(Exception.class)
-    @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
-    @ResponseBody
-    public Response handleException(Exception e) {
+    public Object handleException(Exception e, HttpServletRequest request) {
         LOG.error(e.getMessage(), e);
-        return ResponseUtil.failure(e.getMessage());
+        return respond(request, HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e.getMessage());
+    }
+
+    private Object respond(HttpServletRequest request, HttpStatus status, String title, String message) {
+        if (wantsJson(request)) {
+            Response body = ResponseUtil.failure(message);
+            return ResponseEntity.status(status).body(body);
+        }
+        ModelAndView modelAndView = new ModelAndView("error");
+        modelAndView.setStatus(status);
+        modelAndView.addObject("status", status.value());
+        modelAndView.addObject("title", title);
+        modelAndView.addObject("message", message == null || message.isBlank() ? title : message);
+        return modelAndView;
+    }
+
+    private boolean wantsJson(HttpServletRequest request) {
+        String requestedWith = request.getHeader("X-Requested-With");
+        if ("XMLHttpRequest".equalsIgnoreCase(requestedWith)) {
+            return true;
+        }
+
+        String accept = request.getHeader("Accept");
+        if (accept != null && accept.contains("application/json")) {
+            return true;
+        }
+
+        String uri = request.getRequestURI();
+        return uri.contains("/private/") || uri.contains("/manager/") || uri.contains("/internal/");
     }
 }

@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{editUserDetailsForm.title})}">
+  <meta charset="UTF-8">
+  <title>User details.</title>
+</head>
+<body>
+<th:block th:replace="~{fragments/layout :: appHeader('console')}"></th:block>
+<main class="page">
+  <section class="hero">
+    <p class="hero-subtitle" th:text="#{editUserDetailsForm.title}">User details.</p>
+    <p th:text="#{editUserDetailsForm.description}">
+      In this page you can manage your account informations and modify your password.
+    </p>
+  </section>
+
+  <div class="layout">
+    <section class="card">
+      <div th:if="${success}" class="alert alert-success" th:text="#{editUserDetailsForm.success}">
+        User details updated successfully
+      </div>
+
+      <form id="form" method="post" th:object="${editUserDetailsFormBean}">
+        <div th:if="${hasErrors}" class="alert alert-error" th:text="#{form.error}">
+          The form contains errors
+        </div>
+
+        <fieldset class="fieldset">
+          <legend th:text="#{editUserDetailsForm.fieldset.userDetails}">User details</legend>
+          <div class="form-grid">
+            <th:block th:if="${editUserDetailsFormBean.isOAuth2}">
+              <div class="static-field">
+                <div class="label" th:text="#{firstName.label}">First Name</div>
+                <p class="static-value" th:text="*{firstName}"></p>
+              </div>
+              <div class="static-field">
+                <div class="label" th:text="#{surname.label}">Surname</div>
+                <p class="static-value" th:text="*{surname}"></p>
+              </div>
+            </th:block>
+
+            <th:block th:unless="${editUserDetailsFormBean.isOAuth2}">
+              <div class="field">
+                <label for="firstName">
+                  <span th:text="#{firstName.label}">First Name</span>
+                  <span th:if="${session.firstNameRequired}" class="required-marker">*</span>
+                </label>
+                <input id="firstName" type="text" th:field="*{firstName}"
+                       th:placeholder="#{firstName.placeholder}">
+              </div>
+
+              <div class="field">
+                <label for="surname">
+                  <span th:text="#{surname.label}">Surname</span>
+                  <span th:if="${session.surnameRequired}" class="required-marker">*</span>
+                </label>
+                <input id="surname" type="text" th:field="*{surname}"
+                       th:placeholder="#{surname.placeholder}">
+              </div>
+            </th:block>
+
+            <div class="static-field">
+              <div class="label" th:text="#{email.label}">E-mail</div>
+              <p class="static-value" th:text="*{email}"></p>
+              <a th:href="@{/account/changeEmail}" th:text="#{editUserDetailsForm.changeEmail.link}">Change e-mail</a>
+            </div>
+
+            <div class="field">
+              <label for="phone">
+                <span th:text="#{phone.label}">Phone</span>
+                <span th:if="${session.phoneRequired}" class="required-marker">*</span>
+              </label>
+              <input id="phone" type="tel" th:field="*{phone}"
+                     th:placeholder="#{phone.placeholder}"
+                     inputmode="tel"
+                     autocomplete="tel"
+                     pattern="(?:\\d|\\+|\\(|\\)|\\.|-| )*"
+                     th:attr="data-invalid-message=#{phone.error.invalidFormat}">
+              <p id="phone-error" class="field-error" aria-live="polite"></p>
+            </div>
+
+            <div class="field">
+              <label for="facsimile">
+                <span th:text="#{facsimile.label}">Fax</span>
+                <span th:if="${session.facsimileRequired}" class="required-marker">*</span>
+              </label>
+              <input id="facsimile" type="tel" th:field="*{facsimile}"
+                     th:placeholder="#{facsimile.placeholder}"
+                     inputmode="tel"
+                     autocomplete="tel"
+                     pattern="(?:\\d|\\+|\\(|\\)|\\.|-| )*"
+                     th:attr="data-invalid-message=#{facsimile.error.invalidFormat}">
+              <p id="facsimile-error" class="field-error" aria-live="polite"></p>
+            </div>
+
+            <div class="static-field">
+              <div class="label" th:text="#{org.label}">Organization</div>
+              <p class="static-value" th:if="${!#strings.isEmpty(editUserDetailsFormBean.org)}" th:text="*{org}"></p>
+              <p class="static-value muted" th:unless="${!#strings.isEmpty(editUserDetailsFormBean.org)}" th:text="#{org.empty}">empty</p>
+            </div>
+
+            <div class="field">
+              <label for="title">
+                <span th:text="#{title.label}">Job title</span>
+                <span th:if="${session.titleRequired}" class="required-marker">*</span>
+              </label>
+              <input id="title" type="text" th:field="*{title}"
+                     th:placeholder="#{title.placeholder}">
+            </div>
+
+            <div class="field">
+              <label for="description">
+                <span th:text="#{description.label}">Description</span>
+                <span th:if="${session.descriptionRequired}" class="required-marker">*</span>
+              </label>
+              <textarea id="description" th:field="*{description}"
+                        th:placeholder="#{description.placeholder}"></textarea>
+            </div>
+
+            <div class="field">
+              <label for="postalAddress">
+                <span th:text="#{postalAddress.label}">Postal address</span>
+                <span th:if="${session.postalAddressRequired}" class="required-marker">*</span>
+              </label>
+              <textarea id="postalAddress" th:field="*{postalAddress}"
+                        th:placeholder="#{postalAddress.placeholder}"></textarea>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="fieldset"
+                  th:if="${!editUserDetailsFormBean.isOAuth2 and !editUserDetailsFormBean.isExternalAuth}">
+          <legend th:text="#{editUserDetailsForm.fieldset.credentials}">Credentials</legend>
+          <div class="form-grid">
+            <div class="static-field">
+              <div class="label" th:text="#{uid.label}">User ID</div>
+              <p class="static-value" th:text="*{uid}"></p>
+            </div>
+
+            <div class="static-field">
+              <div class="label" th:text="#{password.label}">Password</div>
+              <a th:href="@{/account/changePassword}" th:text="#{editUserDetailsForm.changePassword.link}">
+                Change Password
+              </a>
+            </div>
+          </div>
+        </fieldset>
+
+        <div class="actions">
+          <button type="submit" class="button button-primary" th:text="#{submit.label}">Submit</button>
+        </div>
+      </form>
+    </section>
+
+    <aside class="stack">
+      <section class="card" th:if="${organization != null}">
+        <div class="org-header">
+          <div>
+            <p class="muted" th:text="#{editUserDetailsForm.organisation}">Organization</p>
+            <h2 class="org-title" th:text="${organization.name}">Organization name</h2>
+          </div>
+          <a class="button button-link" th:if="${isReferentOrSuperUser}" th:href="@{/account/orgdetails}"
+             th:text="#{editUserDetailsForm.editOrg}">
+            Edit Organization
+          </a>
+        </div>
+
+        <p th:if="${organization.description}" th:text="${organization.description}"></p>
+
+        <p th:if="${organization.url}">
+          <a th:href="${organization.url}" target="_blank" rel="noopener"
+             th:text="#{editUserDetailsForm.url}">Website</a>
+        </p>
+
+        <img class="org-logo" th:if="${organization.logo}"
+             th:src="'data:image/jpeg;base64,' + ${organization.logo}" alt="Organization logo">
+
+        <div th:if="${!#lists.isEmpty(organizationMembers)}">
+          <h3 th:text="|#{editUserDetailsForm.members} (${#lists.size(organizationMembers)})|">Members (0)</h3>
+          <ul class="org-members">
+            <li th:each="member : ${organizationMembers}">
+              <span th:text="${member.surname ?: member.uid}">Surname</span>
+              <span th:if="${member.givenName != null}" th:text="| ${member.givenName}|"> Firstname</span>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="card gdpr-card">
+        <h2 class="org-title" th:text="#{editUserDetailsForm.gdpr}">GDPR</h2>
+        <p th:text="#{editUserDetailsForm.downloadMsg}">
+          In accordance with the European General Data Protection Regulation, you are able to download your data on this
+          platform at any time.
+        </p>
+        <p>
+          <a class="button button-primary" th:href="@{/account/gdpr/download}" target="_blank"
+             th:text="#{editUserDetailsForm.download}">Download my data</a>
+        </p>
+
+        <th:block th:if="${gdprAllowAccountDeletion}">
+          <p th:text="#{editUserDetailsForm.deleteMsg}">
+            You may also permanently delete your account. WARNING: this cannot be undone !
+          </p>
+          <button id="delete-account-button" type="button" class="button button-danger"
+                  th:text="#{editUserDetailsForm.delete}">Delete my account</button>
+        </th:block>
+      </section>
+    </aside>
+  </div>
+</main>
+
+<script th:inline="javascript">
+  const liveValidatedFields = [
+    document.getElementById('phone'),
+    document.getElementById('facsimile')
+  ].filter(Boolean);
+
+  const updateFieldValidationState = (field) => {
+    const errorElement = document.getElementById(`${field.id}-error`);
+    if (!errorElement) {
+      return;
+    }
+    field.setCustomValidity('');
+    if (field.validity.patternMismatch) {
+      field.setCustomValidity(field.dataset.invalidMessage || 'Invalid format');
+    }
+    const message = field.validationMessage;
+    const showMessage = field.value.trim() !== '' && !field.validity.valid;
+    field.classList.toggle('is-invalid', showMessage);
+    errorElement.textContent = showMessage ? message : '';
+  };
+
+  liveValidatedFields.forEach((field) => {
+    field.addEventListener('input', () => updateFieldValidationState(field));
+    field.addEventListener('blur', () => updateFieldValidationState(field));
+  });
+
+  const deleteButton = document.getElementById('delete-account-button');
+  if (deleteButton) {
+    deleteButton.addEventListener('click', async () => {
+      const confirmMessage = /*[[#{editUserDetailsForm.deleteConfirm}]]*/ 'Delete your account?';
+      const failureMessage = /*[[#{editUserDetailsForm.deleteFail}]]*/ 'Unable to delete your account.';
+      if (!window.confirm(confirmMessage)) {
+        return;
+      }
+      try {
+        const response = await fetch(/*[[@{/account/gdpr/delete}]]*/ '/account/gdpr/delete', {
+          method: 'POST',
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        });
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+        window.location.href = /*[[@{/logout}]]*/ '/logout';
+      } catch (error) {
+        window.alert(failureMessage);
+      }
+    });
+  }
+</script>
+</body>
+</html>
