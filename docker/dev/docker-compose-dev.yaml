@@ -22,12 +22,19 @@ services:
     ports:
       - "1389:389"
 
+  smtp:
+    image: axllent/mailpit:latest
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+
   gateway:
     image: georchestra/gateway:latest
     depends_on:
       - nginx
       - database
       - ldap
+      - smtp
     volumes:
       - ./datadir:/etc/georchestra
     extra_hosts:
