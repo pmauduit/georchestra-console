@@ -13,6 +13,38 @@ A rewrite of geOrchestra's console webapp using updated versions of the dependen
 
 # (B)log
 
+## March, 31th 2025
+
+Added a dedicated development environment:
+
+* `spring-boot-devtools` for local development
+* a dedicated Docker stack in `docker/dev/docker-compose-dev.yaml`
+* a dedicated development datadir in `docker/dev/datadir`
+* a first Thymeleaf template
+
+To run the app in dev:
+
+1. start the dev Docker services
+
+```bash
+cd docker/dev
+docker compose -f docker-compose-dev.yaml up -d
+```
+
+2. launch the Spring Boot app locally
+
+```bash
+mvn spring-boot:run \
+  -Dspring-boot.run.jvmArguments="-Dgeorchestra.datadir=$(pwd)/docker/dev/datadir -DpgsqlHost=localhost -DpgsqlPort=15432 -DldapHost=localhost -DldapPort=1389" \
+  -Dspring-boot.run.arguments=--server.port=8081
+```
+
+Then:
+
+* direct access: `http://localhost:8081/console`
+* through the gateway: `http://localhost:8080/console`
+
+
 ## July, 9th 2025
 
 I WIP-ed a bit this morning on it, here is I went thus far:
