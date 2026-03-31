@@ -23,6 +23,7 @@ import java.util.Locale;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -32,15 +33,16 @@ import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 @Configuration
 public class ConsoleWebMvcConfiguration implements WebMvcConfigurer {
 
-    @Bean
-    LocaleResolver localeResolver() {
+    @Bean(name = DispatcherServlet.LOCALE_RESOLVER_BEAN_NAME)
+    public LocaleResolver localeResolver() {
         CookieLocaleResolver resolver = new CookieLocaleResolver("locale");
         resolver.setDefaultLocale(Locale.ENGLISH);
+        resolver.setCookiePath("/");
         return resolver;
     }
 
     @Bean
-    LocaleChangeInterceptor localeChangeInterceptor() {
+    public LocaleChangeInterceptor localeChangeInterceptor() {
         LocaleChangeInterceptor interceptor = new LocaleChangeInterceptor();
         interceptor.setParamName("locale");
         return interceptor;
@@ -48,6 +50,6 @@ public class ConsoleWebMvcConfiguration implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(localeChangeInterceptor());
+        registry.addInterceptor(localeChangeInterceptor()).addPathPatterns("/**");
     }
 }

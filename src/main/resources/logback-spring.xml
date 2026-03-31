@@ -16,7 +16,7 @@
     </rollingPolicy>
   </appender>
 
-  <logger name="org.georchestra.console" level="WARN" additivity="false">
+  <logger name="org.georchestra.console" level="DEBUG" additivity="false">
     <appender-ref ref="ROLLING"/>
   </logger>
 

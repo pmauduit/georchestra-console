@@ -60,7 +60,7 @@ public class HomeControllerTest {
         assertTrue("expected 302, got " + response.getStatus(),
                 response.getStatus() == HttpServletResponse.SC_MOVED_TEMPORARILY);
         assertTrue("bad redirectUrl, got " + response.getRedirectedUrl(),
-                response.getRedirectedUrl().contains("/account/userdetails?login"));
+                response.getRedirectedUrl().contains("/account/userdetails"));
     }
 
     @Test
@@ -73,7 +73,7 @@ public class HomeControllerTest {
         assertTrue("expected 302, got " + response.getStatus(),
                 response.getStatus() == HttpServletResponse.SC_MOVED_TEMPORARILY);
         assertTrue("bad redirectUrl, got " + response.getRedirectedUrl(),
-                response.getRedirectedUrl().contains("/account/userdetails?login"));
+                response.getRedirectedUrl().contains("/account/userdetails"));
     }
 
     @Test

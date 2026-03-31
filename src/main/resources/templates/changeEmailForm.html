@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{changeEmailForm.title})}">
+  <meta charset="UTF-8">
+  <title>Change e-mail.</title>
+</head>
+<body>
+<th:block th:replace="~{fragments/layout :: appHeader('console')}"></th:block>
+<main class="page page-narrow">
+  <section class="hero">
+    <p class="hero-subtitle" th:text="#{changeEmailForm.title}">Change e-mail.</p>
+    <p th:text="#{changeEmailForm.description}">
+      You will receive a validation link to your new e-mail address to confirm this change.
+    </p>
+  </section>
+
+  <section class="card">
+    <div th:if="${message}" class="alert" th:text="${message}">Info</div>
+
+    <form id="form" method="post" th:object="${changeEmailFormBean}" novalidate>
+      <div th:if="${#fields.hasErrors('*')}" class="alert alert-error" th:text="#{form.error}">
+        The form contains errors
+      </div>
+
+      <fieldset class="fieldset">
+        <legend th:text="#{changeEmailForm.fieldset.email}">New e-mail address</legend>
+        <div class="form-grid">
+          <div class="field">
+            <label for="newEmail">
+              <span th:text="#{email.label}">E-mail</span>
+              <span class="required-marker">*</span>
+            </label>
+            <input id="newEmail" type="email" th:field="*{newEmail}"
+                   th:placeholder="#{email.placeholder}"
+                   autocomplete="email"
+                   required>
+            <p class="field-error"
+               th:if="${#fields.hasErrors('newEmail')}"
+               th:errors="*{newEmail}">
+              Invalid e-mail
+            </p>
+          </div>
+        </div>
+      </fieldset>
+
+      <div class="actions">
+        <button type="submit" class="button button-primary" th:text="#{submit.label}">Submit</button>
+      </div>
+    </form>
+  </section>
+</main>
+</body>
+</html>

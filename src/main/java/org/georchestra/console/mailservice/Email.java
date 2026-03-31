@@ -21,8 +21,12 @@ package org.georchestra.console.mailservice;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 import jakarta.mail.Message;
@@ -38,6 +42,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.georchestra.commons.configuration.GeorchestraConfiguration;
+import org.springframework.context.i18n.LocaleContextHolder;
 
 public class Email {
 
@@ -107,28 +112,98 @@ public class Email {
      * @throws IOException
      */
     private String loadBody(final String fileName) {
+        if (fileName == null || fileName.isBlank()) {
+            throw new IllegalStateException("Mail template file is not configured");
+        }
+        Locale locale = LocaleContextHolder.getLocale();
+        List<String> candidateTemplates = resolveTemplateCandidates(fileName, locale);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Resolving mail template '" + fileName + "' for locale " + locale
+                    + ", candidates=" + candidateTemplates);
+        }
 
         if ((georConfig != null) && (georConfig.activated())) {
-            try {
-                File fileTmpl = Paths.get(georConfig.getContextDataDir(), "templates", fileName).toFile();
-
-                return FileUtils.readFileToString(fileTmpl, templateEncoding);
+            for (String candidate : candidateTemplates) {
+                File fileTmpl = Paths.get(georConfig.getContextDataDir(), "templates", candidate).toFile();
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Trying mail template from datadir: " + fileTmpl.getAbsolutePath());
+                }
+                if (fileTmpl.isFile()) {
+                    try {
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("Using mail template from datadir: " + fileTmpl.getAbsolutePath());
+                        }
+                        return FileUtils.readFileToString(fileTmpl, templateEncoding);
+                    } catch (IOException e) {
+                        LOG.error("Unable to get the template '" + candidate + "' from geOrchestra datadir.", e);
+                    }
+                }
+            }
+        }
+        for (String candidate : candidateTemplates) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Trying mail template from classpath: /mail-templates/" + candidate);
+            }
+            try (InputStream classpathTemplate = Email.class.getResourceAsStream("/mail-templates/" + candidate)) {
+                if (classpathTemplate != null) {
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Using mail template from classpath: /mail-templates/" + candidate);
+                    }
+                    return new String(classpathTemplate.readAllBytes(), Charset.forName(templateEncoding));
+                }
             } catch (IOException e) {
-                LOG.error("Unable to get the template from geOrchestra datadir. "
-                        + "Falling back on the default template provided by the webapp.", e);
+                LOG.error("Unable to load the template '" + candidate + "' from classpath resources.", e);
             }
         }
         /* Trying to resolve the templates from inside the webapp */
-        String tmplFromWebapp = this.servletContext
-                .getRealPath(Paths.get("/WEB-INF", "templates", fileName).toString());
-
-        String body = null;
-        try {
-            body = FileUtils.readFileToString(new File(tmplFromWebapp), templateEncoding);
-        } catch (IOException e) {
-            LOG.error(e);
+        if (this.servletContext == null) {
+            throw new IllegalStateException("Mail template '" + fileName + "' not found in datadir or classpath");
         }
-        return body;
+        for (String candidate : candidateTemplates) {
+            String tmplFromWebapp = this.servletContext.getRealPath(Paths.get("/WEB-INF", "templates", candidate).toString());
+            if (tmplFromWebapp == null) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Mail template not resolvable from webapp path for candidate: " + candidate);
+                }
+                continue;
+            }
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Trying mail template from webapp: " + tmplFromWebapp);
+            }
+            try {
+                File templateFile = new File(tmplFromWebapp);
+                if (templateFile.isFile()) {
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Using mail template from webapp: " + tmplFromWebapp);
+                    }
+                    return FileUtils.readFileToString(templateFile, templateEncoding);
+                }
+            } catch (IOException e) {
+                LOG.error("Unable to load the template '" + candidate + "' from webapp resources.", e);
+            }
+        }
+        LOG.warn("No mail template found for '" + fileName + "' and locale " + locale
+                + ". Tried candidates " + candidateTemplates);
+        throw new IllegalStateException("Mail template '" + fileName + "' not found for locale "
+                + locale);
+    }
+
+    private List<String> resolveTemplateCandidates(String fileName, Locale locale) {
+        List<String> candidates = new ArrayList<>();
+        String language = locale == null ? "" : locale.getLanguage();
+        String country = locale == null ? "" : locale.getCountry();
+        int extensionIndex = fileName.lastIndexOf('.');
+        String baseName = extensionIndex >= 0 ? fileName.substring(0, extensionIndex) : fileName;
+        String extension = extensionIndex >= 0 ? fileName.substring(extensionIndex) : "";
+
+        if (!language.isBlank() && !country.isBlank()) {
+            candidates.add(baseName + "_" + language + "_" + country + extension);
+        }
+        if (!language.isBlank()) {
+            candidates.add(baseName + "_" + language + extension);
+        }
+        candidates.add(fileName);
+        return candidates;
     }
 
     public MimeMessage send() throws MessagingException {

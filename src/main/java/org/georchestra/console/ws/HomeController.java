@@ -78,7 +78,7 @@ public class HomeController {
             response.sendRedirect(publicContextPath + redirectUrl);
         } else {
             // redirect to CAS
-            response.sendRedirect(publicContextPath + "/account/userdetails?login");
+            response.sendRedirect(publicContextPath + "/account/userdetails");
         }
     }
 

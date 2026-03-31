@@ -1,0 +1,12 @@
+Hallo {name},
+
+U heeft gevraagd om uw e-mailadres te wijzigen op {publicUrl}/.
+Als u deze wijziging niet hebt aangevraagd, kunt u deze e-mail negeren.
+
+Om uw nieuwe e-mailadres te bevestigen, opent u deze link: {url}.
+Als u nog niet bent aangemeld, wordt u gevraagd om in te loggen.
+
+Let op: deze e-mail is persoonlijk, stuur hem niet door.
+
+---
+Verzonden door {instanceName} ({publicUrl}/)

@@ -36,6 +36,10 @@ body {
   padding: 32px 16px 48px;
 }
 
+.page-narrow {
+  max-width: 760px;
+}
+
 .hero {
   margin-bottom: 24px;
 }

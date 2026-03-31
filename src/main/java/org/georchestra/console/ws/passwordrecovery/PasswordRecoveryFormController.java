@@ -91,7 +91,7 @@ public class PasswordRecoveryFormController {
     @Value("${publicContextPath:/console}")
     private String publicContextPath;
 
-    @Value("https://${domainName}")
+    @Value("${publicUrl:https://${domainName}}")
     private String publicUrl;
 
     public PasswordRecoveryFormController(AccountDao dao, RoleDao gDao, EmailFactory emailFactory,

@@ -10,7 +10,7 @@
 </head>
 <body>
 <th:block th:fragment="appHeader(activeApp)">
-  <div id="go_head" th:if="${param.noheader == null}">
+  <div id="go_head" th:if="${param.noheader == null and header != null}">
     <geor-header th:attr="logo-url=${header.logoUrl},
                           stylesheet=${header.georchestraStylesheet},
                           config-file=${header.headerConfigFile},

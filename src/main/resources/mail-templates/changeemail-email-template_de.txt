@@ -1,0 +1,12 @@
+Hallo {name},
+
+Sie haben angefordert, Ihre E-Mail-Adresse auf {publicUrl}/ zu ändern.
+Falls Sie diese Änderung nicht angefordert haben, ignorieren Sie diese E-Mail einfach.
+
+Um Ihre neue E-Mail-Adresse zu bestätigen, öffnen Sie bitte diesen Link: {url}.
+Falls Sie noch nicht angemeldet sind, werden Sie zur Anmeldung aufgefordert.
+
+Achtung: Diese E-Mail ist persönlich. Bitte leiten Sie sie nicht weiter.
+
+---
+Gesendet von {instanceName} ({publicUrl}/)

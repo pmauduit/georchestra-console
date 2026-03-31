@@ -39,6 +39,7 @@ import org.georchestra.ds.users.UserRule;
 import org.georchestra.security.api.OrganizationsApi;
 import org.georchestra.security.api.RolesApi;
 import org.georchestra.security.api.UsersApi;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.ldap.core.LdapTemplate;
@@ -81,8 +82,72 @@ public class ConsoleConfiguration {
         return new PasswordUtils();
     }
 
-    public @Bean EmailFactory emailFactory() {
-        return new EmailFactory();
+    public @Bean EmailFactory emailFactory(
+            @Value("${smtpHost:localhost}") String smtpHost,
+            @Value("${smtpPort:25}") int smtpPort,
+            @Value("${emailHtml:false}") boolean emailHtml,
+            @Value("${replyTo:}") String replyTo,
+            @Value("${from:}") String from,
+            @Value("${templateEncoding:UTF-8}") String templateEncoding,
+            @Value("${domainName:localhost}") String domainName,
+            @Value("${publicUrl:}") String publicUrl,
+            @Value("${instanceName:geOrchestra}") String instanceName,
+            @Value("${administratorEmail:georchestra@localhost}") String administratorEmail,
+            @Value("${subject.account.created:}") String accountCreatedSubject,
+            @Value("${subject.account.in.process:}") String accountInProcessSubject,
+            @Value("${subject.requires.moderation:}") String requiresModerationSubject,
+            @Value("${subject.change.password:}") String changePasswordSubject,
+            @Value("${subject.change.password-oauth2:}") String changePasswordOAuth2Subject,
+            @Value("${subject.change.email:}") String changeEmailSubject,
+            @Value("${subject.account.uid.renamed:}") String accountUidRenamedSubject,
+            @Value("${subject.new.account.notification:}") String newAccountNotificationSubject,
+            @Value("${subject.new.oauth2account.notification:}") String newOAuth2AccountNotificationSubject) {
+        EmailFactory factory = new EmailFactory();
+        factory.setSmtpHost(smtpHost);
+        factory.setSmtpPort(smtpPort);
+        factory.setEmailHtml(emailHtml);
+        factory.setReplyTo(replyTo == null || replyTo.isBlank() ? administratorEmail : replyTo);
+        factory.setFrom(from == null || from.isBlank() ? administratorEmail : from);
+        factory.setBodyEncoding("UTF-8");
+        factory.setSubjectEncoding("UTF-8");
+        factory.setTemplateEncoding(templateEncoding);
+        factory.setAccountWasCreatedEmailFile("newaccount-was-created-template.txt");
+        factory.setAccountWasCreatedEmailSubject(
+                fallbackSubject(accountCreatedSubject, "[%s] Your account has been created", instanceName));
+        factory.setAccountCreationInProcessEmailFile("account-creation-in-progress-template.txt");
+        factory.setAccountCreationInProcessEmailSubject(
+                fallbackSubject(accountInProcessSubject, "[%s] Your new account is waiting for validation", instanceName));
+        factory.setNewAccountRequiresModerationEmailFile("newaccount-requires-moderation-template.txt");
+        factory.setNewAccountRequiresModerationEmailSubject(
+                fallbackSubject(requiresModerationSubject, "[%s] New account waiting for validation", instanceName));
+        factory.setChangePasswordEmailFile("changepassword-email-template.txt");
+        factory.setChangePasswordEmailSubject(
+                fallbackSubject(changePasswordSubject, "[%s] Update your password", instanceName));
+        factory.setChangePasswordOAuth2EmailFile("changepasswordoauth2-email-template.txt");
+        factory.setChangePasswordOAuth2EmailSubject(
+                fallbackSubject(changePasswordOAuth2Subject, "[%s] Update your password", instanceName));
+        factory.setChangeEmailAddressEmailFile("changeemail-email-template.txt");
+        factory.setChangeEmailAddressEmailSubject(
+                fallbackSubject(changeEmailSubject, "[%s] Update your e-mail address", instanceName));
+        factory.setAccountUidRenamedEmailFile("account-uid-renamed.txt");
+        factory.setAccountUidRenamedEmailSubject(
+                fallbackSubject(accountUidRenamedSubject, "[%s] New login for your account", instanceName));
+        factory.setNewAccountNotificationEmailFile("newaccount-notification-template.txt");
+        factory.setNewOAuth2AccountNotificationEmailFile("new-oauth2-account-notification-template.txt");
+        factory.setNewAccountNotificationEmailSubject(
+                fallbackSubject(newAccountNotificationSubject, "[%s] New account created", instanceName));
+        factory.setNewOAuth2AccountNotificationEmailSubject(
+                fallbackSubject(newOAuth2AccountNotificationSubject, "[%s] New OAuth2 account created", instanceName));
+        factory.setPublicUrl(publicUrl == null || publicUrl.isBlank() ? "https://" + domainName : publicUrl);
+        factory.setInstanceName(instanceName);
+        factory.setAdministratorEmail(administratorEmail);
+        return factory;
+    }
+
+    private String fallbackSubject(String configuredValue, String defaultPattern, String instanceName) {
+        return configuredValue == null || configuredValue.isBlank()
+                ? defaultPattern.formatted(instanceName)
+                : configuredValue;
     }
 
     public @Bean UserInfoExporter userInfoExporter(AccountDao accountDao, OrgsDao orgsDao) {

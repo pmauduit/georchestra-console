@@ -49,6 +49,8 @@ import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
 /**
@@ -78,7 +80,7 @@ public class ChangeEmailFormController {
     @Value("${publicContextPath:/console}")
     private String publicContextPath;
 
-    @Value("https://${domainName}")
+    @Value("${publicUrl:https://${domainName}}")
     private String publicUrl;
 
     public ChangeEmailFormController(AccountDao accountDao, EmailFactory emailFactory, UserTokenDao userTokenDao,
@@ -217,8 +219,14 @@ public class ChangeEmailFormController {
      * @return a new URL to change email address
      */
     protected String makeChangeEmailURL(final String publicUrl, final String contextPath, final String token) {
-        String url = UriComponentsBuilder.fromUriString(publicUrl).path(contextPath).path("/account/validateEmail")
-                .query("token={token}").buildAndExpand(token).toUriString();
+        String baseUrl = publicUrl.endsWith("/") ? publicUrl.substring(0, publicUrl.length() - 1) : publicUrl;
+        String resolvedContextPath = contextPath == null || contextPath.isBlank() ? "" : contextPath;
+        if (!resolvedContextPath.isEmpty() && !resolvedContextPath.startsWith("/")) {
+            resolvedContextPath = "/" + resolvedContextPath;
+        }
+
+        String url = baseUrl + resolvedContextPath + "/account/validateEmail?token="
+                + URLEncoder.encode(token, StandardCharsets.UTF_8);
 
         if (LOG.isDebugEnabled()) {
             LOG.debug("generated url:" + url);
