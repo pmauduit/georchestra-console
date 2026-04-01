@@ -78,8 +78,19 @@ public class ConsoleConfiguration {
         return new ReCaptchaParameters("aaaa", "secret", "http://localhost:6000/verify");
     }
 
-    public @Bean PasswordUtils passwordUtils() {
-        return new PasswordUtils();
+    public @Bean PasswordUtils passwordUtils(
+            @Value("${password.minimumLength:8}") int minimumLength,
+            @Value("${password.requireLowers:false}") boolean requireLowers,
+            @Value("${password.requireUppers:false}") boolean requireUppers,
+            @Value("${password.requireDigits:false}") boolean requireDigits,
+            @Value("${password.requireSpecials:false}") boolean requireSpecials) {
+        PasswordUtils passwordUtils = new PasswordUtils();
+        passwordUtils.setMinimumLength(minimumLength);
+        passwordUtils.setRequireLowers(requireLowers);
+        passwordUtils.setRequireUppers(requireUppers);
+        passwordUtils.setRequireDigits(requireDigits);
+        passwordUtils.setRequireSpecials(requireSpecials);
+        return passwordUtils;
     }
 
     public @Bean EmailFactory emailFactory(

@@ -1,6 +1,6 @@
 spring:
   config:
-    import: classpath:/console.yaml,optional:file:${georchestra.datadir}/default.properties,optional:file:${georchestra.datadir}/console/console.yaml
+    import: classpath:/console.yaml,optional:file:${georchestra.datadir}/default.properties,optional:file:${georchestra.datadir}/console/console.yaml,optional:file:${georchestra.datadir}/console/console.properties
   application:
     name: console
   messages:
