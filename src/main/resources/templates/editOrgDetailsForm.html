@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{editOrgDetailsForm.title})}">
+  <meta charset="UTF-8">
+  <title>Edit organization.</title>
+</head>
+<body>
+<th:block th:replace="~{fragments/layout :: appHeader('console')}"></th:block>
+<main class="page">
+  <section class="hero">
+    <div class="hero-inline">
+      <p class="hero-subtitle" th:text="${name}">Organization name</p>
+      <p class="hero-text" th:text="#{editOrgDetailsForm.description}">
+        Update your organization information.
+      </p>
+    </div>
+  </section>
+
+  <div class="layout">
+    <section class="card">
+      <div th:if="${success}" class="alert alert-success" th:text="#{editOrgDetailsForm.success}">
+        Organization updated successfully
+      </div>
+
+      <form id="form" method="post" th:action="@{/account/orgdetails}"
+            th:object="${editOrgDetailsFormBean}" enctype="multipart/form-data">
+        <div th:if="${#fields.hasErrors('*')}" class="alert alert-error" th:text="#{form.error}">
+          The form contains errors
+        </div>
+
+        <fieldset class="fieldset">
+          <legend th:text="#{editOrgDetailsForm.fieldset.orgDetails}">Organization details</legend>
+          <input type="hidden" th:field="*{id}">
+
+          <div class="form-grid">
+            <div class="field">
+              <label for="name">
+                <span th:text="#{name.label}">Name</span>
+                <span th:if="${session.nameRequired}" class="required-marker">*</span>
+              </label>
+              <input id="name" type="text" th:field="*{name}">
+              <p class="field-error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}">
+                Invalid name
+              </p>
+            </div>
+
+            <div class="field">
+              <label for="orgUniqueId">
+                <span th:text="#{orgUniqueId.label}">Organization ID</span>
+                <span th:if="${session.orgUniqueIdRequired}" class="required-marker">*</span>
+              </label>
+              <input id="orgUniqueId" type="text" th:field="*{orgUniqueId}">
+              <p class="field-error" th:if="${#fields.hasErrors('orgUniqueId')}" th:errors="*{orgUniqueId}">
+                Invalid ID
+              </p>
+            </div>
+
+            <div class="field">
+              <label for="description">
+                <span th:text="#{description.label}">Description</span>
+                <span th:if="${session.descriptionRequired}" class="required-marker">*</span>
+              </label>
+              <textarea id="description" rows="4" th:field="*{description}"></textarea>
+              <p class="field-error" th:if="${#fields.hasErrors('description')}" th:errors="*{description}">
+                Invalid description
+              </p>
+            </div>
+
+            <div class="field">
+              <label for="address">
+                <span th:text="#{address.label}">Address</span>
+                <span th:if="${session.addressRequired}" class="required-marker">*</span>
+              </label>
+              <textarea id="address" rows="3" th:field="*{address}"></textarea>
+              <p class="field-error" th:if="${#fields.hasErrors('address')}" th:errors="*{address}">
+                Invalid address
+              </p>
+            </div>
+
+            <div class="field">
+              <label for="url">
+                <span th:text="#{url.label}">Website</span>
+                <span th:if="${session.urlRequired}" class="required-marker">*</span>
+              </label>
+              <input id="url" type="url" th:field="*{url}">
+              <p class="field-error" th:if="${#fields.hasErrors('url')}" th:errors="*{url}">
+                Invalid URL
+              </p>
+            </div>
+
+            <div class="field">
+              <label for="mail">
+                <span th:text="#{mail.label}">E-mail</span>
+                <span th:if="${session.mailRequired}" class="required-marker">*</span>
+              </label>
+              <input id="mail" type="email" th:field="*{mail}">
+              <p class="field-error" th:if="${#fields.hasErrors('mail')}" th:errors="*{mail}">
+                Invalid e-mail
+              </p>
+            </div>
+
+            <div class="field">
+              <label for="logo">
+                <span th:text="#{logo.label}">Logo</span>
+                <span th:if="${session.logoRequired}" class="required-marker">*</span>
+              </label>
+              <input id="logo" type="file" name="logo" accept="image/*">
+            </div>
+          </div>
+        </fieldset>
+
+        <div class="actions">
+          <button type="submit" class="button button-primary" th:text="#{submit.label}">Submit</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="card" th:if="${logo}">
+      <img class="preview" th:src="|data:image/jpeg;base64,${logo}|" alt="logo">
+    </section>
+  </div>
+</main>
+</body>
+</html>
