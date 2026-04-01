@@ -340,7 +340,7 @@ public final class NewAccountFormController {
                 logUtils.createLog(account.getUid(), AdminLogType.PENDING_USER_CREATED, null);
             }
 
-            return "welcomeNewUser";
+            return "account/welcomeNewUser";
 
         } catch (DuplicatedEmailException e) {
 
