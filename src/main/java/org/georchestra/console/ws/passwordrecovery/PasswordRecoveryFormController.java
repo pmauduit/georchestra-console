@@ -116,7 +116,7 @@ public class PasswordRecoveryFormController {
         if (email != null) {
             PasswordType pt = getPasswordType(email);
             if (pt == PasswordType.SASL) {
-                return "userManagedBySASL";
+                return "account/userManagedBySASL";
             }
         }
         HttpSession session = request.getSession();
@@ -134,7 +134,7 @@ public class PasswordRecoveryFormController {
         model.addAttribute("recaptchaActivated", this.reCaptchaActivated);
         session.setAttribute("reCaptchaPublicKey", this.reCaptchaParameters.getPublicKey());
 
-        return "passwordRecoveryForm";
+        return "account/passwordRecoveryForm";
     }
 
     /**
@@ -158,7 +158,7 @@ public class PasswordRecoveryFormController {
             RecaptchaUtils.validate(reCaptchaParameters, formBean.getRecaptcha_response_field(), resultErrors);
         }
         if (resultErrors.hasErrors()) {
-            return "passwordRecoveryForm";
+            return "account/passwordRecoveryForm";
         }
 
         try {
@@ -198,7 +198,7 @@ public class PasswordRecoveryFormController {
         } catch (NameNotFoundException e) {
         }
 
-        return "emailWasSentForPasswordChange";
+        return "account/emailWasSentForPasswordChange";
     }
 
     /**

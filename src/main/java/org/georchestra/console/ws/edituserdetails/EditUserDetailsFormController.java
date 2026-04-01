@@ -130,7 +130,7 @@ public class EditUserDetailsFormController {
                 }
             }
 
-            return "editUserDetailsForm";
+            return "account/editUserDetailsForm";
 
         } catch (DataServiceException e) {
             throw new IllegalStateException("Unable to load user details view model", e);
@@ -210,7 +210,7 @@ public class EditUserDetailsFormController {
 
         if (resultErrors.hasErrors()) {
             model.addAttribute("hasErrors", true);
-            return "editUserDetailsForm";
+            return "account/editUserDetailsForm";
         }
 
         // updates the account details
@@ -231,14 +231,14 @@ public class EditUserDetailsFormController {
             if (logUtils != null) {
                 logUtils.logChanges(modifiedAccount, originalAccount);
             }
-            return "editUserDetailsForm";
+            return "account/editUserDetailsForm";
 
         } catch (DuplicatedEmailException e) {
 
             // right now the email cannot be edited (review requirement)
             // resultErrors.addError(new ObjectError("email", "Exist a user with this
             // e-mail"));
-            return "createAccountForm";
+            return "account/createAccountForm";
 
         } catch (DataServiceException e) {
             throw new IllegalStateException("Unable to update user details", e);

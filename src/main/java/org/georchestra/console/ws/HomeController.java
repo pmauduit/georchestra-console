@@ -84,7 +84,7 @@ public class HomeController {
 
     @RequestMapping(value = { "/manager/", "/manager/home" })
     public String consoleHome(HttpServletRequest request) throws IOException {
-        return "managerUi";
+        return "manager/managerUi";
     }
 
     public void setPublicContextPath(String publicContextPath) {

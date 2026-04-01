@@ -111,7 +111,7 @@ public class PasswordRecoveryFormControllerTest {
 
         String ret = ctrl.setupForm(request, "test@localhost.com", model);
 
-        assertEquals("passwordRecoveryForm", ret);
+        assertEquals("account/passwordRecoveryForm", ret);
     }
 
     @Test
@@ -139,7 +139,7 @@ public class PasswordRecoveryFormControllerTest {
         String ret = ctrl.generateToken(request, formBean, result, status);
 
         Mockito.verifyNoInteractions(efi);
-        assertEquals("emailWasSentForPasswordChange", ret);
+        assertEquals("account/emailWasSentForPasswordChange", ret);
     }
 
     @Test
@@ -150,7 +150,7 @@ public class PasswordRecoveryFormControllerTest {
         String ret = ctrl.generateToken(request, formBean, result, status);
 
         Mockito.verifyNoInteractions(efi);
-        assertEquals("passwordRecoveryForm", ret);
+        assertEquals("account/passwordRecoveryForm", ret);
     }
 
     @Test
@@ -161,7 +161,7 @@ public class PasswordRecoveryFormControllerTest {
 
         Mockito.verify(efi).sendChangePasswordEmail(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
                 Mockito.any());
-        assertEquals("emailWasSentForPasswordChange", ret);
+        assertEquals("account/emailWasSentForPasswordChange", ret);
     }
 
     @Test
@@ -173,7 +173,7 @@ public class PasswordRecoveryFormControllerTest {
         String ret = ctrl.generateToken(request, formBean, result, status);
 
         Mockito.verifyNoInteractions(efi);
-        assertEquals("passwordRecoveryForm", ret);
+        assertEquals("account/passwordRecoveryForm", ret);
     }
 
     /**
@@ -205,7 +205,7 @@ public class PasswordRecoveryFormControllerTest {
         String ret = ctrl.generateToken(request, formBean, result, status);
 
         Mockito.verifyNoInteractions(efi);
-        assertEquals("emailWasSentForPasswordChange", ret);
+        assertEquals("account/emailWasSentForPasswordChange", ret);
     }
 
     /**
@@ -220,7 +220,7 @@ public class PasswordRecoveryFormControllerTest {
         String ret = ctrl.generateToken(request, formBean, result, status);
 
         Mockito.verify(efi).sendChangePasswordOAuth2Email(Mockito.any(), Mockito.any(), Mockito.any());
-        assertEquals("emailWasSentForPasswordChange", ret);
+        assertEquals("account/emailWasSentForPasswordChange", ret);
     }
 
     @Test

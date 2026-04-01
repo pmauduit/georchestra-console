@@ -206,7 +206,7 @@ public final class NewAccountFormController {
                     "true");
         }
 
-        return "createAccountForm";
+        return "account/createAccountForm";
     }
 
     /**
@@ -236,7 +236,7 @@ public final class NewAccountFormController {
         validateFields(formBean, result);
 
         if (result.hasErrors()) {
-            return "createAccountForm";
+            return "account/createAccountForm";
         }
 
         if (formBean.getCreateOrg()) {
@@ -347,13 +347,13 @@ public final class NewAccountFormController {
             result.rejectValue("email", "email.error.exist",
                     new String[] { String.format("%s%s", publicContextPath, "/account/passwordRecovery") },
                     "there is a user with this e-mail");
-            return "createAccountForm";
+            return "account/createAccountForm";
 
         } catch (DuplicatedUidException e) {
 
             formBean.setUid(accountDao.generateUid(formBean.getUid()));
             result.rejectValue("uid", "uid.error.exist", "the uid exist");
-            return "createAccountForm";
+            return "account/createAccountForm";
 
         } catch (DataServiceException | MessagingException e) {
 

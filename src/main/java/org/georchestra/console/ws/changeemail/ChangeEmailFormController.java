@@ -111,7 +111,7 @@ public class ChangeEmailFormController {
     public String setupForm(Model model) throws DataServiceException {
         ChangeEmailFormBean formBean = new ChangeEmailFormBean();
         model.addAttribute(formBean);
-        return "changeEmailForm";
+        return "account/changeEmailForm";
     }
 
     /**
@@ -131,7 +131,7 @@ public class ChangeEmailFormController {
         if (validation.validateUserFieldWithSpecificMsg("newEmail", formBean.getNewEmail(), result)
                 && !EmailValidator.getInstance().isValid(formBean.getNewEmail())) {
             result.rejectValue("newEmail", "email.error.invalidFormat", "Invalid Format");
-            return "changeEmailForm";
+            return "account/changeEmailForm";
         }
 
         String newEmail = formBean.getNewEmail();
@@ -141,7 +141,7 @@ public class ChangeEmailFormController {
             result.rejectValue("newEmail", "email.error.exist",
                     new String[] { String.format("%s%s", publicContextPath, "/account/changeEmail") },
                     "there is a user with this e-mail");
-            return "changeEmailForm";
+            return "account/changeEmailForm";
         } catch (NameNotFoundException e) {}
 
         Account account = getAccount();
@@ -168,7 +168,7 @@ public class ChangeEmailFormController {
 
         LOG.debug(AdminLogType.EMAIL_CHANGE_EMAIL_SENT + " from " + account.getUid() + " to " + newEmail);
 
-        return "emailWasSentForEmailChange";
+        return "account/emailWasSentForEmailChange";
     }
 
     /**

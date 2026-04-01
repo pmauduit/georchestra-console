@@ -94,7 +94,7 @@ public class ManagerLogsController {
         model.addAttribute("types", extractDistinct(logs, l -> l.getType() == null ? "" : l.getType().name()));
         model.addAttribute("allTypes", AdminLogType.values());
 
-        return "managerLogs";
+        return "manager/managerLogs";
     }
 
     private List<AdminLogEntry> fetchLogsForUser(Authentication auth, int limit, int page) {

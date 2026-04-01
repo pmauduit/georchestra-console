@@ -144,7 +144,7 @@ public class EditUserDetailsFormControllerTest {
         Mockito.when(dao.findByUID(Mockito.anyString())).thenReturn(this.mtesterAccount);
 
         String ret = ctrl.setupForm(request, response, model);
-        assertEquals("editUserDetailsForm", ret);
+        assertEquals("account/editUserDetailsForm", ret);
     }
 
     /**
@@ -166,7 +166,7 @@ public class EditUserDetailsFormControllerTest {
         ArgumentCaptor<ObjectNode> orgWithExtCaptor = ArgumentCaptor.forClass(ObjectNode.class);
         verify(model, times(2)).addAttribute(Mockito.eq("isReferentOrSuperUser"), refOrSuCaptor.capture());
         verify(model, times(2)).addAttribute(Mockito.eq("org"), orgWithExtCaptor.capture());
-        assertEquals("editUserDetailsForm", ret);
+        assertEquals("account/editUserDetailsForm", ret);
         assertNotNull("expected a isReferentOrSuperUser in the model, null returned", refOrSuCaptor.getValue());
         List<Boolean> refOrSuValues = refOrSuCaptor.getAllValues();
         assertEquals(2, refOrSuValues.size());
@@ -184,16 +184,17 @@ public class EditUserDetailsFormControllerTest {
 
         String ret = ctrl.setupForm(request, response, model);
 
-        assertEquals("editUserDetailsForm", ret);
+        assertEquals("account/editUserDetailsForm", ret);
     }
 
     @Test
     public void testEditNoOrg() throws Exception {
         request.addHeader(SEC_USERNAME, "mtesterNoOrg");
+        formBean.setUid("mtesterNoOrg");
         Mockito.when(dao.findByUID(Mockito.anyString())).thenReturn(this.mtesterAccountNoOrg);
         String ret = ctrl.edit(request, response, model, formBean, resultErrors, sessionStatus);
 
-        assertEquals("editUserDetailsForm", ret);
+        assertEquals("account/editUserDetailsForm", ret);
     }
 
     /**
@@ -224,6 +225,7 @@ public class EditUserDetailsFormControllerTest {
     public void testEditUserMissingRequiredField() throws IOException {
         request.addHeader(SEC_USERNAME, "mtester");
         EditUserDetailsFormBean formBeanWithMissingField = new EditUserDetailsFormBean();
+        formBeanWithMissingField.setUid("mtester");
         BindingResult resultErrors = new MapBindingResult(new HashMap<>(), "errors");
         ctrl = new EditUserDetailsFormController(dao, orgsDao, roleDao,
                 new Validation("firstName,surname,org,orgType"));
@@ -239,6 +241,7 @@ public class EditUserDetailsFormControllerTest {
     public void specialValidators() throws IOException {
         request.addHeader(SEC_USERNAME, "mtester");
         EditUserDetailsFormBean formBeanWithMissingField = new EditUserDetailsFormBean();
+        formBeanWithMissingField.setUid("mtester");
         BindingResult resultErrors = new MapBindingResult(new HashMap<>(), "errors");
         ctrl = new EditUserDetailsFormController(dao, orgsDao, roleDao,
                 new Validation("phone,facsimile,title,description,postalAddress"));
