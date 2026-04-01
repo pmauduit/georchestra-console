@@ -42,6 +42,9 @@ import org.georchestra.security.api.UsersApi;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.boot.jdbc.DataSourceBuilder;
+
+import javax.sql.DataSource;
 import org.springframework.ldap.core.LdapTemplate;
 
 import javax.sql.DataSource;
@@ -91,6 +94,21 @@ public class ConsoleConfiguration {
         passwordUtils.setRequireDigits(requireDigits);
         passwordUtils.setRequireSpecials(requireSpecials);
         return passwordUtils;
+    }
+
+    @Bean(name = "dataSourceGeonetwork")
+    public DataSource dataSourceGeonetwork(
+            @Value("${pgsqlGNHost:${pgsqlHost}}") String host,
+            @Value("${pgsqlGNPort:${pgsqlPort}}") int port,
+            @Value("${pgsqlGNDatabase:${pgsqlDatabase}}") String database,
+            @Value("${pgsqlGNUser:${pgsqlUser}}") String user,
+            @Value("${pgsqlGNPassword:${pgsqlPassword}}") String password) {
+        String url = String.format("jdbc:postgresql://%s:%d/%s", host, port, database);
+        return DataSourceBuilder.create()
+                .url(url)
+                .username(user)
+                .password(password)
+                .build();
     }
 
     public @Bean EmailFactory emailFactory(
