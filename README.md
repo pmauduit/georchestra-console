@@ -15,7 +15,14 @@ Current runtime target: Java 21.
 
 # (B)log
 
-## March, 31th 2025
+## April, 1st 2026
+
+End migration JSP in Thymeleaf
+Start migration Angular in Thymeleaf, for the moment some angular are copied in project to test quickly, to be removed
+exemple http://localhost:8080/console/manager/logs Style need to be review
+In createAccoutForm, new org with areas is not working
+
+## March, 31th 2026
 
 Added a dedicated development environment:
 
