@@ -82,7 +82,7 @@ public class HomeController {
         }
     }
 
-    @RequestMapping(value = "/manager/")
+    @RequestMapping(value = { "/manager/", "/manager/home" })
     public String consoleHome(HttpServletRequest request) throws IOException {
         return "managerUi";
     }

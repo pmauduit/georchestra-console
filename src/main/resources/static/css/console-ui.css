@@ -106,6 +106,46 @@ body {
   padding: 24px;
 }
 
+.table-wrapper {
+  overflow-x: auto;
+  margin-top: 16px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.table th,
+.table td {
+  text-align: left;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.table thead th {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+.table .empty {
+  text-align: center;
+  color: var(--muted);
+  padding: 16px;
+}
+
+.filters {
+  display: grid;
+  gap: 16px;
+}
+
+.filters .form-grid {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
 .alert {
   border-radius: 12px;
   padding: 14px 16px;
