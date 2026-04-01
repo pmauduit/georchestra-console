@@ -44,6 +44,38 @@ body {
   margin-bottom: 24px;
 }
 
+.hero p {
+  margin: 12px 0 0;
+  color: var(--muted);
+  max-width: 72ch;
+}
+
+.hero-subtitle {
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.hero-text {
+  font-size: 1rem;
+}
+
+@media (min-width: 900px) {
+  .hero-inline {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 12px;
+  }
+
+  .hero-inline .hero-subtitle {
+    margin: 0;
+  }
+
+  .hero-inline .hero-text {
+    margin: 0;
+  }
+}
+
 .hero h1 {
   margin: 0;
   font-size: 2rem;
@@ -58,11 +90,6 @@ body {
   font-weight: 400;
 }
 
-.hero p {
-  margin: 12px 0 0;
-  color: var(--muted);
-  max-width: 72ch;
-}
 
 .layout {
   display: grid;
@@ -256,6 +283,53 @@ a {
 
 .org-members li + li {
   margin-top: 6px;
+}
+
+.policy-list {
+  margin: 0;
+  padding-left: 20px;
+  color: var(--muted);
+}
+
+.policy-list li + li {
+  margin-top: 6px;
+}
+
+.pwd-quality {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 0.5rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  background: var(--georchestra-secondary-light, #f3f4f6);
+  color: var(--georchestra-primary, #1f2937);
+}
+
+.pwd-quality--empty {
+  background: var(--georchestra-secondary-light, #f3f4f6);
+  color: var(--georchestra-primary, #1f2937);
+}
+
+.pwd-quality--veryweak {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.pwd-quality--weak {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.pwd-quality--good {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.pwd-quality--strong {
+  background: #dcfce7;
+  color: #166534;
 }
 
 .gdpr-card p {

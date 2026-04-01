@@ -8,10 +8,12 @@
 <th:block th:replace="~{fragments/layout :: appHeader('console')}"></th:block>
 <main class="page page-narrow">
   <section class="hero">
-    <p class="hero-subtitle" th:text="#{changeEmailForm.title}">Change e-mail.</p>
-    <p th:text="#{changeEmailForm.description}">
-      You will receive a validation link to your new e-mail address to confirm this change.
-    </p>
+    <div class="hero-inline">
+      <p class="hero-subtitle" th:text="#{changeEmailForm.title}">Change e-mail.</p>
+      <p class="hero-text" th:text="#{changeEmailForm.description}">
+        You will receive a validation link to your new e-mail address to confirm this change.
+      </p>
+    </div>
   </section>
 
   <section class="card">

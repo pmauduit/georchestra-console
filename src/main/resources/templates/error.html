@@ -8,8 +8,10 @@
 <th:block th:replace="~{fragments/layout :: appHeader('console')}"></th:block>
 <main class="page">
   <section class="hero">
-    <p class="hero-subtitle" th:text="${title}">Error</p>
-    <p th:text="|HTTP ${status}|">HTTP 500</p>
+    <div class="hero-inline">
+      <p class="hero-subtitle" th:text="${title}">Error</p>
+      <p class="hero-text" th:text="|HTTP ${status}|">HTTP 500</p>
+    </div>
   </section>
 
   <section class="card">

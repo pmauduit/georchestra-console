@@ -8,10 +8,12 @@
 <th:block th:replace="~{fragments/layout :: appHeader('console')}"></th:block>
 <main class="page page-narrow">
   <section class="hero">
-    <p class="hero-subtitle" th:text="#{emailWasSent.title}">E-mail sent</p>
-    <p th:text="#{emailWasSentForEmailChange.body}">
-      A validation link has been sent to your new e-mail address. Please, check your e-mail box.
-    </p>
+    <div class="hero-inline">
+      <p class="hero-subtitle" th:text="#{emailWasSent.title}">E-mail sent</p>
+      <p class="hero-text" th:text="#{emailWasSentForEmailChange.body}">
+        A validation link has been sent to your new e-mail address. Please, check your e-mail box.
+      </p>
+    </div>
   </section>
 
   <section class="card">

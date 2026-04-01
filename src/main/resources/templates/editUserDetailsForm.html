@@ -8,10 +8,12 @@
 <th:block th:replace="~{fragments/layout :: appHeader('console')}"></th:block>
 <main class="page">
   <section class="hero">
-    <p class="hero-subtitle" th:text="#{editUserDetailsForm.title}">User details.</p>
-    <p th:text="#{editUserDetailsForm.description}">
-      In this page you can manage your account informations and modify your password.
-    </p>
+    <div class="hero-inline">
+      <p class="hero-subtitle" th:text="#{editUserDetailsForm.title}">User details.</p>
+      <p class="hero-text" th:text="#{editUserDetailsForm.description}">
+        In this page you can manage your account informations and modify your password.
+      </p>
+    </div>
   </section>
 
   <div class="layout">
