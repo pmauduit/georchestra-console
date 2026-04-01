@@ -1,0 +1,13 @@
+Beste admin,
+
+Een nieuwe {oauth2}-gebruiker heeft zich aangemeld op {publicUrl}/ !
+
+Gebruikersnaam: {name}
+E-mail gebruiker: {email}
+{uid_msg}{org_msg}{provider_msg}
+
+U kunt de accountinstellingen van {name} beheren op {publicUrl}/console/manager/users/{user_id}/infos !
+
+
+---
+Verzonden door {instanceName} ({publicUrl}/)

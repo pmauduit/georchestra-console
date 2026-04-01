@@ -1,0 +1,8 @@
+Hallo {name},
+
+Ihre Anfrage zur Erstellung eines neuen Kontos wird sehr bald bearbeitet.
+
+Ihr Login ist: {uid}
+
+---
+Gesendet von {instanceName} ({publicUrl}/)

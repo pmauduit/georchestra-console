@@ -1,0 +1,13 @@
+Bonjour admin,
+
+Un nouvel utilisateur {oauth2} s'est inscrit sur {publicUrl}/ !
+
+Nom d'utilisateur : {name}
+E-mail utilisateur : {email}
+{uid_msg}{org_msg}{provider_msg}
+
+Vous pouvez gérer les paramètres du compte {name} sur {publicUrl}/console/manager/users/{user_id}/infos !
+
+
+---
+Envoyé par {instanceName} ({publicUrl}/)

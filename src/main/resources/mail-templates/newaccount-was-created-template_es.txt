@@ -1,0 +1,10 @@
+Hola {name},
+
+Su cuenta en {publicUrl}/ ha sido creada correctamente.
+Visite {publicUrl}/console/ para iniciar sesión con el identificador "{uid}" y su contraseña.
+
+Disfrute de geOrchestra,
+
+El administrador de la plataforma
+---
+Enviado por {instanceName} ({publicUrl}/)

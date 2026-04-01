@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{createAccountForm.title})}">
+  <meta charset="UTF-8">
+  <title>New account.</title>
+  <script th:if="${recaptchaActivated}" src="https://www.google.com/recaptcha/api.js" async defer></script>
+</head>
+<body>
+<th:block th:replace="~{fragments/layout :: appHeader('console')}"></th:block>
+<main class="page">
+  <section class="hero">
+    <div class="hero-inline">
+      <p class="hero-subtitle" th:text="#{createAccountForm.title}">New account.</p>
+      <p class="hero-text" th:text="#{createAccountForm.subtitle}">Create your account.</p>
+    </div>
+    <p class="hero-text" th:text="#{createAccountForm.description}">
+      An email will be sent to the above address to confirm the account creation.
+    </p>
+  </section>
+
+  <section class="card">
+    <div th:if="${message}" class="alert" th:text="${message}">Info</div>
+
+    <form id="form" method="post" th:action="@{/account/new}" th:object="${accountFormBean}"
+          th:with="passwordPattern=|^${pwdUtils.requireLowers ? '(?=.*[a-z])' : ''}${pwdUtils.requireUppers ? '(?=.*[A-Z])' : ''}${pwdUtils.requireDigits ? '(?=.*[0-9])' : ''}${pwdUtils.requireSpecials ? '(?=.*[^a-zA-Z0-9])' : ''}.{${pwdUtils.minimumLength},}$|"
+          th:attr="data-min-length=${pwdUtils.minimumLength},
+                   data-require-lowers=${pwdUtils.requireLowers},
+                   data-require-uppers=${pwdUtils.requireUppers},
+                   data-require-digits=${pwdUtils.requireDigits},
+                   data-require-specials=${pwdUtils.requireSpecials},
+                   data-msg-required=#{password.error.required},
+                   data-msg-size=#{password.error.sizeError(${pwdUtils.minimumLength})},
+                   data-msg-lowers=#{password.error.requireLowers},
+                   data-msg-uppers=#{password.error.requireUppers},
+                   data-msg-digits=#{password.error.requireDigits},
+                   data-msg-specials=#{password.error.requireSpecials},
+                   data-msg-confirm=#{confirmPassword.error.pwdNotEquals}">
+      <div th:if="${#fields.hasErrors('*')}" class="alert alert-error" th:text="#{form.error}">
+        The form contains errors
+      </div>
+
+      <fieldset class="fieldset">
+        <legend th:text="#{createAccountForm.fieldset.userDetails}">User details</legend>
+
+        <div class="form-grid">
+          <div class="field">
+            <label for="firstName">
+              <span th:text="#{firstName.label}">First Name</span>
+              <span class="required-marker">*</span>
+            </label>
+            <input id="firstName" type="text" th:field="*{firstName}"
+                   th:placeholder="#{firstName.placeholder}"
+                   required>
+            <p class="field-error" th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}">
+              Invalid first name
+            </p>
+          </div>
+
+          <div class="field">
+            <label for="surname">
+              <span th:text="#{surname.label}">Surname</span>
+              <span class="required-marker">*</span>
+            </label>
+            <input id="surname" type="text" th:field="*{surname}"
+                   th:placeholder="#{surname.placeholder}"
+                   required>
+            <p class="field-error" th:if="${#fields.hasErrors('surname')}" th:errors="*{surname}">
+              Invalid surname
+            </p>
+          </div>
+
+          <div class="field">
+            <label for="email">
+              <span th:text="#{email.label}">E-mail</span>
+              <span th:if="${session.emailRequired}" class="required-marker">*</span>
+            </label>
+            <input id="email" type="email" th:field="*{email}"
+                   th:placeholder="#{email.placeholder}"
+                   autocomplete="email"
+                   th:required="${session.emailRequired}">
+            <p class="field-error" th:if="${#fields.hasErrors('email')}"
+               th:utext="${#fields.errors('email')[0]}">
+              Invalid e-mail
+            </p>
+          </div>
+
+          <div class="field">
+            <label for="phone">
+              <span th:text="#{phone.label}">Phone</span>
+              <span th:if="${session.phoneRequired}" class="required-marker">*</span>
+            </label>
+            <input id="phone" type="tel" th:field="*{phone}"
+                   th:placeholder="#{phone.placeholder}"
+                   th:required="${session.phoneRequired}"
+                   pattern="^[0-9+(). ]*(?:-[0-9+(). ]*)*$"
+                   th:attr="title=#{phone.error.invalidFormat}">
+            <p class="field-error" th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}">
+              Invalid phone
+            </p>
+          </div>
+
+          <div class="field">
+            <label for="org">
+              <span th:text="#{org.label}">Organization</span>
+              <span th:if="${session.orgRequired}" class="required-marker">*</span>
+            </label>
+            <select id="org" th:field="*{org}" th:required="${session.orgRequired}">
+              <option value="-" th:text="#{org.placeholder}">Organization</option>
+              <option th:each="orgEntry : ${orgs}"
+                      th:value="${orgEntry.key}"
+                      th:text="${orgEntry.value}">
+                Organization
+              </option>
+            </select>
+            <p class="field-error" th:if="${#fields.hasErrors('org')}" th:errors="*{org}">
+              Invalid organization
+            </p>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="checkbox">
+            <input id="createOrg" type="checkbox" th:field="*{createOrg}">
+            <span th:text="#{org.cannot_find_org_in_list}">My organization is not present</span>
+          </label>
+        </div>
+
+        <div id="create-org-section" class="create-org-section" th:attr="hidden=${!accountFormBean.createOrg}">
+          <div class="form-grid">
+            <div class="field">
+              <label for="orgName">
+                <span th:text="#{org.creation.label}">Organization Name</span>
+                <span th:if="${session.orgNameRequired}" class="required-marker">*</span>
+              </label>
+              <input id="orgName" type="text" th:field="*{orgName}"
+                     th:required="${session.orgNameRequired}">
+              <p class="field-error" th:if="${#fields.hasErrors('orgName')}" th:errors="*{orgName}">
+                Invalid name
+              </p>
+            </div>
+
+            <div class="field">
+              <label for="orgShortName">
+                <span th:text="#{org.creation.shortLabel}">Short Name</span>
+                <span th:if="${session.orgShortNameRequired}" class="required-marker">*</span>
+              </label>
+            <input id="orgShortName" type="text" th:field="*{orgShortName}"
+                     pattern="[A-Za-z0-9_]*"
+                     th:required="${session.orgShortNameRequired}"
+                     th:attr="title=#{org.shortNameFormat}">
+              <p class="field-error" th:if="${#fields.hasErrors('orgShortName')}" th:errors="*{orgShortName}">
+                Invalid short name
+              </p>
+            </div>
+
+            <div class="field">
+              <label for="orgUniqueId">
+                <span th:text="#{org.creation.orgUniqueId}">Identification number</span>
+                <span th:if="${session.orgUniqueIdRequired}" class="required-marker">*</span>
+              </label>
+              <input id="orgUniqueId" type="text" th:field="*{orgUniqueId}"
+                     th:required="${session.orgUniqueIdRequired}">
+              <p class="field-error" th:if="${#fields.hasErrors('orgUniqueId')}" th:errors="*{orgUniqueId}">
+                Invalid ID
+              </p>
+            </div>
+
+            <div class="field">
+              <label for="orgAddress">
+                <span th:text="#{org.creation.address}">Address</span>
+                <span th:if="${session.orgAddressRequired}" class="required-marker">*</span>
+              </label>
+              <textarea id="orgAddress" rows="3" th:field="*{orgAddress}"
+                        th:required="${session.orgAddressRequired}"></textarea>
+              <p class="field-error" th:if="${#fields.hasErrors('orgAddress')}" th:errors="*{orgAddress}">
+                Invalid address
+              </p>
+            </div>
+
+            <div class="field">
+              <label for="orgType">
+                <span th:text="#{org.creation.orgType}">Organization type</span>
+                <span th:if="${session.orgTypeRequired}" class="required-marker">*</span>
+              </label>
+              <select id="orgType" th:field="*{orgType}" th:required="${session.orgTypeRequired}">
+                <option th:each="orgType : ${orgTypes}"
+                        th:value="${orgType.key}"
+                        th:text="${orgType.value}">
+                  Type
+                </option>
+              </select>
+              <p class="field-error" th:if="${#fields.hasErrors('orgType')}" th:errors="*{orgType}">
+                Invalid organization type
+              </p>
+            </div>
+
+            <div class="field">
+              <label for="orgDescription">
+                <span th:text="#{org.creation.orgDescription}">Description</span>
+                <span th:if="${session.orgDescriptionRequired}" class="required-marker">*</span>
+              </label>
+              <textarea id="orgDescription" rows="3" th:field="*{orgDescription}"
+                        th:required="${session.orgDescriptionRequired}"></textarea>
+              <p class="field-error" th:if="${#fields.hasErrors('orgDescription')}" th:errors="*{orgDescription}">
+                Invalid description
+              </p>
+            </div>
+
+            <div class="field">
+              <label for="orgUrl">
+                <span th:text="#{org.creation.orgUrl}">Url</span>
+                <span th:if="${session.orgUrlRequired}" class="required-marker">*</span>
+              </label>
+              <input id="orgUrl" type="url" th:field="*{orgUrl}"
+                     th:required="${session.orgUrlRequired}">
+              <p class="field-error" th:if="${#fields.hasErrors('orgUrl')}" th:errors="*{orgUrl}">
+                Invalid URL
+              </p>
+            </div>
+
+            <div class="field">
+              <label for="orgMail">
+                <span th:text="#{org.creation.orgMail}">Mail</span>
+                <span th:if="${session.orgMailRequired}" class="required-marker">*</span>
+              </label>
+              <input id="orgMail" type="email" th:field="*{orgMail}"
+                     th:required="${session.orgMailRequired}">
+              <p class="field-error" th:if="${#fields.hasErrors('orgMail')}" th:errors="*{orgMail}">
+                Invalid e-mail
+              </p>
+            </div>
+
+            <div class="field">
+              <label for="orgLogo">
+                <span th:text="#{org.creation.orgLogo}">Logo</span>
+                <span th:if="${session.orgLogoRequired}" class="required-marker">*</span>
+              </label>
+              <input id="orgLogo" type="file" name="orgLogoFile" accept="image/*"
+                     th:required="${session.orgLogoRequired}">
+            </div>
+          </div>
+
+          <div class="org-tools" th:if="${competenceAreaEnabled}" ng-app="manager" ng-strict-di
+               ng-controller="StandaloneController">
+            <areas item="org"></areas>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="field">
+            <label for="title">
+              <span th:text="#{title.label}">Job title</span>
+              <span th:if="${session.titleRequired}" class="required-marker">*</span>
+            </label>
+            <input id="title" type="text" th:field="*{title}"
+                   th:placeholder="#{title.placeholder}"
+                   th:required="${session.titleRequired}">
+            <p class="field-error" th:if="${#fields.hasErrors('title')}" th:errors="*{title}">
+              Invalid title
+            </p>
+          </div>
+
+          <div class="field">
+            <label for="description">
+              <span th:text="#{description.label}">Description</span>
+              <span th:if="${session.descriptionRequired}" class="required-marker">*</span>
+            </label>
+            <textarea id="description" rows="4" th:field="*{description}"
+                      th:placeholder="#{description.placeholder}"
+                      th:required="${session.descriptionRequired}"></textarea>
+            <p class="field-error" th:if="${#fields.hasErrors('description')}" th:errors="*{description}">
+              Invalid description
+            </p>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset class="fieldset">
+        <legend th:text="#{createAccountForm.fieldset.credentials}">Credentials</legend>
+
+        <div class="form-grid">
+          <div class="field">
+            <label for="uid">
+              <span th:text="#{uid.label}">User ID</span>
+              <span th:if="${session.uidRequired}" class="required-marker">*</span>
+            </label>
+            <input id="uid" type="text" th:field="*{uid}"
+                   th:placeholder="#{uid.placeholder}"
+                   pattern="[A-Za-z][A-Za-z0-9_.-]*"
+                   autocomplete="username"
+                   th:required="${session.uidRequired}"
+                   th:attr="title=#{uid.error.invalid}">
+            <p class="field-error" th:if="${#fields.hasErrors('uid')}" th:errors="*{uid}">
+              Invalid uid
+            </p>
+          </div>
+
+          <div class="field">
+            <label for="password">
+              <span th:text="#{password.label}">Password</span>
+              <span th:if="${session.passwordRequired}" class="required-marker">*</span>
+            </label>
+            <input id="password" type="password" th:field="*{password}"
+                   th:placeholder="#{password.placeholder}"
+                   autocomplete="new-password"
+                   th:required="${session.passwordRequired}"
+                   th:attr="minlength=${pwdUtils.minimumLength},pattern=${passwordPattern}">
+            <div id="pwdQuality"
+                 class="pwd-quality pwd-quality--empty"
+                 th:attr="data-empty=#{password.label.empty},data-veryweak=#{password.label.veryweak},data-weak=#{password.label.weak},data-good=#{password.label.good},data-strong=#{password.label.strong}"
+                 th:text="#{password.label.empty}">
+              Empty
+            </div>
+            <p id="password-client-error" class="field-error" aria-live="polite"
+               th:if="${!#fields.hasErrors('password')}"></p>
+            <p class="field-error" th:if="${#fields.hasErrors('password')}" th:errors="*{password}">
+              Invalid password
+            </p>
+          </div>
+
+          <div class="field">
+            <label for="confirmPassword">
+              <span th:text="#{confirmPassword.label}">Confirm password</span>
+              <span th:if="${session.confirmPasswordRequired}" class="required-marker">*</span>
+            </label>
+            <input id="confirmPassword" type="password" th:field="*{confirmPassword}"
+                   th:placeholder="#{confirmPassword.placeholder}"
+                   autocomplete="new-password"
+                   th:required="${session.confirmPasswordRequired}">
+            <p id="confirm-password-client-error" class="field-error" aria-live="polite"
+               th:if="${!#fields.hasErrors('confirmPassword')}"></p>
+            <p class="field-error" th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}">
+              Passwords do not match
+            </p>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset class="fieldset">
+        <legend th:text="#{password.policy}">Password policy</legend>
+        <ul class="policy-list">
+          <li th:text="#{password.policy.size(${pwdUtils.minimumLength})}">
+            Minimum length: 8 characters
+          </li>
+          <li th:if="${pwdUtils.requireLowers}" th:text="#{password.error.requireLowers}">
+            The password must contain lower cases
+          </li>
+          <li th:if="${pwdUtils.requireUppers}" th:text="#{password.error.requireUppers}">
+            The password must contain upper cases
+          </li>
+          <li th:if="${pwdUtils.requireDigits}" th:text="#{password.error.requireDigits}">
+            The password must contain digits
+          </li>
+          <li th:if="${pwdUtils.requireSpecials}" th:text="#{password.error.requireSpecials}">
+            The password must contain special characters
+          </li>
+        </ul>
+      </fieldset>
+
+      <fieldset th:if="${privacyPolicyAgreementActivated}" class="fieldset">
+        <legend th:text="#{createAccountForm.fieldset.privacyPolicyAgreement}">Terms and conditions</legend>
+        <div class="field">
+          <label class="checkbox">
+            <input type="checkbox" th:field="*{privacyPolicyAgreed}" required>
+            <span th:text="#{privacyPolicyAgreed.label}">Conditions</span>
+          </label>
+          <p class="help-text" th:utext="#{privacyPolicyAgreed.checkboxLabel(${privacyPolicyAgreementUrl})}">
+            I read and agree to the conditions
+          </p>
+          <p class="field-error" th:if="${#fields.hasErrors('privacyPolicyAgreed')}"
+             th:errors="*{privacyPolicyAgreed}">
+            Please accept the conditions
+          </p>
+        </div>
+      </fieldset>
+
+      <fieldset th:if="${consentAgreementActivated}" class="fieldset">
+        <legend th:text="#{createAccountForm.fieldset.consentAgreement}">Consent</legend>
+        <div class="field">
+          <label class="checkbox">
+            <input type="checkbox" th:field="*{consentAgreed}" required>
+            <span th:text="#{consentAgreed.label}">Consent</span>
+          </label>
+          <p class="help-text" th:utext="#{consentAgreed.checkboxLabel(${consentAgreementUrl})}">
+            I consent to my personal information being processed.
+          </p>
+          <p class="field-error" th:if="${#fields.hasErrors('consentAgreed')}" th:errors="*{consentAgreed}">
+            Consent is required
+          </p>
+        </div>
+      </fieldset>
+
+      <fieldset th:if="${recaptchaActivated}" class="fieldset">
+        <div class="recaptcha">
+          <div class="g-recaptcha" th:attr="data-sitekey=${session.reCaptchaPublicKey}"></div>
+          <input type="hidden" name="recaptcha_response_field" id="recaptcha_response_field">
+          <p class="field-error" th:if="${#fields.hasErrors('recaptcha_response_field')}"
+             th:errors="*{recaptcha_response_field}">
+            Invalid captcha
+          </p>
+        </div>
+      </fieldset>
+
+      <div class="actions">
+        <button id="submit-btn" type="submit" class="button button-primary" th:text="#{submit.label}">Submit</button>
+      </div>
+    </form>
+  </section>
+</main>
+<!-- TODO remove this, needed for organisation logo and zones-->
+<script th:src="@{/manager/public/libraries.js}"></script>
+<script th:src="@{/manager/public/templates.js}"></script>
+<script th:src="@{/manager/public/app.js}"></script>
+<script th:src="@{/js/console-form-utils.js}"></script>
+<script type="text/javascript">
+  (function () {
+    if (typeof window.require === "function") {
+      try {
+        window.require("app");
+      } catch (e) {
+        // ignore if not available
+      }
+    }
+
+    const form = document.getElementById("form");
+    const firstName = document.getElementById("firstName");
+    const surname = document.getElementById("surname");
+    const uid = document.getElementById("uid");
+    const password = document.getElementById("password");
+    const confirmPassword = document.getElementById("confirmPassword");
+    const indicator = document.getElementById("pwdQuality");
+
+    if (!form || !password || !confirmPassword || !indicator) {
+      return;
+    }
+
+    let uidLocked = uid && uid.value.trim() !== "";
+    const deaccentuate = (value) => value
+      .replace(/ç/g, "c")
+      .replace(/(á|à|ä|â|å|Â|Ä|Á|À|Ã)/g, "a")
+      .replace(/(é|è|ë|ê|Ê|Ë|É|È|Ę)/g, "e")
+      .replace(/(í|ì|ï|î|Î|Ï|Í|Ì|Į)/g, "i")
+      .replace(/(ó|ò|ö|ô|ø|Ô|Ö|Ó|Ò)/g, "o")
+      .replace(/(ú|ù|ü|û|Û|Ü|Ú|Ù|Ų)/g, "u");
+
+    const makeUid = () => {
+      if (!uid || uidLocked) {
+        return;
+      }
+      const name = (firstName?.value || "").trim();
+      const last = (surname?.value || "").trim();
+      if (!name && !last) {
+        return;
+      }
+      const seed = `${name.charAt(0)}${last}`.toLowerCase();
+      const normalized = deaccentuate(seed).replace(/[^a-z0-9_.-]*/gi, "");
+      uid.value = normalized;
+    };
+
+    const createOrg = document.getElementById("createOrg");
+    const createOrgSection = document.getElementById("create-org-section");
+    const orgSelect = document.getElementById("org");
+    const toggleCreateOrg = () => {
+      if (!createOrg || !createOrgSection) {
+        return;
+      }
+      const active = createOrg.checked;
+      createOrgSection.hidden = !active;
+      if (orgSelect) {
+        orgSelect.disabled = active;
+      }
+      if (form) {
+        if (active) {
+          form.setAttribute("enctype", "multipart/form-data");
+        } else {
+          form.removeAttribute("enctype");
+        }
+      }
+      const fields = createOrgSection.querySelectorAll("input, textarea, select");
+      fields.forEach((field) => {
+        field.disabled = !active;
+        if (!active) {
+          field.setCustomValidity("");
+        }
+      });
+    };
+
+    firstName?.addEventListener("input", () => {
+      makeUid();
+    });
+    surname?.addEventListener("input", () => {
+      makeUid();
+    });
+    uid?.addEventListener("input", () => {
+      uidLocked = uid.value.trim() !== "";
+    });
+    createOrg?.addEventListener("change", () => {
+      toggleCreateOrg();
+    });
+
+    if (window.ConsoleFormUtils) {
+      window.ConsoleFormUtils.attachPasswordValidation({
+        formId: "form",
+        passwordId: "password",
+        confirmId: "confirmPassword",
+        indicatorId: "pwdQuality",
+        passwordErrorId: "password-client-error",
+        confirmErrorId: "confirm-password-client-error",
+        submitId: "submit-btn"
+      });
+    }
+
+    toggleCreateOrg();
+  }());
+</script>
+</body>
+</html>

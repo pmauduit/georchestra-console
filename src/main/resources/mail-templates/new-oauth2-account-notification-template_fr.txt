@@ -1,0 +1,15 @@
+Bonjour administrateur,
+
+Un nouvel utilisateur s'est inscrit via OAuth2 sur {instanceName} :
+
+Nom : {name}
+E-mail : {email}
+Identifiant local : {uid}
+Organisation : {org}
+Fournisseur d'identité : {providerName}
+Identifiant du fournisseur : {providerUid}
+
+Gérez ce compte sur {publicUrl}/console/manager/users/{uid}/infos.
+
+---
+Ce message a été envoyé automatiquement par {instanceName} ({publicUrl}/), merci de ne pas répondre.

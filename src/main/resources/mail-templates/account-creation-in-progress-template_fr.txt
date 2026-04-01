@@ -1,0 +1,8 @@
+Bonjour {name},
+
+Votre demande de création de compte sera traitée très prochainement.
+
+Votre identifiant est : {uid}
+
+---
+Envoyé par {instanceName} ({publicUrl}/)

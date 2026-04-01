@@ -26,6 +26,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -39,6 +40,7 @@ import jakarta.mail.MessagingException;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.StringUtils;
@@ -127,6 +129,9 @@ public final class NewAccountFormController {
     // TODO
     protected String consentAgreementUrl;
 
+    @Value("${competenceAreaEnabled:false}")
+    private boolean competenceAreaEnabled;
+
     @Autowired
     protected LogUtils logUtils;
 
@@ -189,15 +194,7 @@ public final class NewAccountFormController {
         HttpSession session = request.getSession();
 
         populateOrgsAndOrgTypes(model);
-
-        model.addAttribute("privacyPolicyAgreementActivated", this.privacyPolicyAgreementActivated);
-        model.addAttribute("privacyPolicyAgreementUrl", this.privacyPolicyAgreementUrl);
-
-        model.addAttribute("consentAgreementActivated", this.consentAgreementActivated);
-        model.addAttribute("consentAgreementUrl", this.consentAgreementUrl);
-
-        model.addAttribute("recaptchaActivated", this.reCaptchaActivated);
-        model.addAttribute("pwdUtils", passwordUtils);
+        populateCommonModelAttributes(model);
 
         session.setAttribute("reCaptchaPublicKey", reCaptchaParameters.getPublicKey());
         for (String f : validation.getRequiredUserFields()) {
@@ -229,12 +226,13 @@ public final class NewAccountFormController {
      */
     @PostMapping("/account/new")
     public String create(HttpServletRequest request, @ModelAttribute AccountFormBean formBean,
-            @RequestParam(required = false, defaultValue = "") String orgCities, BindingResult result,
+            @RequestParam(required = false, defaultValue = "") String orgCities,
+            @RequestParam(required = false) MultipartFile orgLogoFile, BindingResult result,
             SessionStatus sessionStatus, Model model) throws IOException, SQLException {
 
         populateOrgsAndOrgTypes(model);
+        populateCommonModelAttributes(model);
         model.addAttribute("moderatedSignup", this.moderatedSignup);
-        model.addAttribute("pwdUtils", passwordUtils);
         validateFields(formBean, result);
 
         if (result.hasErrors()) {
@@ -256,7 +254,11 @@ public final class NewAccountFormController {
                 org.setOrgType(formBean.getOrgType());
                 org.setDescription(formBean.getOrgDescription());
                 org.setUrl(formBean.getOrgUrl());
-                org.setLogo(formBean.getOrgLogo());
+                if (orgLogoFile != null && !orgLogoFile.isEmpty()) {
+                    org.setLogo(transformLogoFileToBase64(orgLogoFile));
+                } else {
+                    org.setLogo(formBean.getOrgLogo());
+                }
                 org.setMail(formBean.getOrgMail());
                 org.setOrgUniqueId(formBean.getOrgUniqueId());
                 // Parse and store cities
@@ -431,6 +433,21 @@ public final class NewAccountFormController {
     private void populateOrgsAndOrgTypes(Model model) {
         model.addAttribute("orgs", getOrgs());
         model.addAttribute("orgTypes", getOrgTypes());
+    }
+
+    private String transformLogoFileToBase64(MultipartFile logo) throws IOException {
+        byte[] base64Encoded = Base64.getMimeEncoder().encode(logo.getBytes());
+        return new String(base64Encoded);
+    }
+
+    private void populateCommonModelAttributes(Model model) {
+        model.addAttribute("privacyPolicyAgreementActivated", this.privacyPolicyAgreementActivated);
+        model.addAttribute("privacyPolicyAgreementUrl", this.privacyPolicyAgreementUrl);
+        model.addAttribute("consentAgreementActivated", this.consentAgreementActivated);
+        model.addAttribute("consentAgreementUrl", this.consentAgreementUrl);
+        model.addAttribute("recaptchaActivated", this.reCaptchaActivated);
+        model.addAttribute("pwdUtils", passwordUtils);
+        model.addAttribute("competenceAreaEnabled", this.competenceAreaEnabled);
     }
 
     /**

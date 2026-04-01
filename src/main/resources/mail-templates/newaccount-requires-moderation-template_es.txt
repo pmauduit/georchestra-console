@@ -1,0 +1,12 @@
+Hola admin,
+
+Se ha creado una nueva cuenta en {publicUrl}/ y está pendiente de validación.
+
+Nombre de usuario: {name}
+ID de usuario: {uid}
+Organización: {org}
+
+Visite {publicUrl}/console/manager/browse/pending/users?login para revisar los usuarios pendientes.
+
+---
+Enviado por {instanceName} ({publicUrl}/)

@@ -1,0 +1,15 @@
+Hallo Administrator,
+
+Ein neuer Benutzer hat sich über OAuth2 auf {instanceName} registriert:
+
+Name: {name}
+E-Mail: {email}
+Lokale Kennung: {uid}
+Organisation: {org}
+Identitätsanbieter: {providerName}
+Anbieterkennung: {providerUid}
+
+Verwalten Sie dieses Konto unter {publicUrl}/console/manager/users/{uid}/infos.
+
+---
+Diese Nachricht wurde automatisch von {instanceName} ({publicUrl}/) gesendet, bitte nicht antworten.

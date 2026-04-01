@@ -1,0 +1,12 @@
+Hallo Admin,
+
+Ein neues Konto wurde auf {publicUrl}/ erstellt und wartet auf eine Freigabe.
+
+Benutzername: {name}
+Benutzer-ID: {uid}
+Organisation: {org}
+
+Besuchen Sie {publicUrl}/console/manager/browse/pending/users?login, um die ausstehenden Benutzer zu prüfen.
+
+---
+Gesendet von {instanceName} ({publicUrl}/)

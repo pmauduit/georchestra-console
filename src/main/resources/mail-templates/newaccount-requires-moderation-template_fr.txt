@@ -1,0 +1,12 @@
+Bonjour admin,
+
+Un nouveau compte a été créé sur {publicUrl}/ et attend une validation.
+
+Nom d'utilisateur : {name}
+Identifiant : {uid}
+Organisation : {org}
+
+Rendez-vous sur {publicUrl}/console/manager/browse/pending/users?login pour consulter les utilisateurs en attente.
+
+---
+Envoyé par {instanceName} ({publicUrl}/)

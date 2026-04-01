@@ -200,7 +200,8 @@ body {
 }
 
 input,
-textarea {
+textarea,
+select {
   width: 100%;
   border: 1px solid var(--border);
   border-radius: 10px;
@@ -216,7 +217,8 @@ textarea {
 }
 
 input:focus,
-textarea:focus {
+textarea:focus,
+select:focus {
   outline: 2px solid color-mix(in srgb, var(--primary) 22%, white);
   border-color: var(--primary);
 }
@@ -231,6 +233,193 @@ input.is-invalid {
   margin: 6px 0 0;
   color: var(--danger);
   font-size: 0.9rem;
+}
+
+.help-text {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.checkbox {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  font-weight: 600;
+}
+
+.org-tools .row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: flex-start;
+  margin: 0;
+}
+
+.org-tools .col-md-4 {
+  flex: 0 0 220px;
+}
+
+.org-tools .col-md-8 {
+  flex: 1 1 260px;
+  position: relative;
+}
+
+.org-tools .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 10px;
+  padding: 10px 14px;
+  background: var(--primary);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.org-tools .btn-primary {
+  background: var(--primary);
+}
+
+.org-tools .image-input {
+  display: none;
+}
+
+.org-tools .preview {
+  max-width: 100%;
+  max-height: 300px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  display: block;
+  background: #fff;
+}
+
+.org-tools .img-responsive {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+.org-tools .delete-logo {
+  position: absolute;
+  right: 8px;
+  top: 8px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 0;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.org-tools .area {
+  position: relative;
+  margin-top: 16px;
+}
+
+.org-tools .area .loading {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  text-align: center;
+  font-size: 200%;
+  color: #fff;
+  line-height: 10em;
+  border-radius: 12px;
+}
+
+.org-tools .area .map {
+  height: 420px;
+  width: 100%;
+  position: relative;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+  background: #f9fafb;
+}
+
+.org-tools .area .ol-zoom {
+  top: auto;
+  bottom: 0.5em;
+}
+
+.org-tools .area .ol-dragbox {
+  border-color: var(--primary);
+}
+
+.org-tools .area .ol-control button {
+  background: color-mix(in srgb, var(--primary) 60%, transparent);
+}
+
+.org-tools .area .ol-control button:hover {
+  background: color-mix(in srgb, var(--primary) 80%, transparent);
+}
+
+.org-tools .area .alert-info {
+  text-align: center;
+  margin: 12px 0;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--soft);
+  color: var(--text);
+  padding: 10px;
+}
+
+.org-tools .area .attributions {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  z-index: 1;
+  background: rgba(255, 255, 255, 0.8);
+  padding: 0.25em 1em;
+  font-size: 11px;
+  color: #666;
+}
+
+.org-tools .area .selection {
+  position: absolute;
+  top: 0.5em;
+  right: 0.5em;
+  z-index: 1;
+}
+
+.org-tools .area .search-container {
+  position: absolute;
+  top: 0.5em;
+  left: 0.5em;
+  z-index: 1;
+  width: 15em;
+}
+
+.org-tools .area .search-clear {
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+
+.org-tools .area .pagination {
+  margin: 10px 0 0;
+}
+
+.org-tools .area .alternate {
+  opacity: 75%;
+  font-style: italic;
+}
+
+.org-tools .importexport {
+  margin-top: 12px;
+  display: flex;
+  gap: 8px;
+}
+
+.org-tools .importexport .btn {
+  flex: 1;
+  justify-content: center;
 }
 
 .static-value {

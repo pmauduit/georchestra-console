@@ -22,7 +22,13 @@ spring:
     base: dc=georchestra,dc=org
     username: cn=admin,dc=georchestra,dc=org
     password: secret
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB
 
 server:
   servlet:
     context-path: /console
+  tomcat:
+    max-multipart-files: 100
