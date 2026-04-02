@@ -97,7 +97,7 @@ public class NewPasswordFormController {
             model.addAttribute(formBean);
             model.addAttribute("pwdUtils", passwordUtils);
 
-            return "newPasswordForm";
+            return "account/newPasswordForm";
 
         } catch (NameNotFoundException e) {
             model.asMap().clear();
@@ -131,7 +131,7 @@ public class NewPasswordFormController {
 
         if (result.hasErrors()) {
 
-            return "newPasswordForm";
+            return "account/newPasswordForm";
         }
 
         // changes the user's password and removes the token
@@ -146,7 +146,7 @@ public class NewPasswordFormController {
 
             sessionStatus.setComplete();
 
-            return "passwordUpdated";
+            return "account/passwordUpdated";
 
         } catch (DataServiceException e) {
             LOG.error("cannot set the the new password. " + e.getMessage());
