@@ -32,9 +32,15 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.georchestra.console.dao.AdvancedDelegationDao;
+import org.georchestra.console.dao.AttachmentDao;
 import org.georchestra.console.dao.DelegationDao;
+import org.georchestra.console.dao.EmailDao;
+import org.georchestra.console.dao.EmailTemplateDao;
 import org.georchestra.console.dto.SimpleAccount;
+import org.georchestra.console.model.Attachment;
 import org.georchestra.console.model.DelegationEntry;
+import org.georchestra.console.model.EmailEntry;
+import org.georchestra.console.model.EmailTemplate;
 import org.georchestra.ds.DataServiceException;
 import org.georchestra.ds.orgs.Org;
 import org.georchestra.ds.orgs.OrgsDao;
@@ -90,18 +96,24 @@ public class ManagerUsersController {
     private final RoleDao roleDao;
     private final AdvancedDelegationDao advancedDelegationDao;
     private final DelegationDao delegationDao;
+    private final EmailDao emailDao;
+    private final EmailTemplateDao emailTemplateDao;
+    private final AttachmentDao attachmentDao;
     private final UserRule userRule;
     private final MessageSource messageSource;
 
     @Autowired
     public ManagerUsersController(AccountDao accountDao, OrgsDao orgDao, RoleDao roleDao,
-            AdvancedDelegationDao advancedDelegationDao, DelegationDao delegationDao, UserRule userRule,
-            MessageSource messageSource) {
+            AdvancedDelegationDao advancedDelegationDao, DelegationDao delegationDao, EmailDao emailDao,
+            EmailTemplateDao emailTemplateDao, AttachmentDao attachmentDao, UserRule userRule, MessageSource messageSource) {
         this.accountDao = accountDao;
         this.orgDao = orgDao;
         this.roleDao = roleDao;
         this.advancedDelegationDao = advancedDelegationDao;
         this.delegationDao = delegationDao;
+        this.emailDao = emailDao;
+        this.emailTemplateDao = emailTemplateDao;
+        this.attachmentDao = attachmentDao;
         this.userRule = userRule;
         this.messageSource = messageSource;
     }
@@ -221,6 +233,44 @@ public class ManagerUsersController {
         Account account = findManagedAccount(uid, auth, superuser);
         model.addAttribute("managedUser", UserInfoView.from(account));
         return "manager/managerUserManage";
+    }
+
+    @GetMapping("/users/{uid:.+}/messages")
+    @PreAuthorize("hasAnyRole('SUPERUSER','ORGADMIN')")
+    public String userMessages(@PathVariable String uid,
+            @RequestParam(required = false) Long msgid,
+            @RequestParam(required = false, defaultValue = "false") boolean compose,
+            Model model) throws DataServiceException {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        boolean superuser = auth != null && auth.getAuthorities().contains(ROLE_SUPERUSER);
+
+        Account account = findManagedAccount(uid, auth, superuser);
+        List<EmailEntry> emails = emailDao.findByRecipientOrderByDateDesc(uid);
+        EmailDetailsView selectedMessage = emails.stream()
+                .filter(message -> msgid != null && message.getId() == msgid.longValue())
+                .findFirst()
+                .map(EmailDetailsView::from)
+                .orElse(null);
+
+        List<EmailSummaryView> messageSummaries = emails.stream()
+                .map(EmailSummaryView::from)
+                .collect(Collectors.toList());
+        List<TemplateView> templates = streamOf(emailTemplateDao.findAll()).stream()
+                .sorted(Comparator.comparing(EmailTemplate::getName, Comparator.nullsLast(String::compareToIgnoreCase)))
+                .map(template -> new TemplateView(template.getId(), template.getName(), template.getContent()))
+                .collect(Collectors.toList());
+        List<AttachmentView> attachments = streamOf(attachmentDao.findAll()).stream()
+                .sorted(Comparator.comparing(Attachment::getName, Comparator.nullsLast(String::compareToIgnoreCase)))
+                .map(attachment -> new AttachmentView(attachment.getId(), attachment.getName(), attachment.getMimeType()))
+                .collect(Collectors.toList());
+
+        model.addAttribute("managedUser", UserInfoView.from(account));
+        model.addAttribute("messages", messageSummaries);
+        model.addAttribute("selectedMessage", selectedMessage);
+        model.addAttribute("templates", templates);
+        model.addAttribute("attachments", attachments);
+        model.addAttribute("compose", compose && selectedMessage == null);
+        return "manager/managerUserMessages";
     }
 
     private List<SimpleAccount> findVisibleUsers(Authentication auth, boolean superuser) throws DataServiceException {
@@ -377,6 +427,12 @@ public class ManagerUsersController {
         return value != null && value.toLowerCase().contains(query);
     }
 
+    private <T> List<T> streamOf(Iterable<T> values) {
+        List<T> result = new ArrayList<>();
+        values.forEach(result::add);
+        return result;
+    }
+
     private List<SimpleAccount> sortUsers(List<SimpleAccount> users, String sort, String dir) {
         Comparator<String> stringComparator = Comparator.nullsLast(String::compareToIgnoreCase);
         Comparator<SimpleAccount> comparator;
@@ -460,6 +516,48 @@ public class ManagerUsersController {
     }
 
     public record RoleView(String cn, String label, String description, boolean assigned) {
+    }
+
+    public record EmailSummaryView(long id, String sender, String subject, java.util.Date date, int attachmentCount) {
+        static EmailSummaryView from(EmailEntry entry) {
+            return new EmailSummaryView(
+                    entry.getId(),
+                    entry.getSender(),
+                    entry.getSubject(),
+                    entry.getDate(),
+                    entry.getAttachments() == null ? 0 : entry.getAttachments().size());
+        }
+    }
+
+    public record EmailDetailsView(
+            long id,
+            String sender,
+            String subject,
+            java.util.Date date,
+            String body,
+            List<AttachmentView> attachments) {
+        static EmailDetailsView from(EmailEntry entry) {
+            List<AttachmentView> attachmentViews = entry.getAttachments() == null ? List.of()
+                    : entry.getAttachments().stream()
+                            .map(attachment -> new AttachmentView(
+                                    attachment.getId(),
+                                    attachment.getName(),
+                                    attachment.getMimeType()))
+                            .collect(Collectors.toList());
+            return new EmailDetailsView(
+                    entry.getId(),
+                    entry.getSender(),
+                    entry.getSubject(),
+                    entry.getDate(),
+                    entry.getBody(),
+                    attachmentViews);
+        }
+    }
+
+    public record TemplateView(long id, String name, String content) {
+    }
+
+    public record AttachmentView(long id, String name, String mimeType) {
     }
 
     public record UserInfoView(

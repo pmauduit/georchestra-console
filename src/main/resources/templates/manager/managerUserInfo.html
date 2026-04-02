@@ -208,7 +208,7 @@
           <a class="role-link is-active" href="#" th:text="#{manager.userinfo.tab.infos}">Infos</a>
           <a class="role-link" th:href="@{/manager/users/{uid}/roles(uid=${managedUser.uid})}"
              th:text="#{manager.userinfo.tab.roles}">Roles</a>
-          <a class="role-link" th:href="${publicContextPath + '/manager/#!/users/' + managedUser.uid + '/messages'}"
+          <a class="role-link" th:href="@{/manager/users/{uid}/messages(uid=${managedUser.uid})}"
              th:text="#{manager.userinfo.tab.messages}">Messages</a>
           <a class="role-link" th:href="${publicContextPath + '/manager/#!/users/' + managedUser.uid + '/logs'}"
              th:text="#{manager.userinfo.tab.logs}">Logs</a>

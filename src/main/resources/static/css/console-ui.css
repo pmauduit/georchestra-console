@@ -335,6 +335,30 @@ body {
   margin: 0;
 }
 
+.manager-message-body {
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--secondary-soft) 30%, white);
+}
+
+.manager-message-body > :first-child {
+  margin-top: 0;
+}
+
+.manager-message-body > :last-child {
+  margin-bottom: 0;
+}
+
+.manager-message-attachments {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.manager-message-attachments li + li {
+  margin-top: 8px;
+}
+
 .filters {
   display: grid;
   gap: 16px;
