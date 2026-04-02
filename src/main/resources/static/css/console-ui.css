@@ -287,6 +287,28 @@ body {
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 }
 
+.manager-role-grid {
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.manager-role-option {
+  align-items: flex-start;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--secondary-soft) 42%, white);
+}
+
+.manager-role-option input {
+  width: auto;
+  margin-top: 3px;
+}
+
+.manager-role-option span {
+  display: grid;
+  gap: 4px;
+}
+
 .field-span-2 {
   grid-column: span 2;
 }

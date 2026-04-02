@@ -67,6 +67,8 @@ public class ManagerUsersController {
     private static final GrantedAuthority ROLE_SUPERUSER = new SimpleGrantedAuthority("ROLE_SUPERUSER");
     private static final DateTimeFormatter ISO_DATE = DateTimeFormatter.ISO_LOCAL_DATE;
     private static final SimpleDateFormat LEGACY_DATE = new SimpleDateFormat("yyyy-MM-dd");
+    private static final List<String> READONLY_ROLES = List.of("PENDING", "EXPIRED", "TEMPORARY", "ORGADMIN");
+    private static final String TEMPORARY_ROLE = "TEMPORARY";
 
     private static final List<String> ADMIN_ROLES = List.of(
             "SUPERUSER",
@@ -178,6 +180,38 @@ public class ManagerUsersController {
         return "manager/managerUserInfo";
     }
 
+    @GetMapping("/users/{uid:.+}/roles")
+    @PreAuthorize("hasAnyRole('SUPERUSER','ORGADMIN')")
+    public String userRoles(@PathVariable String uid, Model model) throws DataServiceException {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        boolean superuser = auth != null && auth.getAuthorities().contains(ROLE_SUPERUSER);
+
+        Account account = findManagedAccount(uid, auth, superuser);
+        List<Role> visibleRoles = findVisibleRoles(auth, superuser);
+        Set<String> assignedRoles = assignedRoleNames(account, visibleRoles);
+
+        List<RoleView> adminRoles = visibleRoles.stream()
+                .filter(role -> ADMIN_ROLES.contains(role.getName()))
+                .filter(role -> !READONLY_ROLES.contains(role.getName()))
+                .map(role -> new RoleView(role.getName(), resolve(roleLabelKey(role.getName())), role.getDescription(),
+                        assignedRoles.contains(role.getName())))
+                .collect(Collectors.toList());
+
+        List<RoleView> appRoles = visibleRoles.stream()
+                .filter(role -> !ADMIN_ROLES.contains(role.getName()))
+                .filter(role -> !TEMPORARY_ROLE.equals(role.getName()))
+                .map(role -> new RoleView(role.getName(), role.getName(), role.getDescription(),
+                        assignedRoles.contains(role.getName())))
+                .collect(Collectors.toList());
+
+        model.addAttribute("managedUser", UserInfoView.from(account));
+        model.addAttribute("adminRoles", adminRoles);
+        model.addAttribute("appRoles", appRoles);
+        model.addAttribute("selectedRoles", new ArrayList<>(assignedRoles));
+        model.addAttribute("roleSummary", String.join(", ", assignedRoles));
+        return "manager/managerUserRoles";
+    }
+
     private List<SimpleAccount> findVisibleUsers(Authentication auth, boolean superuser) throws DataServiceException {
         ProtectedUserFilter protectedUserFilter = new ProtectedUserFilter(userRule.getListUidProtected());
         List<Account> accounts = accountDao.findFilterBy(protectedUserFilter);
@@ -227,6 +261,30 @@ public class ManagerUsersController {
         }
         organizations.sort(Comparator.comparing(Org::getName, Comparator.nullsLast(String::compareToIgnoreCase)));
         return organizations;
+    }
+
+    private List<Role> findVisibleRoles(Authentication auth, boolean superuser) throws DataServiceException {
+        List<Role> roles = new ArrayList<>(roleDao.findAll());
+        if (!superuser && auth != null) {
+            Set<String> delegatedRoles = delegatedRoles(auth, false);
+            roles = roles.stream()
+                    .filter(role -> delegatedRoles.contains(role.getName()))
+                    .collect(Collectors.toList());
+        }
+        roles.sort(Comparator.comparing(Role::getName, Comparator.nullsLast(String::compareToIgnoreCase)));
+        return roles;
+    }
+
+    private Set<String> assignedRoleNames(Account account, List<Role> visibleRoles) throws DataServiceException {
+        Set<String> assigned = roleDao.findAllForUser(account).stream()
+                .map(Role::getName)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+        for (Role role : visibleRoles) {
+            if (role.getUserList().contains(account.getUid())) {
+                assigned.add(role.getName());
+            }
+        }
+        return assigned;
     }
 
     private List<RoleEntry> buildBrowseRoles(Authentication auth, boolean superuser, List<Role> roles,
@@ -388,6 +446,9 @@ public class ManagerUsersController {
     }
 
     public record RoleEntry(String cn, String label, String description, int count) {
+    }
+
+    public record RoleView(String cn, String label, String description, boolean assigned) {
     }
 
     public record UserInfoView(

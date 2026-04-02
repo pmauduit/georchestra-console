@@ -16,6 +16,8 @@ Current runtime target: Java 21.
 
 * Add missing template for new password
 * Add manager/browse/user
+* remove ActiveMq link to https://github.com/georchestra/georchestra/pull/4644/
+* Change manager/roles angular to thymeleaf, but adding role to user need validation click. In current version non click needed ( perhaps to do but not the time in the community sprint )
 
 # (B)log
 

@@ -203,10 +203,8 @@
         <h2 class="org-title" th:text="#{manager.userinfo.tabs}">Other tabs</h2>
         <nav class="role-list">
           <a class="role-link is-active" href="#" th:text="#{manager.userinfo.tab.infos}">Infos</a>
-          <a class="role-link" th:href="${publicContextPath + '/manager/#!/users/' + managedUser.uid + '/roles'}"
+          <a class="role-link" th:href="@{/manager/users/{uid}/roles(uid=${managedUser.uid})}"
              th:text="#{manager.userinfo.tab.roles}">Roles</a>
-          <a class="role-link" th:href="${publicContextPath + '/manager/#!/users/' + managedUser.uid + '/analytics'}"
-             th:text="#{manager.userinfo.tab.analytics}">Analytics</a>
           <a class="role-link" th:href="${publicContextPath + '/manager/#!/users/' + managedUser.uid + '/messages'}"
              th:text="#{manager.userinfo.tab.messages}">Messages</a>
           <a class="role-link" th:href="${publicContextPath + '/manager/#!/users/' + managedUser.uid + '/logs'}"
