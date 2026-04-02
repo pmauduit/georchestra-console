@@ -31,12 +31,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.georchestra.console.dao.AdminLogDao;
 import org.georchestra.console.dao.AdvancedDelegationDao;
 import org.georchestra.console.dao.AttachmentDao;
 import org.georchestra.console.dao.DelegationDao;
 import org.georchestra.console.dao.EmailDao;
 import org.georchestra.console.dao.EmailTemplateDao;
 import org.georchestra.console.dto.SimpleAccount;
+import org.georchestra.console.model.AdminLogEntry;
 import org.georchestra.console.model.Attachment;
 import org.georchestra.console.model.DelegationEntry;
 import org.georchestra.console.model.EmailEntry;
@@ -52,6 +54,8 @@ import org.georchestra.ds.users.ProtectedUserFilter;
 import org.georchestra.ds.users.UserRule;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -96,6 +100,7 @@ public class ManagerUsersController {
     private final RoleDao roleDao;
     private final AdvancedDelegationDao advancedDelegationDao;
     private final DelegationDao delegationDao;
+    private final AdminLogDao logDao;
     private final EmailDao emailDao;
     private final EmailTemplateDao emailTemplateDao;
     private final AttachmentDao attachmentDao;
@@ -104,13 +109,14 @@ public class ManagerUsersController {
 
     @Autowired
     public ManagerUsersController(AccountDao accountDao, OrgsDao orgDao, RoleDao roleDao,
-            AdvancedDelegationDao advancedDelegationDao, DelegationDao delegationDao, EmailDao emailDao,
+            AdvancedDelegationDao advancedDelegationDao, DelegationDao delegationDao, AdminLogDao logDao, EmailDao emailDao,
             EmailTemplateDao emailTemplateDao, AttachmentDao attachmentDao, UserRule userRule, MessageSource messageSource) {
         this.accountDao = accountDao;
         this.orgDao = orgDao;
         this.roleDao = roleDao;
         this.advancedDelegationDao = advancedDelegationDao;
         this.delegationDao = delegationDao;
+        this.logDao = logDao;
         this.emailDao = emailDao;
         this.emailTemplateDao = emailTemplateDao;
         this.attachmentDao = attachmentDao;
@@ -235,6 +241,22 @@ public class ManagerUsersController {
         return "manager/managerUserManage";
     }
 
+    @GetMapping("/users/add")
+    @PreAuthorize("hasAnyRole('SUPERUSER','ORGADMIN')")
+    public String userCreate(Model model) throws DataServiceException {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        boolean superuser = auth != null && auth.getAuthorities().contains(ROLE_SUPERUSER);
+        List<Org> visibleOrgs = findVisibleOrganizations(auth, superuser, null).stream()
+                .filter(org -> !org.isPending())
+                .collect(Collectors.toList());
+
+        model.addAttribute("managedUser", UserInfoView.blank());
+        model.addAttribute("organizations", visibleOrgs.stream()
+                .map(org -> new OrgEntry(org.getId(), org.getName(), false, org.getName()))
+                .collect(Collectors.toList()));
+        return "manager/managerUserCreate";
+    }
+
     @GetMapping("/users/{uid:.+}/messages")
     @PreAuthorize("hasAnyRole('SUPERUSER','ORGADMIN')")
     public String userMessages(@PathVariable String uid,
@@ -271,6 +293,28 @@ public class ManagerUsersController {
         model.addAttribute("attachments", attachments);
         model.addAttribute("compose", compose && selectedMessage == null);
         return "manager/managerUserMessages";
+    }
+
+    @GetMapping("/users/{uid:.+}/logs")
+    @PreAuthorize("hasAnyRole('SUPERUSER','ORGADMIN')")
+    public String userLogs(@PathVariable String uid, Model model) throws DataServiceException {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        boolean superuser = auth != null && auth.getAuthorities().contains(ROLE_SUPERUSER);
+        Account account = findManagedAccount(uid, auth, superuser);
+
+        List<AdminLogEntry> logs = superuser
+                ? logDao.findAll(PageRequest.of(0, 200, Sort.by(Sort.Direction.DESC, "date"))).getContent()
+                : logDao.myFindByTargets(
+                        advancedDelegationDao.findUsersUnderDelegation(auth.getName()),
+                        PageRequest.of(0, 200, Sort.by(Sort.Direction.DESC, "date")));
+        List<AdminLogEntry> filteredLogs = logs.stream()
+                .filter(log -> uid.equals(log.getTarget()))
+                .sorted(Comparator.comparing(AdminLogEntry::getDate, Comparator.nullsLast(Comparator.naturalOrder())).reversed())
+                .collect(Collectors.toList());
+
+        model.addAttribute("managedUser", UserInfoView.from(account));
+        model.addAttribute("logs", filteredLogs);
+        return "manager/managerUserLogs";
     }
 
     private List<SimpleAccount> findVisibleUsers(Authentication auth, boolean superuser) throws DataServiceException {
@@ -607,6 +651,31 @@ public class ManagerUsersController {
                     account.getOAuth2Provider(),
                     account.getIsExternalAuth(),
                     account.isPending());
+        }
+
+        static UserInfoView blank() {
+            return new UserInfoView(
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    false,
+                    false);
         }
     }
 }

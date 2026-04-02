@@ -240,10 +240,6 @@
             </div>
           </div>
 
-          <div class="org-tools" th:if="${competenceAreaEnabled}" ng-app="manager" ng-strict-di
-               ng-controller="StandaloneController">
-            <areas item="org"></areas>
-          </div>
         </div>
 
         <div class="form-grid">
@@ -407,21 +403,9 @@
     </form>
   </section>
 </main>
-<!-- TODO remove this, needed for organisation logo and zones-->
-<script th:src="@{/manager/public/libraries.js}"></script>
-<script th:src="@{/manager/public/templates.js}"></script>
-<script th:src="@{/manager/public/app.js}"></script>
 <script th:src="@{/js/console-form-utils.js}"></script>
 <script type="text/javascript">
   (function () {
-    if (typeof window.require === "function") {
-      try {
-        window.require("app");
-      } catch (e) {
-        // ignore if not available
-      }
-    }
-
     const form = document.getElementById("form");
     const firstName = document.getElementById("firstName");
     const surname = document.getElementById("surname");

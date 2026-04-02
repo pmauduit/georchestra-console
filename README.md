@@ -15,9 +15,14 @@ Current runtime target: Java 21.
 ## April, 2th 2026
 
 * Add missing template for new password
-* Add manager/browse/user
+* Add manager for users, orgs, roles, delegation ( add sort feature )
 * remove ActiveMq link to https://github.com/georchestra/georchestra/pull/4644/
-* Change manager/roles angular to thymeleaf, but adding role to user need validation click. In current version non click needed ( perhaps to do but not the time in the community sprint )
+* Change manager angular to thymeleaf, but adding role to user need validation click. In current version non click needed ( perhaps to do but not the time in the community sprint, same fonctionnality different step to do it )
+* remove all temporary Angularjs
+* We also finished the keg of beer
+
+On the frontend side, the zone skills feature still needs to be redone (no migration done), and the UI needs a general polish across all interfaces. I haven’t deployed it to a server—only locally using the dev Docker Compose setup. The configuration files still need to be placed in the data directory; we’ll probably need to convert the console.properties file to YAML and add all the new email templates into the data directory. We should also check whether the small amount of JavaScript is properly minified.
+The GDPR-related features for data deletion and data export have not been tested.
 
 # (B)log
 

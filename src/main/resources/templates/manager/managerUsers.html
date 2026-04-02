@@ -17,6 +17,7 @@
   </section>
 
   <nav class="manager-tabs">
+    <a class="manager-tab" th:href="@{/manager/home}" th:text="#{nav.dashboard}">Dashboard</a>
     <a class="manager-tab active" th:href="@{/manager/browse/all/users}" th:text="#{nav.users}">Users</a>
     <a class="manager-tab" th:href="@{/manager/orgs/}" th:text="#{nav.orgs}">Orgs</a>
     <a class="manager-tab" th:href="@{/manager/roles/all}" th:text="#{nav.roles}">Roles</a>
@@ -29,7 +30,7 @@
       <div class="manager-aside-header">
         <h2 th:text="#{manager.users.browse.title}">Browse</h2>
         <a class="button button-link"
-           th:href="${publicContextPath + '/manager/#!/users/add'}"
+           th:href="@{/manager/users/add}"
            th:text="#{role.newuser}">New user</a>
       </div>
 
@@ -116,7 +117,7 @@
             <td th:text="${user.uid}">uid</td>
             <td>
               <a th:if="${user.orgId != null}"
-                 th:href="${publicContextPath + '/manager/#!/org/' + user.orgId + '/infos'}"
+                 th:href="@{/manager/org/{id}/infos(id=${user.orgId})}"
                  th:text="${user.orgName}">
                 Organization
               </a>

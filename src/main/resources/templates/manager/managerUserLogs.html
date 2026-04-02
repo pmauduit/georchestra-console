@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{manager.userlogs.title})}">
+  <meta charset="UTF-8">
+  <title>User logs</title>
+</head>
+<body>
+<th:block th:replace="~{fragments/layout :: appHeader('console')}"></th:block>
+<main class="page">
+  <section class="hero">
+    <div class="hero-inline">
+      <p class="hero-subtitle" th:text="#{manager.userlogs.title}">User logs</p>
+      <p class="hero-text" th:text="#{manager.userlogs.description}">
+        Review the audit trail for a single user without relying on the legacy Angular logger.
+      </p>
+    </div>
+  </section>
+
+  <nav class="manager-tabs">
+    <a class="manager-tab" th:href="@{/manager/home}" th:text="#{nav.dashboard}">Dashboard</a>
+    <a class="manager-tab active" th:href="@{/manager/browse/all/users}" th:text="#{nav.users}">Users</a>
+    <a class="manager-tab" th:href="@{/manager/orgs/}" th:text="#{nav.orgs}">Orgs</a>
+    <a class="manager-tab" th:href="@{/manager/roles/all}" th:text="#{nav.roles}">Roles</a>
+    <a class="manager-tab" th:if="${isSuperuserView}" th:href="@{/manager/delegations}" th:text="#{nav.delegations}">Delegations</a>
+    <a class="manager-tab" th:href="@{/manager/logs}" th:text="#{logs.title}">Logs</a>
+  </nav>
+
+  <div class="layout">
+    <section class="card">
+      <div class="manager-user-header">
+        <div>
+          <p class="muted">
+            <a th:href="@{/manager/users/{uid}/infos(uid=${managedUser.uid})}" th:text="#{manager.userlogs.back}">
+              Back to user details
+            </a>
+          </p>
+          <h1 th:text="${managedUser.commonName != null and !#strings.isEmpty(managedUser.commonName) ? managedUser.commonName : managedUser.uid}">
+            User name
+          </h1>
+          <p class="muted" th:text="${managedUser.uid}">uid</p>
+        </div>
+      </div>
+
+      <p class="muted" th:text="#{logs.total(${#lists.size(logs)})}">Total: 0</p>
+
+      <div class="table-wrapper">
+        <table class="table">
+          <thead>
+          <tr>
+            <th th:text="#{logs.date}">Date</th>
+            <th th:text="#{logs.sender}">Author</th>
+            <th th:text="#{logs.type}">Action</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr th:each="log : ${logs}">
+            <td th:text="${log.formattedDate}">2025-01-01</td>
+            <td th:text="${log.admin}">admin</td>
+            <td th:text="${log.type}">ACTION</td>
+          </tr>
+          <tr th:if="${#lists.isEmpty(logs)}">
+            <td colspan="3" class="empty" th:text="#{manager.userlogs.empty}">No log entry found for this user.</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <aside class="stack">
+      <section class="card">
+        <h2 class="org-title" th:text="#{manager.userinfo.tabs}">Other tabs</h2>
+        <nav class="role-list">
+          <a class="role-link" th:href="@{/manager/users/{uid}/infos(uid=${managedUser.uid})}"
+             th:text="#{manager.userinfo.tab.infos}">Infos</a>
+          <a class="role-link" th:href="@{/manager/users/{uid}/roles(uid=${managedUser.uid})}"
+             th:text="#{manager.userinfo.tab.roles}">Roles</a>
+          <a class="role-link" th:href="@{/manager/users/{uid}/messages(uid=${managedUser.uid})}"
+             th:text="#{manager.userinfo.tab.messages}">Messages</a>
+          <a class="role-link is-active" href="#" th:text="#{manager.userinfo.tab.logs}">Logs</a>
+          <a class="role-link" th:href="@{/manager/users/{uid}/manage(uid=${managedUser.uid})}"
+             th:text="#{manager.userinfo.tab.manage}">Manage</a>
+        </nav>
+      </section>
+    </aside>
+  </div>
+</main>
+</body>
+</html>
