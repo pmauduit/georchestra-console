@@ -19,6 +19,8 @@
 
 package org.georchestra.console.ws;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -59,6 +61,13 @@ public class GlobalViewAttributes {
     @ModelAttribute("publicContextPath")
     public String publicContextPath() {
         return publicContextPath;
+    }
+
+    @ModelAttribute("isSuperuserView")
+    public boolean isSuperuserView() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        return auth != null && auth.getAuthorities().stream()
+                .anyMatch(authority -> "ROLE_SUPERUSER".equals(authority.getAuthority()));
     }
 
     public record HeaderAttributes(boolean useLegacyHeader, String headerUrl, String headerHeight,

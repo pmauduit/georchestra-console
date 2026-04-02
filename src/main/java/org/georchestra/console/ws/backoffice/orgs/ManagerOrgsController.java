@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
 import org.georchestra.console.dao.AdvancedDelegationDao;
 import org.georchestra.console.dao.DelegationDao;
 import org.georchestra.console.model.DelegationEntry;
+import org.georchestra.ds.DataServiceException;
 import org.georchestra.ds.orgs.Org;
 import org.georchestra.ds.orgs.OrgsDao;
 import org.georchestra.ds.users.Account;
@@ -163,7 +164,7 @@ public class ManagerOrgsController {
     public String orgUsers(@PathVariable String id,
             @RequestParam(required = false) String q,
             @RequestParam(required = false, defaultValue = "0") int page,
-            Model model) throws SQLException {
+            Model model) throws SQLException, DataServiceException {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         boolean superuser = auth != null && auth.getAuthorities().contains(ROLE_SUPERUSER);
         Org org = findManagedOrganization(id, auth, superuser);
@@ -208,7 +209,7 @@ public class ManagerOrgsController {
         return orgDao.findByCommonName(id);
     }
 
-    private List<UserListEntry> findVisibleUsers(Authentication auth, boolean superuser) {
+    private List<UserListEntry> findVisibleUsers(Authentication auth, boolean superuser) throws DataServiceException {
         List<Account> accounts = accountDao.findFilterBy(protectedUserFilter);
         if (!superuser && auth != null) {
             Set<String> delegatedUsers = advancedDelegationDao.findUsersUnderDelegation(auth.getName());

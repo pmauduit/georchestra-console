@@ -20,6 +20,7 @@
     <a class="manager-tab" th:href="@{/manager/browse/all/users}" th:text="#{nav.users}">Users</a>
     <a class="manager-tab active" th:href="@{/manager/orgs/}" th:text="#{nav.orgs}">Orgs</a>
     <a class="manager-tab" th:href="@{/manager/roles/all}" th:text="#{nav.roles}">Roles</a>
+    <a class="manager-tab" th:if="${isSuperuserView}" th:href="@{/manager/delegations}" th:text="#{nav.delegations}">Delegations</a>
     <a class="manager-tab" th:href="@{/manager/logs}" th:text="#{logs.title}">Logs</a>
   </nav>
 
