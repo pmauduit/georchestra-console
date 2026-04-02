@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${creating} ? #{manager.rolecreate.title} : #{manager.roleinfo.title})}">
+  <meta charset="UTF-8">
+  <title>Role details</title>
+</head>
+<body>
+<th:block th:replace="~{fragments/layout :: appHeader('console')}"></th:block>
+<main class="page">
+  <section class="hero">
+    <div class="hero-inline">
+      <p class="hero-subtitle" th:text="${creating} ? #{manager.rolecreate.title} : #{manager.roleinfo.title}">Role details</p>
+      <p class="hero-text"
+         th:text="${creating} ? #{manager.rolecreate.description} : #{manager.roleinfo.description}">
+        Review and update the main role information exposed by the legacy manager infos tab.
+      </p>
+    </div>
+  </section>
+
+  <nav class="manager-tabs">
+    <a class="manager-tab" th:href="@{/manager/browse/all/users}" th:text="#{nav.users}">Users</a>
+    <a class="manager-tab active" th:href="@{/manager/roles/all}" th:text="#{nav.roles}">Roles</a>
+    <a class="manager-tab" th:href="@{/manager/logs}" th:text="#{logs.title}">Logs</a>
+  </nav>
+
+  <div class="layout">
+    <section class="card">
+      <div class="manager-user-header">
+        <div>
+          <p class="muted">
+            <a th:href="@{/manager/roles/all}" th:text="#{manager.roleinfo.back}">Back to roles</a>
+          </p>
+          <h1 th:text="${creating} ? #{roles.newrole} : ${role.cn}">Role name</h1>
+          <p class="muted" th:if="${!creating}" th:text="${role.cn}">ROLE</p>
+        </div>
+        <div class="manager-user-statuses" th:if="${readonly}">
+          <span class="status-badge status-warning" th:text="#{manager.roleinfo.protected}">Protected role</span>
+        </div>
+      </div>
+
+      <div id="manager-role-feedback" class="alert" hidden aria-live="polite"></div>
+
+      <form id="manager-role-info-form" class="manager-user-form">
+        <fieldset class="fieldset">
+          <legend th:text="#{manager.roleinfo.fieldset}">Role definition</legend>
+          <div class="form-grid manager-user-form-grid">
+            <div class="field">
+              <label for="cn" th:text="#{role.cn}">Identifier</label>
+              <input id="cn" name="cn" type="text" required pattern="^[A-Z0-9_-]+$"
+                     th:readonly="${readonly}" th:value="${role.cn}">
+              <p class="help-text" th:text="#{role.helpFormat}">Identifier should only contain uppercased alphanumerical characters</p>
+            </div>
+
+            <div class="field field-span-2">
+              <label for="description" th:text="#{role.description}">Description</label>
+              <textarea id="description" name="description" th:readonly="${readonly}"
+                        th:text="${role.description}"></textarea>
+            </div>
+
+            <label class="checkbox manager-role-option" th:if="${!readonly}">
+              <input id="favorite" name="favorite" type="checkbox" th:checked="${role.favorite}">
+              <span>
+                <strong th:text="#{role.favorite}">Favorite</strong>
+              </span>
+            </label>
+          </div>
+        </fieldset>
+
+        <div class="actions" th:if="${!readonly}">
+          <button type="submit" class="button button-primary"
+                  th:text="${creating} ? #{manager.rolecreate.submit} : #{role.save}">Save</button>
+          <a class="button button-link" th:href="@{/manager/roles/all}" th:text="#{manager.userinfo.cancel}">Cancel</a>
+        </div>
+      </form>
+    </section>
+
+    <aside class="stack" th:if="${!creating}">
+      <section class="card">
+        <h2 class="org-title" th:text="#{manager.userinfo.tabs}">Other tabs</h2>
+        <nav class="role-list">
+          <a class="role-link is-active" href="#" th:text="#{manager.userinfo.tab.infos}">Infos</a>
+          <a class="role-link" th:href="@{/manager/roles/{cn}/users(cn=${role.cn})}"
+             th:text="#{manager.roleinfo.tab.users}">Users</a>
+          <a class="role-link" th:if="${!readonly}" th:href="@{/manager/roles/{cn}/manage(cn=${role.cn})}"
+             th:text="#{manager.userinfo.tab.manage}">Manage</a>
+        </nav>
+      </section>
+
+      <section class="card">
+        <h2 class="org-title" th:text="#{manager.roleinfo.summary}">Summary</h2>
+        <dl class="summary-list">
+          <div>
+            <dt th:text="#{role.cn}">Identifier</dt>
+            <dd th:text="${role.cn}">ROLE</dd>
+          </div>
+          <div>
+            <dt th:text="#{role.membersCount}">Members</dt>
+            <dd th:text="${roleMembersCount}">0</dd>
+          </div>
+        </dl>
+      </section>
+    </aside>
+  </div>
+</main>
+
+<script th:inline="javascript">
+  const roleForm = document.getElementById('manager-role-info-form');
+  if (roleForm) {
+    const roleFeedback = document.getElementById('manager-role-feedback');
+    const creating = /*[[${creating}]]*/ false;
+    const readonly = /*[[${readonly}]]*/ false;
+    const originalCn = /*[[${role.cn}]]*/ '';
+    const roleCreated = /*[[#{role.created}]]*/ 'Role created';
+    const roleUpdated = /*[[#{role.updated}]]*/ 'Role updated';
+    const roleError = /*[[#{role.error}]]*/ 'Error creating role';
+    const roleUpdateError = /*[[#{manager.roleinfo.updateError}]]*/ 'Error updating role';
+    const createUrl = /*[[@{/private/roles}]]*/ '/private/roles';
+    const infosBaseUrl = /*[[@{/manager/roles/}]]*/ '/manager/roles/';
+
+    const showRoleFeedback = (message, type) => {
+      roleFeedback.hidden = false;
+      roleFeedback.className = `alert ${type === 'success' ? 'alert-success' : 'alert-error'}`;
+      roleFeedback.textContent = message;
+    };
+
+    if (!readonly) {
+      roleForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        const cn = document.getElementById('cn').value.trim().toUpperCase();
+        const description = document.getElementById('description').value.trim();
+        const favorite = document.getElementById('favorite')?.checked ?? false;
+        const payload = { cn, description, isFavorite: favorite };
+        const targetUrl = creating ? createUrl : `${createUrl}/${encodeURIComponent(originalCn)}`;
+        const method = creating ? 'POST' : 'PUT';
+
+        try {
+          const response = await fetch(targetUrl, {
+            method,
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify(payload)
+          });
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+          }
+          const nextCn = encodeURIComponent(cn);
+          window.location.assign(`${infosBaseUrl}${nextCn}/infos`);
+        } catch (error) {
+          showRoleFeedback(creating ? roleError : roleUpdateError, 'error');
+        }
+      });
+    }
+  }
+</script>
+</body>
+</html>

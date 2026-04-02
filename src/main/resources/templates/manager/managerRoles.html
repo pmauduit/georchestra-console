@@ -28,7 +28,7 @@
         <h2 th:text="#{manager.roles.scope.title}">Browse</h2>
         <a class="button button-link"
            th:if="${isSuperuser}"
-           th:href="${publicContextPath + '/manager/#!/roles/all?new=role'}"
+           th:href="@{/manager/roles/new}"
            th:text="#{roles.newrole}">
           New role
         </a>
@@ -74,7 +74,7 @@
           <tbody>
           <tr th:each="role : ${roles}">
             <td>
-              <a th:href="${publicContextPath + '/manager/#!/roles/' + role.cn + '/infos'}"
+              <a th:href="@{/manager/roles/{cn}/infos(cn=${role.cn})}"
                  th:title="${role.description}">
                 <span th:text="${role.cn}">ROLE</span>
               </a>

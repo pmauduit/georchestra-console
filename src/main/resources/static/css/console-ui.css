@@ -692,6 +692,18 @@ button:disabled {
   font-weight: 600;
 }
 
+.text-danger {
+  color: var(--danger);
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 20px;
+}
+
 .hero-subtitle,
 .org-title,
 a {

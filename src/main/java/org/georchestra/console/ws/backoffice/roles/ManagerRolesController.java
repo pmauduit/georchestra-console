@@ -36,12 +36,12 @@ import org.georchestra.ds.DataServiceException;
 import org.georchestra.ds.roles.Role;
 import org.georchestra.ds.roles.RoleDao;
 import org.georchestra.ds.roles.RoleFactory;
+import org.georchestra.ds.users.Account;
 import org.georchestra.ds.users.AccountDao;
 import org.georchestra.ds.users.ProtectedUserFilter;
 import org.georchestra.ds.users.UserRule;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.MessageSource;
-import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -59,6 +59,7 @@ public class ManagerRolesController {
 
     private static final SimpleGrantedAuthority ROLE_SUPERUSER = new SimpleGrantedAuthority("ROLE_SUPERUSER");
     private static final List<String> READONLY_ROLES = List.of("PENDING", "EXPIRED", "TEMPORARY", "ORGADMIN");
+    private static final int USERS_PAGE_SIZE = 15;
     private static final String VIRTUAL_TEMPORARY_ROLE_NAME = "TEMPORARY";
     private static final String VIRTUAL_TEMPORARY_ROLE_DESCRIPTION = "Virtual role that contains all temporary users";
     private static final String VIRTUAL_EXPIRED_ROLE_NAME = "EXPIRED";
@@ -69,32 +70,31 @@ public class ManagerRolesController {
     private final AdvancedDelegationDao advancedDelegationDao;
     private final DelegationDao delegationDao;
     private final ProtectedUserFilter protectedUserFilter;
-    private final MessageSource messageSource;
 
     @Autowired
     public ManagerRolesController(RoleDao roleDao, AccountDao accountDao, AdvancedDelegationDao advancedDelegationDao,
-            DelegationDao delegationDao, UserRule userRule, MessageSource messageSource) {
+            DelegationDao delegationDao, UserRule userRule) {
         this.roleDao = roleDao;
         this.accountDao = accountDao;
         this.advancedDelegationDao = advancedDelegationDao;
         this.delegationDao = delegationDao;
         this.protectedUserFilter = new ProtectedUserFilter(userRule.getListUidProtected());
-        this.messageSource = messageSource;
     }
 
     @GetMapping("/roles/{scope}")
     @PreAuthorize("hasAnyRole('SUPERUSER','ORGADMIN')")
     public String roles(@PathVariable String scope, @RequestParam(required = false) String q, Model model)
             throws DataServiceException {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        boolean superuser = auth != null && auth.getAuthorities().contains(ROLE_SUPERUSER);
+        Authentication auth = authentication();
+        boolean superuser = isSuperuser(auth);
         String normalizedScope = "all".equalsIgnoreCase(scope) ? "all" : "all";
 
-        List<RoleListEntry> roles = findVisibleRoles(auth, superuser);
+        List<RoleListEntry> roles = findVisibleRoleEntries(auth, superuser);
         if (q != null && !q.isBlank()) {
-            String normalizedQuery = q.toLowerCase(LocaleContextHolder.getLocale());
+            String normalizedQuery = q.toLowerCase();
             roles = roles.stream()
-                    .filter(role -> role.cn().toLowerCase(LocaleContextHolder.getLocale()).contains(normalizedQuery))
+                    .filter(role -> role.cn().toLowerCase().contains(normalizedQuery)
+                            || contains(role.description(), normalizedQuery))
                     .collect(Collectors.toList());
         }
 
@@ -106,7 +106,107 @@ public class ManagerRolesController {
         return "manager/managerRoles";
     }
 
-    private List<RoleListEntry> findVisibleRoles(Authentication auth, boolean superuser) throws DataServiceException {
+    @GetMapping("/roles/new")
+    @PreAuthorize("hasRole('SUPERUSER')")
+    public String newRole(Model model) {
+        model.addAttribute("role", new RoleForm("", "", false, true));
+        model.addAttribute("readonly", false);
+        model.addAttribute("creating", true);
+        return "manager/managerRoleInfo";
+    }
+
+    @GetMapping("/roles/{cn:.+}/infos")
+    @PreAuthorize("hasAnyRole('SUPERUSER','ORGADMIN')")
+    public String roleInfos(@PathVariable String cn, Model model) throws DataServiceException {
+        Authentication auth = authentication();
+        boolean superuser = isSuperuser(auth);
+        Role role = findManagedRole(cn, auth, superuser);
+        populateRoleInfoModel(model, role, false);
+        return "manager/managerRoleInfo";
+    }
+
+    @GetMapping("/roles/{cn:.+}/users")
+    @PreAuthorize("hasAnyRole('SUPERUSER','ORGADMIN')")
+    public String roleUsers(@PathVariable String cn,
+            @RequestParam(required = false) String q,
+            @RequestParam(required = false, defaultValue = "0") int page,
+            Model model) throws DataServiceException {
+        Authentication auth = authentication();
+        boolean superuser = isSuperuser(auth);
+        Role role = findManagedRole(cn, auth, superuser);
+        List<UserListEntry> visibleUsers = findVisibleUsers(auth, superuser);
+
+        Set<String> currentUserIds = new LinkedHashSet<>(role.getUserList());
+        List<UserListEntry> assignedUsers = visibleUsers.stream()
+                .filter(user -> currentUserIds.contains(user.uid()))
+                .collect(Collectors.toList());
+        List<UserListEntry> filteredUsers = filterUsers(assignedUsers, q);
+        int currentPage = normalizePage(page, filteredUsers.size(), USERS_PAGE_SIZE);
+        List<UserListEntry> pageUsers = paginate(filteredUsers, currentPage, USERS_PAGE_SIZE);
+        List<UserListEntry> availableUsers = visibleUsers.stream()
+                .filter(user -> !currentUserIds.contains(user.uid()))
+                .collect(Collectors.toList());
+
+        populateRoleInfoModel(model, role, false);
+        model.addAttribute("query", q == null ? "" : q);
+        model.addAttribute("managedUsers", pageUsers);
+        model.addAttribute("availableUsers", availableUsers);
+        model.addAttribute("totalUsers", filteredUsers.size());
+        model.addAttribute("page", currentPage);
+        model.addAttribute("pageSize", USERS_PAGE_SIZE);
+        model.addAttribute("pageCount", pageCount(filteredUsers.size(), USERS_PAGE_SIZE));
+        model.addAttribute("hasPreviousPage", currentPage > 0);
+        model.addAttribute("hasNextPage", currentPage + 1 < pageCount(filteredUsers.size(), USERS_PAGE_SIZE));
+        return "manager/managerRoleUsers";
+    }
+
+    @GetMapping("/roles/{cn:.+}/manage")
+    @PreAuthorize("hasAnyRole('SUPERUSER','ORGADMIN')")
+    public String roleManage(@PathVariable String cn, Model model) throws DataServiceException {
+        Authentication auth = authentication();
+        boolean superuser = isSuperuser(auth);
+        Role role = findManagedRole(cn, auth, superuser);
+        populateRoleInfoModel(model, role, false);
+        return "manager/managerRoleManage";
+    }
+
+    private void populateRoleInfoModel(Model model, Role role, boolean creating) {
+        boolean readonly = READONLY_ROLES.contains(role.getName());
+        model.addAttribute("role", new RoleForm(role.getName(), role.getDescription(), role.isFavorite(), readonly));
+        model.addAttribute("readonly", readonly);
+        model.addAttribute("creating", creating);
+        model.addAttribute("roleMembersCount", role.getUserList().size());
+    }
+
+    private Role findManagedRole(String cn, Authentication auth, boolean superuser) throws DataServiceException {
+        Role role = VIRTUAL_TEMPORARY_ROLE_NAME.equals(cn) ? generateVirtualRoles().getLeft()
+                : VIRTUAL_EXPIRED_ROLE_NAME.equals(cn) ? generateVirtualRoles().getRight()
+                        : roleDao.findByCommonName(cn);
+        role.setUserList(protectedUserFilter.filterStringList(role.getUserList()));
+        if (!superuser) {
+            Set<String> delegatedRoles = delegatedRoles(auth, false);
+            if (!delegatedRoles.contains(role.getName())) {
+                throw new AccessDeniedException("Role not under delegation: " + cn);
+            }
+            Set<String> delegatedUsers = delegatedUsers(auth, false);
+            role.setUserList(role.getUserList().stream().filter(delegatedUsers::contains).collect(Collectors.toList()));
+        }
+        return role;
+    }
+
+    private List<RoleListEntry> findVisibleRoleEntries(Authentication auth, boolean superuser) throws DataServiceException {
+        return findVisibleRoles(auth, superuser).stream()
+                .map(role -> new RoleListEntry(
+                        role.getName(),
+                        role.getDescription(),
+                        role.isFavorite(),
+                        role.getUserList().size(),
+                        READONLY_ROLES.contains(role.getName())))
+                .sorted(Comparator.comparing(RoleListEntry::cn, String.CASE_INSENSITIVE_ORDER))
+                .collect(Collectors.toList());
+    }
+
+    private List<Role> findVisibleRoles(Authentication auth, boolean superuser) throws DataServiceException {
         Set<String> delegatedRoles = delegatedRoles(auth, superuser);
         Set<String> delegatedUsers = delegatedUsers(auth, superuser);
 
@@ -115,24 +215,75 @@ public class ManagerRolesController {
         Pair<Role, Role> virtualRoles = generateVirtualRoles();
         roles.addAll(Arrays.asList(virtualRoles.getLeft(), virtualRoles.getRight()));
 
-        List<RoleListEntry> entries = new ArrayList<>();
+        List<Role> result = new ArrayList<>();
         for (Role role : roles) {
             if (!superuser && !delegatedRoles.contains(role.getName())) {
                 continue;
             }
-            List<String> users = role.getUserList();
             if (!superuser) {
-                users = users.stream().filter(delegatedUsers::contains).collect(Collectors.toList());
+                role.setUserList(role.getUserList().stream().filter(delegatedUsers::contains).collect(Collectors.toList()));
             }
-            entries.add(new RoleListEntry(
-                    role.getName(),
-                    role.getDescription(),
-                    role.isFavorite(),
-                    users.size(),
-                    READONLY_ROLES.contains(role.getName())));
+            result.add(role);
         }
-        entries.sort(Comparator.comparing(RoleListEntry::cn, String::compareToIgnoreCase));
-        return entries;
+        result.sort(Comparator.comparing(Role::getName, String.CASE_INSENSITIVE_ORDER));
+        return result;
+    }
+
+    private List<UserListEntry> findVisibleUsers(Authentication auth, boolean superuser) throws DataServiceException {
+        List<Account> accounts = accountDao.findFilterBy(protectedUserFilter);
+        if (!superuser && auth != null) {
+            Set<String> delegatedUsers = delegatedUsers(auth, false);
+            accounts = accounts.stream()
+                    .filter(account -> delegatedUsers.contains(account.getUid()))
+                    .collect(Collectors.toList());
+        }
+        return accounts.stream()
+                .map(UserListEntry::from)
+                .sorted(Comparator.comparing(UserListEntry::sortKey, String.CASE_INSENSITIVE_ORDER))
+                .collect(Collectors.toList());
+    }
+
+    private List<UserListEntry> filterUsers(List<UserListEntry> users, String query) {
+        if (query == null || query.isBlank()) {
+            return users;
+        }
+        String normalizedQuery = query.toLowerCase();
+        return users.stream()
+                .filter(user -> user.uid().toLowerCase().contains(normalizedQuery)
+                        || user.displayName().toLowerCase().contains(normalizedQuery))
+                .collect(Collectors.toList());
+    }
+
+    private <T> List<T> paginate(List<T> values, int page, int pageSize) {
+        int fromIndex = Math.min(page * pageSize, values.size());
+        int toIndex = Math.min(fromIndex + pageSize, values.size());
+        return values.subList(fromIndex, toIndex);
+    }
+
+    private int normalizePage(int page, int total, int pageSize) {
+        int pageCount = pageCount(total, pageSize);
+        if (page < 0) {
+            return 0;
+        }
+        if (pageCount == 0) {
+            return 0;
+        }
+        return Math.min(page, pageCount - 1);
+    }
+
+    private int pageCount(int total, int pageSize) {
+        if (total <= 0) {
+            return 0;
+        }
+        return (total + pageSize - 1) / pageSize;
+    }
+
+    private boolean isSuperuser(Authentication auth) {
+        return auth != null && auth.getAuthorities().contains(ROLE_SUPERUSER);
+    }
+
+    private Authentication authentication() {
+        return SecurityContextHolder.getContext().getAuthentication();
     }
 
     private Set<String> delegatedRoles(Authentication auth, boolean superuser) {
@@ -168,17 +319,26 @@ public class ManagerRolesController {
         return Pair.of(temporaryRole, expiredRole);
     }
 
-    private String resolve(String key) {
-        return messageSource.getMessage(key, null, key, LocaleContextHolder.getLocale());
+    private boolean contains(String value, String query) {
+        return value != null && value.toLowerCase().contains(query);
     }
 
     public record RoleListEntry(String cn, String description, boolean favorite, int usersCount, boolean readonly) {
-        public String translatedCn() {
-            return cn;
+    }
+
+    public record RoleForm(String cn, String description, boolean favorite, boolean readonly) {
+    }
+
+    public record UserListEntry(String uid, String displayName) {
+        static UserListEntry from(Account account) {
+            String givenName = account.getGivenName() == null ? "" : account.getGivenName();
+            String surname = account.getSurname() == null ? "" : account.getSurname();
+            String fullName = (surname + " " + givenName).trim();
+            return new UserListEntry(account.getUid(), fullName.isEmpty() ? account.getUid() : fullName);
         }
 
-        public String translatedLabel() {
-            return cn;
+        String sortKey() {
+            return displayName + " " + uid;
         }
     }
 }
