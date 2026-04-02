@@ -83,10 +83,6 @@
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-ldap</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>org.springframework.amqp</groupId>
-			<artifactId>spring-rabbit</artifactId>
-		</dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-thymeleaf</artifactId>
@@ -213,12 +209,6 @@
 			<groupId>com.github.database-rider</groupId>
 			<artifactId>rider-spring</artifactId>
 			<version>1.44.0</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.testcontainers</groupId>
-			<artifactId>rabbitmq</artifactId>
-			<version>1.21.4</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
