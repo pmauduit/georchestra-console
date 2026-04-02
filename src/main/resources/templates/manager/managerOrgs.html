@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{manager.orgs.title})}">
+  <meta charset="UTF-8">
+  <title>Organizations</title>
+</head>
+<body>
+<th:block th:replace="~{fragments/layout :: appHeader('console')}"></th:block>
+<main class="page">
+  <section class="hero">
+    <div class="hero-inline">
+      <p class="hero-subtitle" th:text="#{manager.orgs.title}">Organizations</p>
+      <p class="hero-text" th:text="#{manager.orgs.description}">
+        Browse organizations available to the current administrator and filter the directory.
+      </p>
+    </div>
+  </section>
+
+  <nav class="manager-tabs">
+    <a class="manager-tab" th:href="@{/manager/browse/all/users}" th:text="#{nav.users}">Users</a>
+    <a class="manager-tab active" th:href="@{/manager/orgs/}" th:text="#{nav.orgs}">Orgs</a>
+    <a class="manager-tab" th:href="@{/manager/roles/all}" th:text="#{nav.roles}">Roles</a>
+    <a class="manager-tab" th:href="@{/manager/logs}" th:text="#{logs.title}">Logs</a>
+  </nav>
+
+  <section class="manager-grid">
+    <aside class="card manager-aside">
+      <div class="manager-aside-header">
+        <h2 th:text="#{manager.orgs.scope.title}">Browse</h2>
+        <a class="button button-link"
+           th:if="${isSuperuser}"
+           th:href="@{/manager/orgs/new}"
+           th:text="#{orgs.neworg}">
+          New org
+        </a>
+      </div>
+      <nav class="role-list">
+        <a class="role-link" th:classappend="${scope == 'all'} ? ' is-active'" th:href="@{/manager/orgs/}">
+          <span th:text="#{orgs.allorgs}">All orgs</span>
+          <span class="role-count" th:text="${allCount}">0</span>
+        </a>
+        <a class="role-link" th:classappend="${scope == 'pending'} ? ' is-active'" th:href="@{/manager/orgs/pending}">
+          <span th:text="#{orgs.pending}">Pending</span>
+          <span class="role-count" th:text="${pendingCount}">0</span>
+        </a>
+      </nav>
+    </aside>
+
+    <section class="card">
+      <div class="manager-panel-header">
+        <div>
+          <h2 th:text="${scope == 'pending'} ? #{orgs.pending} : #{orgs.allorgs}">Organizations</h2>
+          <p class="muted" th:text="#{manager.orgs.subtitle(${orgCount})}">0 organizations</p>
+        </div>
+      </div>
+
+      <form class="filters" method="get" th:action="${scope == 'pending'} ? @{/manager/orgs/pending} : @{/manager/orgs/}">
+        <div class="form-grid manager-users-filter-grid">
+          <div class="field">
+            <label for="q" th:text="#{orgs.filter_orgs}">Filter</label>
+            <input id="q" type="search" name="q" th:value="${query}" th:placeholder="#{orgs.filter_orgs}">
+          </div>
+        </div>
+        <input type="hidden" name="sort" th:value="${sort}">
+        <input type="hidden" name="dir" th:value="${dir}">
+        <div class="actions">
+          <button type="submit" class="button button-primary" th:text="#{logs.filter.apply}">Apply</button>
+          <a class="button button-link"
+             th:href="${scope == 'pending'} ? @{/manager/orgs/pending} : @{/manager/orgs/}"
+             th:text="#{logs.filter.clear}">Clear</a>
+        </div>
+      </form>
+
+      <div class="table-wrapper">
+        <table class="table">
+          <thead>
+          <tr>
+            <th>
+              <a th:href="${scope == 'pending'} ? @{/manager/orgs/pending(q=${query},sort='name',dir=${sort == 'name' ? nextSortDir : 'asc'})} : @{/manager/orgs/(q=${query},sort='name',dir=${sort == 'name' ? nextSortDir : 'asc'})}">
+                <span th:text="#{org.name}">Name</span>
+                <span th:if="${sort == 'name'}" th:text="${dir == 'asc' ? '↑' : '↓'}">↑</span>
+              </a>
+            </th>
+            <th>
+              <a th:href="${scope == 'pending'} ? @{/manager/orgs/pending(q=${query},sort='shortName',dir=${sort == 'shortName' ? nextSortDir : 'asc'})} : @{/manager/orgs/(q=${query},sort='shortName',dir=${sort == 'shortName' ? nextSortDir : 'asc'})}">
+                <span th:text="#{org.shortName}">Short name</span>
+                <span th:if="${sort == 'shortName'}" th:text="${dir == 'asc' ? '↑' : '↓'}">↑</span>
+              </a>
+            </th>
+            <th>
+              <a th:href="${scope == 'pending'} ? @{/manager/orgs/pending(q=${query},sort='membersCount',dir=${sort == 'membersCount' ? nextSortDir : 'asc'})} : @{/manager/orgs/(q=${query},sort='membersCount',dir=${sort == 'membersCount' ? nextSortDir : 'asc'})}">
+                <span th:text="#{org.membersCount}">Members</span>
+                <span th:if="${sort == 'membersCount'}" th:text="${dir == 'asc' ? '↑' : '↓'}">↑</span>
+              </a>
+            </th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr th:each="org : ${organizations}">
+            <td>
+              <a th:href="@{/manager/org/{id}/infos(id=${org.id})}"
+                 th:classappend="${org.pending} ? ' pending' : ''">
+                <span th:text="${org.name}">Organization</span>
+              </a>
+            </td>
+            <td>
+              <span th:text="${org.shortName}">shortname</span>
+              <span class="muted" th:if="${org.orgUniqueId != null and !#strings.isEmpty(org.orgUniqueId)}"
+                    th:text="${org.orgUniqueId}">id</span>
+            </td>
+            <td th:text="${org.membersCount}">0</td>
+          </tr>
+          <tr th:if="${#lists.isEmpty(organizations)}">
+            <td colspan="3" class="empty" th:text="#{manager.orgs.empty}">No organization found</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </section>
+</main>
+</body>
+</html>

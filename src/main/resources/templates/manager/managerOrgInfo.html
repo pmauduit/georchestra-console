@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${creating} ? #{manager.orgcreate.title} : #{manager.orginfo.title})}">
+  <meta charset="UTF-8">
+  <title>Organization details</title>
+</head>
+<body>
+<th:block th:replace="~{fragments/layout :: appHeader('console')}"></th:block>
+<main class="page">
+  <section class="hero">
+    <div class="hero-inline">
+      <p class="hero-subtitle" th:text="${creating} ? #{manager.orgcreate.title} : #{manager.orginfo.title}">Organization details</p>
+      <p class="hero-text" th:text="${creating} ? #{manager.orgcreate.description} : #{manager.orginfo.description}">
+        Review and update the main organization information exposed by the legacy manager infos tab.
+      </p>
+    </div>
+  </section>
+
+  <nav class="manager-tabs">
+    <a class="manager-tab" th:href="@{/manager/browse/all/users}" th:text="#{nav.users}">Users</a>
+    <a class="manager-tab active" th:href="@{/manager/orgs/}" th:text="#{nav.orgs}">Orgs</a>
+    <a class="manager-tab" th:href="@{/manager/roles/all}" th:text="#{nav.roles}">Roles</a>
+    <a class="manager-tab" th:href="@{/manager/logs}" th:text="#{logs.title}">Logs</a>
+  </nav>
+
+  <div class="layout">
+    <section class="card">
+      <div class="manager-user-header">
+        <div>
+          <p class="muted">
+            <a th:href="@{/manager/orgs/}" th:text="${creating} ? #{manager.orgcreate.back} : #{manager.orginfo.back}">Back to organizations</a>
+          </p>
+          <h1 th:text="${creating} ? #{orgs.neworg} : ${managedOrg.name}">Organization</h1>
+          <p class="muted" th:if="${!creating}" th:text="${managedOrg.id}">org-id</p>
+        </div>
+        <div class="manager-user-statuses" th:if="${managedOrg.pending}">
+          <span class="status-badge status-warning" th:text="#{org.pendingmsg}">Pending organization</span>
+        </div>
+      </div>
+
+      <div id="manager-org-feedback" class="alert" hidden aria-live="polite"></div>
+
+      <div class="alert alert-error" th:if="${!creating and managedOrg.pending}">
+        <span th:text="#{org.pendingmsg}">Pending organization</span>
+        <button type="button" id="confirm-org-button" class="button"
+                th:text="#{org.confirm}">Confirm</button>
+      </div>
+
+      <div class="alert" th:if="${!creating and isSuperuser and !#lists.isEmpty(delegations)}">
+        <strong th:text="#{org.ohasdeleg}">Users belonging to this Org can be managed by:</strong>
+        <span th:each="delegation, stat : ${delegations}">
+          <a th:href="@{/manager/users/{uid}/infos(uid=${delegation.uid})}" th:text="${delegation.uid}">uid</a><span th:if="${!stat.last}">, </span>
+        </span>
+      </div>
+
+      <form id="manager-org-info-form" class="manager-user-form">
+        <fieldset class="fieldset">
+          <legend th:text="#{manager.orginfo.fieldset}">Organization definition</legend>
+          <div class="form-grid manager-user-form-grid">
+            <div class="field">
+              <label for="name" th:text="#{org.name}">Name</label>
+              <input id="name" name="name" type="text" required th:value="${managedOrg.name}">
+            </div>
+
+            <div class="field">
+              <label for="shortName" th:text="#{org.shortName}">Short name</label>
+              <input id="shortName" name="shortName" type="text" th:value="${managedOrg.shortName}">
+            </div>
+
+            <div class="field">
+              <label for="orgType" th:text="#{org.type}">Type</label>
+              <select id="orgType" name="orgType">
+                <option value=""></option>
+                <option th:each="orgType : ${orgTypeValues}" th:value="${orgType}"
+                        th:text="${orgType}" th:selected="${orgType == managedOrg.orgType}">
+                </option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="mail" th:text="#{org.mail}">Mail</label>
+              <input id="mail" name="mail" type="email" th:value="${managedOrg.mail}">
+            </div>
+
+            <div class="field">
+              <label for="url" th:text="#{org.url}">Website</label>
+              <input id="url" name="url" type="url" th:value="${managedOrg.url}">
+            </div>
+
+            <div class="field">
+              <label for="orgUniqueId" th:text="#{org.orgUniqueId}">Identification number</label>
+              <input id="orgUniqueId" name="orgUniqueId" type="text" th:value="${managedOrg.orgUniqueId}">
+            </div>
+
+            <div class="field field-span-2">
+              <label for="address" th:text="#{org.address}">Address</label>
+              <textarea id="address" name="address" th:text="${managedOrg.address}"></textarea>
+            </div>
+
+            <div class="field field-span-2">
+              <label for="description" th:text="#{org.description}">Description</label>
+              <textarea id="description" name="description" maxlength="255"
+                        th:placeholder="#{org.maxdesc}" th:text="${managedOrg.description}"></textarea>
+            </div>
+
+            <div class="field field-span-2">
+              <label for="note" th:text="#{org.note}">Internal notes</label>
+              <textarea id="note" name="note" th:text="${managedOrg.note}"></textarea>
+            </div>
+          </div>
+        </fieldset>
+
+        <div class="actions">
+          <button type="submit" class="button button-primary" th:text="${creating} ? #{manager.orgcreate.submit} : #{org.save}">Save</button>
+          <a class="button button-link" th:href="@{/manager/orgs/}" th:text="#{manager.userinfo.cancel}">Cancel</a>
+        </div>
+      </form>
+    </section>
+
+    <aside class="stack" th:if="${!creating}">
+      <section class="card">
+        <h2 class="org-title" th:text="#{manager.userinfo.tabs}">Other tabs</h2>
+        <nav class="role-list">
+          <a class="role-link is-active" href="#" th:text="#{manager.userinfo.tab.infos}">Infos</a>
+          <a class="role-link" th:href="@{/manager/org/{id}/users(id=${managedOrg.id})}"
+             th:text="#{manager.orginfo.tab.users}">Users</a>
+          <a class="role-link" th:href="@{/manager/org/{id}/manage(id=${managedOrg.id})}"
+             th:text="#{manager.userinfo.tab.manage}">Manage</a>
+        </nav>
+      </section>
+
+      <section class="card">
+        <h2 class="org-title" th:text="#{manager.orginfo.summary}">Summary</h2>
+        <dl class="summary-list">
+          <div>
+            <dt th:text="#{org.shortName}">Short name</dt>
+            <dd th:text="${managedOrg.shortName}">short</dd>
+          </div>
+          <div>
+            <dt th:text="#{org.membersCount}">Members</dt>
+            <dd th:text="${managedOrg.membersCount}">0</dd>
+          </div>
+          <div>
+            <dt th:text="#{org.type}">Type</dt>
+            <dd th:text="${managedOrg.orgType}">type</dd>
+          </div>
+        </dl>
+      </section>
+    </aside>
+  </div>
+</main>
+
+<script th:inline="javascript">
+  const orgForm = document.getElementById('manager-org-info-form');
+  const orgFeedback = document.getElementById('manager-org-feedback');
+  const confirmOrgButton = document.getElementById('confirm-org-button');
+  const creating = /*[[${creating}]]*/ false;
+  const orgSaveSuccess = /*[[#{org.updated}]]*/ 'Organization updated';
+  const orgSaveError = /*[[#{org.error}]]*/ 'Error while saving organization';
+  const updateOrgUrl = /*[[@{/private/orgs/{id}(id=${managedOrg.id})}]]*/ '/private/orgs/org';
+  const createOrgUrl = /*[[@{/private/orgs}]]*/ '/private/orgs';
+  const orgInfosBaseUrl = /*[[@{/manager/org/}]]*/ '/manager/org/';
+
+  const showOrgFeedback = (message, type) => {
+    orgFeedback.hidden = false;
+    orgFeedback.className = `alert ${type === 'success' ? 'alert-success' : 'alert-error'}`;
+    orgFeedback.textContent = message;
+  };
+
+  const formPayload = (forcePending) => ({
+    name: document.getElementById('name').value.trim(),
+    shortName: document.getElementById('shortName').value.trim(),
+    orgType: document.getElementById('orgType').value || null,
+    address: document.getElementById('address').value.trim(),
+    description: document.getElementById('description').value.trim(),
+    note: document.getElementById('note').value.trim(),
+    url: document.getElementById('url').value.trim(),
+    mail: document.getElementById('mail').value.trim(),
+    orgUniqueId: document.getElementById('orgUniqueId').value.trim(),
+    pending: forcePending
+  });
+
+  const updateOrg = async (pendingValue) => {
+    const response = await fetch(creating ? createOrgUrl : updateOrgUrl, {
+      method: creating ? 'POST' : 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      body: JSON.stringify(formPayload(pendingValue))
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+    return response.json();
+  };
+
+  orgForm?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    try {
+      const savedOrg = await updateOrg(/*[[${managedOrg.pending}]]*/ false);
+      if (creating) {
+        window.location.assign(`${orgInfosBaseUrl}${encodeURIComponent(savedOrg.id)}/infos`);
+      } else {
+        showOrgFeedback(orgSaveSuccess, 'success');
+      }
+    } catch (error) {
+      showOrgFeedback(orgSaveError, 'error');
+    }
+  });
+
+  confirmOrgButton?.addEventListener('click', async () => {
+    try {
+      await updateOrg(false);
+      window.location.reload();
+    } catch (error) {
+      showOrgFeedback(orgSaveError, 'error');
+    }
+  });
+</script>
+</body>
+</html>

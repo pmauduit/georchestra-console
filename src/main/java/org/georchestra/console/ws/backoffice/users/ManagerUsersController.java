@@ -212,6 +212,17 @@ public class ManagerUsersController {
         return "manager/managerUserRoles";
     }
 
+    @GetMapping("/users/{uid:.+}/manage")
+    @PreAuthorize("hasAnyRole('SUPERUSER','ORGADMIN')")
+    public String userManage(@PathVariable String uid, Model model) throws DataServiceException {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        boolean superuser = auth != null && auth.getAuthorities().contains(ROLE_SUPERUSER);
+
+        Account account = findManagedAccount(uid, auth, superuser);
+        model.addAttribute("managedUser", UserInfoView.from(account));
+        return "manager/managerUserManage";
+    }
+
     private List<SimpleAccount> findVisibleUsers(Authentication auth, boolean superuser) throws DataServiceException {
         ProtectedUserFilter protectedUserFilter = new ProtectedUserFilter(userRule.getListUidProtected());
         List<Account> accounts = accountDao.findFilterBy(protectedUserFilter);

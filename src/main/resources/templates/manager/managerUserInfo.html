@@ -18,6 +18,7 @@
 
   <nav class="manager-tabs">
     <a class="manager-tab active" th:href="@{/manager/browse/all/users}" th:text="#{nav.users}">Users</a>
+    <a class="manager-tab" th:href="@{/manager/orgs/}" th:text="#{nav.orgs}">Orgs</a>
     <a class="manager-tab" th:href="@{/manager/roles/all}" th:text="#{nav.roles}">Roles</a>
     <a class="manager-tab" th:href="@{/manager/logs}" th:text="#{logs.title}">Logs</a>
   </nav>
@@ -210,7 +211,7 @@
              th:text="#{manager.userinfo.tab.messages}">Messages</a>
           <a class="role-link" th:href="${publicContextPath + '/manager/#!/users/' + managedUser.uid + '/logs'}"
              th:text="#{manager.userinfo.tab.logs}">Logs</a>
-          <a class="role-link" th:href="${publicContextPath + '/manager/#!/users/' + managedUser.uid + '/manage'}"
+          <a class="role-link" th:href="@{/manager/users/{uid}/manage(uid=${managedUser.uid})}"
              th:text="#{manager.userinfo.tab.manage}">Manage</a>
         </nav>
       </section>

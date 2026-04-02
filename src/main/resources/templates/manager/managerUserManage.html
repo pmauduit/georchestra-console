@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{manager.usermanage.title})}">
+  <meta charset="UTF-8">
+  <title>Manage user</title>
+</head>
+<body>
+<th:block th:replace="~{fragments/layout :: appHeader('console')}"></th:block>
+<main class="page">
+  <section class="hero">
+    <div class="hero-inline">
+      <p class="hero-subtitle" th:text="#{manager.usermanage.title}">Manage user</p>
+      <p class="hero-text" th:text="#{manager.usermanage.description}">
+        Delete the selected account when it is no longer needed.
+      </p>
+    </div>
+  </section>
+
+  <nav class="manager-tabs">
+    <a class="manager-tab active" th:href="@{/manager/browse/all/users}" th:text="#{nav.users}">Users</a>
+    <a class="manager-tab" th:href="@{/manager/orgs/}" th:text="#{nav.orgs}">Orgs</a>
+    <a class="manager-tab" th:href="@{/manager/roles/all}" th:text="#{nav.roles}">Roles</a>
+    <a class="manager-tab" th:href="@{/manager/logs}" th:text="#{logs.title}">Logs</a>
+  </nav>
+
+  <div class="layout">
+    <section class="card">
+      <div class="manager-user-header">
+        <div>
+          <p class="muted">
+            <a th:href="@{/manager/users/{uid}/infos(uid=${managedUser.uid})}" th:text="#{manager.usermanage.back}">
+              Back to user details
+            </a>
+          </p>
+          <h1 th:text="${managedUser.commonName != null and !#strings.isEmpty(managedUser.commonName) ? managedUser.commonName : managedUser.uid}">
+            User name
+          </h1>
+          <p class="muted" th:text="${managedUser.uid}">uid</p>
+        </div>
+      </div>
+
+      <div id="manager-user-manage-feedback" class="alert" hidden aria-live="polite"></div>
+
+      <div class="alert alert-error">
+        <p th:text="#{user.warning}">Warning, this action is irreversible.</p>
+      </div>
+
+      <div class="actions">
+        <button type="button" id="delete-user-button" class="button button-danger" th:text="#{user.delete}">Delete user</button>
+        <a class="button button-link" th:href="@{/manager/users/{uid}/infos(uid=${managedUser.uid})}" th:text="#{manager.userinfo.cancel}">Cancel</a>
+      </div>
+    </section>
+
+    <aside class="stack">
+      <section class="card">
+        <h2 class="org-title" th:text="#{manager.userinfo.tabs}">Other tabs</h2>
+        <nav class="role-list">
+          <a class="role-link" th:href="@{/manager/users/{uid}/infos(uid=${managedUser.uid})}"
+             th:text="#{manager.userinfo.tab.infos}">Infos</a>
+          <a class="role-link" th:href="@{/manager/users/{uid}/roles(uid=${managedUser.uid})}"
+             th:text="#{manager.userinfo.tab.roles}">Roles</a>
+          <a class="role-link" th:href="${publicContextPath + '/manager/#!/users/' + managedUser.uid + '/messages'}"
+             th:text="#{manager.userinfo.tab.messages}">Messages</a>
+          <a class="role-link" th:href="${publicContextPath + '/manager/#!/users/' + managedUser.uid + '/logs'}"
+             th:text="#{manager.userinfo.tab.logs}">Logs</a>
+          <a class="role-link is-active" href="#" th:text="#{manager.userinfo.tab.manage}">Manage</a>
+        </nav>
+      </section>
+    </aside>
+  </div>
+</main>
+
+<script th:inline="javascript">
+  const deleteUserButton = document.getElementById('delete-user-button');
+  const userManageFeedback = document.getElementById('manager-user-manage-feedback');
+  const managedUid = /*[[${managedUser.uid}]]*/ 'user';
+  const deleteUserError = /*[[#{manager.usermanage.deleteError}]]*/ 'Unable to delete the user.';
+  const browseUsersUrl = /*[[@{/manager/browse/all/users}]]*/ '/manager/browse/all/users';
+  const deleteUserBaseUrl = /*[[@{/private/users/}]]*/ '/private/users/';
+
+  const showUserManageFeedback = (message) => {
+    userManageFeedback.hidden = false;
+    userManageFeedback.className = 'alert alert-error';
+    userManageFeedback.textContent = message;
+  };
+
+  deleteUserButton?.addEventListener('click', async () => {
+    try {
+      const response = await fetch(`${deleteUserBaseUrl}${encodeURIComponent(managedUid)}`, {
+        method: 'DELETE',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      window.location.assign(browseUsersUrl);
+    } catch (error) {
+      showUserManageFeedback(deleteUserError);
+    }
+  });
+</script>
+</body>
+</html>
