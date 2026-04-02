@@ -239,6 +239,80 @@ body {
   padding: 16px;
 }
 
+.manager-user-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.manager-user-header h1 {
+  margin: 4px 0 0;
+  font-size: 1.7rem;
+}
+
+.manager-user-statuses {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2rem;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.status-warning {
+  background: #fff4e5;
+  color: #b54708;
+}
+
+.status-danger {
+  background: #fef3f2;
+  color: #b42318;
+}
+
+.manager-user-form {
+  display: grid;
+  gap: 24px;
+}
+
+.manager-user-form-grid {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.field-span-2 {
+  grid-column: span 2;
+}
+
+.summary-list {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+}
+
+.summary-list div {
+  display: grid;
+  gap: 4px;
+}
+
+.summary-list dt {
+  color: var(--muted);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.summary-list dd {
+  margin: 0;
+}
+
 .filters {
   display: grid;
   gap: 16px;
@@ -517,6 +591,16 @@ input.is-invalid {
   margin-top: 12px;
   display: flex;
   gap: 8px;
+}
+
+@media (max-width: 720px) {
+  .field-span-2 {
+    grid-column: auto;
+  }
+
+  .manager-user-header {
+    flex-direction: column;
+  }
 }
 
 .org-tools .importexport .btn {

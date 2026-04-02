@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{manager.userinfo.title})}">
+  <meta charset="UTF-8">
+  <title>User details</title>
+</head>
+<body>
+<th:block th:replace="~{fragments/layout :: appHeader('console')}"></th:block>
+<main class="page">
+  <section class="hero">
+    <div class="hero-inline">
+      <p class="hero-subtitle" th:text="#{manager.userinfo.title}">User details</p>
+      <p class="hero-text" th:text="#{manager.userinfo.description}">
+        Review and update the main account information exposed by the legacy manager infos tab.
+      </p>
+    </div>
+  </section>
+
+  <nav class="manager-tabs">
+    <a class="manager-tab active" th:href="@{/manager/browse/all/users}" th:text="#{nav.users}">Users</a>
+    <a class="manager-tab" th:href="@{/manager/logs}" th:text="#{logs.title}">Logs</a>
+  </nav>
+
+  <div class="layout">
+    <section class="card">
+      <div class="manager-user-header">
+        <div>
+          <p class="muted">
+            <a th:href="@{/manager/browse/all/users}" th:text="#{manager.userinfo.back}">Back to users</a>
+          </p>
+          <h1 th:text="${managedUser.commonName != null and !#strings.isEmpty(managedUser.commonName) ? managedUser.commonName : managedUser.uid}">
+            User name
+          </h1>
+          <p class="muted" th:text="${managedUser.uid}">uid</p>
+        </div>
+        <div class="manager-user-statuses">
+          <span class="status-badge status-warning" th:if="${managedUser.pending}"
+                th:text="#{manager.userinfo.status.pending}">Pending</span>
+          <span class="status-badge status-danger" th:if="${expired}"
+                th:text="#{manager.userinfo.status.expired}">Expired</span>
+        </div>
+      </div>
+
+      <div id="manager-user-feedback" class="alert" hidden aria-live="polite"></div>
+
+      <div class="alert alert-error" th:if="${managedUser.pending and currentOrgPending}"
+           th:text="#{manager.userinfo.pendingOrgWarning}">
+        This account cannot be confirmed until its organization is validated.
+      </div>
+
+      <form id="manager-user-info-form" class="manager-user-form">
+        <input type="hidden" id="pending" name="pending" th:value="${managedUser.pending}">
+
+        <fieldset class="fieldset">
+          <legend th:text="#{manager.userinfo.fieldset.identity}">Identity</legend>
+          <div class="form-grid manager-user-form-grid">
+            <div class="field">
+              <label for="sn" th:text="#{surname.label}">Surname</label>
+              <input id="sn" name="sn" type="text" required th:value="${managedUser.surname}">
+            </div>
+
+            <div class="field">
+              <label for="givenName" th:text="#{firstName.label}">First name</label>
+              <input id="givenName" name="givenName" type="text" required th:value="${managedUser.givenName}">
+            </div>
+
+            <div class="field">
+              <label for="cn" th:text="#{manager.userinfo.commonName}">Common name</label>
+              <input id="cn" type="text" th:value="${managedUser.commonName}" disabled>
+            </div>
+
+            <div class="field">
+              <label for="mail" th:text="#{email.label}">E-mail</label>
+              <input id="mail" name="mail" type="email" required th:value="${managedUser.email}">
+            </div>
+
+            <div class="field field-span-2">
+              <label for="postalAddress" th:text="#{postalAddress.label}">Postal address</label>
+              <textarea id="postalAddress" name="postalAddress" th:text="${managedUser.postalAddress}"></textarea>
+            </div>
+
+            <div class="field">
+              <label for="org" th:text="#{org.label}">Organization</label>
+              <select id="org" name="org">
+                <option th:each="org : ${organizations}"
+                        th:value="${org.id()}"
+                        th:text="${org.label()}"
+                        th:selected="${org.id() == managedUser.org}">
+                </option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="manager" th:text="#{manager.userinfo.manager}">Manager</label>
+              <input id="manager" name="manager" type="text" th:value="${managedUser.manager}">
+            </div>
+
+            <div class="field field-span-2">
+              <label for="description" th:text="#{description.label}">Description</label>
+              <textarea id="description" name="description" th:text="${managedUser.description}"></textarea>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="fieldset">
+          <legend th:text="#{manager.userinfo.fieldset.account}">Account</legend>
+          <div class="form-grid manager-user-form-grid">
+            <div class="field">
+              <label for="telephoneNumber" th:text="#{phone.label}">Phone</label>
+              <input id="telephoneNumber" name="telephoneNumber" type="tel"
+                     pattern="(?:[0-9]|\\+|\\(|\\)|\\.|-| )*"
+                     th:attr="data-invalid-message=#{phone.error.invalidFormat}"
+                     th:value="${managedUser.phone}">
+              <p id="telephoneNumber-error" class="field-error" aria-live="polite"></p>
+            </div>
+
+            <div class="field">
+              <label for="facsimileTelephoneNumber" th:text="#{facsimile.label}">Fax</label>
+              <input id="facsimileTelephoneNumber" name="facsimileTelephoneNumber" type="tel"
+                     pattern="(?:[0-9]|\\+|\\(|\\)|\\.|-| )*"
+                     th:attr="data-invalid-message=#{facsimile.error.invalidFormat}"
+                     th:value="${managedUser.facsimile}">
+              <p id="facsimileTelephoneNumber-error" class="field-error" aria-live="polite"></p>
+            </div>
+
+            <div class="field">
+              <label for="title" th:text="#{title.label}">Job title</label>
+              <input id="title" name="title" type="text" th:value="${managedUser.title}">
+            </div>
+
+            <div class="field">
+              <label for="shadowExpire" th:text="#{manager.userinfo.expire}">Expiration date</label>
+              <input id="shadowExpire" name="shadowExpire" type="date" th:value="${managedUser.shadowExpire}">
+            </div>
+
+            <div class="field">
+              <label for="privacyPolicyAgreementDate" th:text="#{manager.userinfo.privacyPolicyAgreementDate}">
+                Privacy policy agreement date
+              </label>
+              <input id="privacyPolicyAgreementDate" type="date" th:value="${managedUser.privacyPolicyAgreementDate}" disabled>
+            </div>
+
+            <div class="field">
+              <label for="uid"
+                     th:text="${managedUser.externalAuth} ? #{manager.userinfo.externalAuth} : #{uid.label}">
+                User ID
+              </label>
+              <input id="uid" name="uid" type="text"
+                     th:value="${managedUser.uid}"
+                     th:readonly="${!canEditLogin}"
+                     th:attr="pattern=${canEditLogin} ? '^[a-zA-Z][a-zA-Z0-9_.-]*$' : null">
+              <p class="help-text" th:if="${managedUser.externalAuth}">
+                <span th:text="${managedUser.oAuth2Provider}">OAuth2</span>
+              </p>
+            </div>
+
+            <div class="field">
+              <label th:text="#{password.label}">Password</label>
+              <a class="button button-link"
+                 th:if="${!managedUser.externalAuth}"
+                 th:href="@{/account/passwordRecovery(email=${managedUser.email})}"
+                 target="_blank"
+                 rel="noopener"
+                 th:text="#{manager.userinfo.passwordReset}">
+                Reset password
+              </a>
+              <p class="muted" th:if="${managedUser.externalAuth}" th:text="#{manager.userinfo.externalAuthReadonly}">
+                Authentication is handled externally.
+              </p>
+            </div>
+
+            <div class="field">
+              <label for="createTimestamp" th:text="#{manager.userinfo.creationDate}">Creation date</label>
+              <input id="createTimestamp" type="date" th:value="${managedUser.creationDate}" disabled>
+            </div>
+
+            <div class="field">
+              <label for="authTimestamp" th:text="#{manager.userinfo.lastLogin}">Last login</label>
+              <input id="authTimestamp" type="date" th:value="${managedUser.lastLogin}" disabled>
+            </div>
+
+            <div class="field field-span-2">
+              <label for="knowledgeInformation" th:text="#{manager.userinfo.note}">Note</label>
+              <textarea id="knowledgeInformation" name="knowledgeInformation" th:text="${managedUser.note}"></textarea>
+            </div>
+          </div>
+        </fieldset>
+
+        <div class="actions">
+          <button type="submit" class="button button-primary" th:text="#{manager.userinfo.save}">Save</button>
+          <button type="button" id="confirm-pending-user" class="button"
+                  th:if="${canConfirm}"
+                  th:text="#{manager.userinfo.confirm}">
+            Confirm user
+          </button>
+          <a class="button button-link" th:href="@{/manager/browse/all/users}" th:text="#{manager.userinfo.cancel}">Cancel</a>
+        </div>
+      </form>
+    </section>
+
+    <aside class="stack">
+      <section class="card">
+        <h2 class="org-title" th:text="#{manager.userinfo.tabs}">Other tabs</h2>
+        <nav class="role-list">
+          <a class="role-link is-active" href="#" th:text="#{manager.userinfo.tab.infos}">Infos</a>
+          <a class="role-link" th:href="${publicContextPath + '/manager/#!/users/' + managedUser.uid + '/roles'}"
+             th:text="#{manager.userinfo.tab.roles}">Roles</a>
+          <a class="role-link" th:href="${publicContextPath + '/manager/#!/users/' + managedUser.uid + '/analytics'}"
+             th:text="#{manager.userinfo.tab.analytics}">Analytics</a>
+          <a class="role-link" th:href="${publicContextPath + '/manager/#!/users/' + managedUser.uid + '/messages'}"
+             th:text="#{manager.userinfo.tab.messages}">Messages</a>
+          <a class="role-link" th:href="${publicContextPath + '/manager/#!/users/' + managedUser.uid + '/logs'}"
+             th:text="#{manager.userinfo.tab.logs}">Logs</a>
+          <a class="role-link" th:href="${publicContextPath + '/manager/#!/users/' + managedUser.uid + '/manage'}"
+             th:text="#{manager.userinfo.tab.manage}">Manage</a>
+        </nav>
+      </section>
+
+      <section class="card">
+        <h2 class="org-title" th:text="#{manager.userinfo.summary}">Summary</h2>
+        <dl class="summary-list">
+          <div>
+            <dt th:text="#{org.label}">Organization</dt>
+            <dd th:text="${currentOrgName != null ? currentOrgName : managedUser.org}">Organization name</dd>
+          </div>
+          <div>
+            <dt th:text="#{email.label}">E-mail</dt>
+            <dd th:text="${managedUser.email}">mail@example.org</dd>
+          </div>
+          <div>
+            <dt th:text="#{uid.label}">User ID</dt>
+            <dd th:text="${managedUser.uid}">uid</dd>
+          </div>
+        </dl>
+      </section>
+    </aside>
+  </div>
+</main>
+
+<script th:inline="javascript">
+  const form = document.getElementById('manager-user-info-form');
+  const feedback = document.getElementById('manager-user-feedback');
+  const pendingField = document.getElementById('pending');
+  const confirmButton = document.getElementById('confirm-pending-user');
+  const successMessage = /*[[#{manager.userinfo.saveSuccess}]]*/ 'User saved.';
+  const confirmSuccessMessage = /*[[#{manager.userinfo.confirmSuccess}]]*/ 'User confirmed.';
+  const genericErrorMessage = /*[[#{manager.userinfo.saveError}]]*/ 'Unable to save the user.';
+  const updateUrl = /*[[@{/private/users/{uid}(uid=${managedUser.uid})}]]*/ '/private/users/user';
+  const redirectBaseUrl = /*[[@{/manager/users/}]]*/ '/manager/users/';
+
+  const liveValidatedFields = [
+    document.getElementById('telephoneNumber'),
+    document.getElementById('facsimileTelephoneNumber')
+  ].filter(Boolean);
+
+  const showFeedback = (message, type) => {
+    feedback.hidden = false;
+    feedback.className = `alert ${type === 'success' ? 'alert-success' : 'alert-error'}`;
+    feedback.textContent = message;
+  };
+
+  const updateFieldValidationState = (field) => {
+    const errorElement = document.getElementById(`${field.id}-error`);
+    if (!errorElement) {
+      return;
+    }
+    field.setCustomValidity('');
+    if (field.validity.patternMismatch) {
+      field.setCustomValidity(field.dataset.invalidMessage || 'Invalid format');
+    }
+    const message = field.validationMessage;
+    const showMessage = field.value.trim() !== '' && !field.validity.valid;
+    field.classList.toggle('is-invalid', showMessage);
+    errorElement.textContent = showMessage ? message : '';
+  };
+
+  liveValidatedFields.forEach((field) => {
+    field.addEventListener('input', () => updateFieldValidationState(field));
+    field.addEventListener('blur', () => updateFieldValidationState(field));
+  });
+
+  const buildPayload = () => {
+    const formData = new FormData(form);
+    const payload = {};
+    for (const [key, value] of formData.entries()) {
+      payload[key] = value;
+    }
+    payload.pending = payload.pending === 'true';
+    return payload;
+  };
+
+  const saveUser = async (pendingValue, successLabel) => {
+    pendingField.value = String(pendingValue);
+    liveValidatedFields.forEach((field) => updateFieldValidationState(field));
+    if (!form.reportValidity()) {
+      return;
+    }
+    try {
+      const response = await fetch(updateUrl, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify(buildPayload())
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      const updatedUser = await response.json();
+      showFeedback(successLabel, 'success');
+      setTimeout(() => {
+        window.location.href = `${redirectBaseUrl}${encodeURIComponent(updatedUser.uid)}/infos`;
+      }, 250);
+    } catch (error) {
+      showFeedback(genericErrorMessage, 'error');
+    }
+  };
+
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    await saveUser(pendingField.value === 'true', successMessage);
+  });
+
+  if (confirmButton) {
+    confirmButton.addEventListener('click', async () => {
+      await saveUser(false, confirmSuccessMessage);
+    });
+  }
+</script>
+</body>
+</html>

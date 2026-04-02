@@ -105,7 +105,7 @@
           <tbody>
           <tr th:each="user : ${users}">
             <td>
-              <a th:href="${publicContextPath + '/manager/#!/users/' + user.uid + '/infos'}"
+              <a th:href="@{/manager/users/{uid}/infos(uid=${user.uid})}"
                  th:text="${((user.surname ?: '') + ' ' + (user.givenName ?: '')).trim()}">
                 User name
               </a>

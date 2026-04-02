@@ -18,6 +18,8 @@
  */
 package org.georchestra.console.ws.backoffice.users;
 
+import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -49,6 +51,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -62,6 +65,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class ManagerUsersController {
 
     private static final GrantedAuthority ROLE_SUPERUSER = new SimpleGrantedAuthority("ROLE_SUPERUSER");
+    private static final DateTimeFormatter ISO_DATE = DateTimeFormatter.ISO_LOCAL_DATE;
+    private static final SimpleDateFormat LEGACY_DATE = new SimpleDateFormat("yyyy-MM-dd");
 
     private static final List<String> ADMIN_ROLES = List.of(
             "SUPERUSER",
@@ -145,6 +150,34 @@ public class ManagerUsersController {
         return "manager/managerUsers";
     }
 
+    @GetMapping("/users/{uid:.+}/infos")
+    @PreAuthorize("hasAnyRole('SUPERUSER','ORGADMIN')")
+    public String userInfos(@PathVariable String uid, Model model) throws DataServiceException {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        boolean superuser = auth != null && auth.getAuthorities().contains(ROLE_SUPERUSER);
+
+        Account account = findManagedAccount(uid, auth, superuser);
+        List<Org> visibleOrgs = findVisibleOrganizations(auth, superuser, account.getOrg());
+        Org currentOrg = account.getOrg() == null ? null : orgDao.findByCommonName(account.getOrg());
+
+        model.addAttribute("managedUser", UserInfoView.from(account));
+        model.addAttribute("organizations", visibleOrgs.stream()
+                .map(org -> new OrgEntry(
+                        org.getId(),
+                        org.getName(),
+                        org.isPending(),
+                        org.isPending() ? org.getName() + " (" + resolve("manager.userinfo.org.pending") + ")"
+                                : org.getName()))
+                .collect(Collectors.toList()));
+        model.addAttribute("expired", isExpired(account));
+        model.addAttribute("currentOrgPending", currentOrg != null && currentOrg.isPending());
+        model.addAttribute("currentOrgName", currentOrg == null ? null : currentOrg.getName());
+        model.addAttribute("canEditLogin", !account.getIsExternalAuth());
+        model.addAttribute("canConfirm", account.isPending() && (currentOrg == null || !currentOrg.isPending()));
+
+        return "manager/managerUserInfo";
+    }
+
     private List<SimpleAccount> findVisibleUsers(Authentication auth, boolean superuser) throws DataServiceException {
         ProtectedUserFilter protectedUserFilter = new ProtectedUserFilter(userRule.getListUidProtected());
         List<Account> accounts = accountDao.findFilterBy(protectedUserFilter);
@@ -175,6 +208,27 @@ public class ManagerUsersController {
         return result;
     }
 
+    private Account findManagedAccount(String uid, Authentication auth, boolean superuser) throws DataServiceException {
+        if (userRule.isProtected(uid)) {
+            throw new AccessDeniedException("The user is protected: " + uid);
+        }
+        checkAuthorization(uid, auth, superuser);
+        return accountDao.findByUID(uid);
+    }
+
+    private List<Org> findVisibleOrganizations(Authentication auth, boolean superuser, String currentOrgId)
+            throws DataServiceException {
+        List<Org> organizations = new ArrayList<>(orgDao.findAll());
+        if (!superuser && auth != null) {
+            Set<String> delegatedOrgs = delegatedOrgs(auth);
+            organizations = organizations.stream()
+                    .filter(org -> delegatedOrgs.contains(org.getId()) || org.getId().equals(currentOrgId))
+                    .collect(Collectors.toList());
+        }
+        organizations.sort(Comparator.comparing(Org::getName, Comparator.nullsLast(String::compareToIgnoreCase)));
+        return organizations;
+    }
+
     private List<RoleEntry> buildBrowseRoles(Authentication auth, boolean superuser, List<Role> roles,
             List<SimpleAccount> visibleUsers, Map<String, Set<String>> roleUsers) {
         Set<String> delegatedRoles = delegatedRoles(auth, superuser);
@@ -198,6 +252,17 @@ public class ManagerUsersController {
                     roleUsers.getOrDefault(role.getName(), Set.of()).size()));
         }
         return entries;
+    }
+
+    private Set<String> delegatedOrgs(Authentication auth) {
+        if (auth == null) {
+            return Set.of();
+        }
+        DelegationEntry delegationEntry = delegationDao.findFirstByUid(auth.getName());
+        if (delegationEntry == null || delegationEntry.getOrgs() == null) {
+            return Set.of();
+        }
+        return new LinkedHashSet<>(Arrays.asList(delegationEntry.getOrgs()));
     }
 
     private Set<String> delegatedRoles(Authentication auth, boolean superuser) {
@@ -309,6 +374,69 @@ public class ManagerUsersController {
         return messageSource.getMessage(key, null, key, LocaleContextHolder.getLocale());
     }
 
+    private boolean isExpired(Account account) throws DataServiceException {
+        return roleDao.findAllForUser(account).stream().anyMatch(role -> "EXPIRED".equals(role.getName()));
+    }
+
+    private void checkAuthorization(String uid, Authentication auth, boolean superuser) {
+        if (!superuser && auth != null && !advancedDelegationDao.findUsersUnderDelegation(auth.getName()).contains(uid)) {
+            throw new AccessDeniedException("User " + uid + " not under delegation");
+        }
+    }
+
+    public record OrgEntry(String id, String name, boolean pending, String label) {
+    }
+
     public record RoleEntry(String cn, String label, String description, int count) {
+    }
+
+    public record UserInfoView(
+            String uid,
+            String commonName,
+            String surname,
+            String givenName,
+            String email,
+            String postalAddress,
+            String org,
+            String description,
+            String manager,
+            String shadowExpire,
+            String phone,
+            String facsimile,
+            String title,
+            String privacyPolicyAgreementDate,
+            String creationDate,
+            String lastLogin,
+            String note,
+            String saslUser,
+            String oAuth2Provider,
+            boolean externalAuth,
+            boolean pending) {
+
+        static UserInfoView from(Account account) {
+            return new UserInfoView(
+                    account.getUid(),
+                    account.getCommonName(),
+                    account.getSurname(),
+                    account.getGivenName(),
+                    account.getEmail(),
+                    account.getPostalAddress(),
+                    account.getOrg(),
+                    account.getDescription(),
+                    account.getManager(),
+                    account.getShadowExpire() == null ? "" : LEGACY_DATE.format(account.getShadowExpire()),
+                    account.getPhone(),
+                    account.getFacsimile(),
+                    account.getTitle(),
+                    account.getPrivacyPolicyAgreementDate() == null ? ""
+                            : ISO_DATE.format(account.getPrivacyPolicyAgreementDate()),
+                    account.getCreationDate() == null ? "" : ISO_DATE.format(account.getCreationDate()),
+                    account.getLastLogin() == null ? "" : ISO_DATE.format(account.getLastLogin()),
+                    account.getNote(),
+                    account.getSASLUser(),
+                    account.getOAuth2Provider(),
+                    account.getIsExternalAuth(),
+                    account.isPending());
+        }
     }
 }
