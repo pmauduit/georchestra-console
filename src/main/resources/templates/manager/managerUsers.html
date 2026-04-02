@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{manager.users.title})}">
+  <meta charset="UTF-8">
+  <title>Users</title>
+</head>
+<body>
+<th:block th:replace="~{fragments/layout :: appHeader('console')}"></th:block>
+<main class="page">
+  <section class="hero">
+    <div class="hero-inline">
+      <p class="hero-subtitle" th:text="#{manager.users.title}">Users</p>
+      <p class="hero-text" th:text="#{manager.users.description}">
+        Browse and filter the accounts available to the current administrator.
+      </p>
+    </div>
+  </section>
+
+  <nav class="manager-tabs">
+    <a class="manager-tab active" th:href="@{/manager/browse/all/users}" th:text="#{nav.users}">Users</a>
+    <a class="manager-tab" th:href="@{/manager/logs}" th:text="#{logs.title}">Logs</a>
+  </nav>
+
+  <section class="manager-grid">
+    <aside class="card manager-aside">
+      <div class="manager-aside-header">
+        <h2 th:text="#{manager.users.browse.title}">Browse</h2>
+        <a class="button button-link"
+           th:href="${publicContextPath + '/manager/#!/users/add'}"
+           th:text="#{role.newuser}">New user</a>
+      </div>
+
+      <nav class="role-list">
+        <a th:each="role : ${browseRoles}"
+           class="role-link"
+           th:classappend="${scope == role.cn()} ? ' is-active' : ''"
+           th:href="@{/manager/browse/{scope}/users(scope=${role.cn()})}"
+           th:title="${role.description()}">
+          <span th:text="${role.label()}">Role</span>
+          <span class="role-count" th:text="${role.count()}">0</span>
+        </a>
+      </nav>
+    </aside>
+
+    <section class="card">
+      <div class="manager-panel-header">
+        <div>
+          <h2 th:if="${activeRole != null}" th:text="${activeRole.label()}">All users</h2>
+          <p class="muted"
+             th:if="${activeRole != null and activeRole.description() != null and !#strings.isEmpty(activeRole.description())}"
+             th:text="${activeRole.description()}">Description</p>
+        </div>
+        <p class="muted" th:text="#{manager.users.total(${totalUsers})}">Total: 0</p>
+      </div>
+
+      <form class="filters" method="get" th:action="@{/manager/browse/{scope}/users(scope=${scope})}">
+        <div class="form-grid manager-users-filter-grid">
+          <div class="field">
+            <label for="q" th:text="#{role.filter_users}">Filter</label>
+            <input id="q" type="search" name="q" th:value="${query}" th:placeholder="#{role.filter_users}">
+            <input type="hidden" name="sort" th:value="${sort}">
+            <input type="hidden" name="dir" th:value="${dir}">
+          </div>
+        </div>
+        <div class="actions">
+          <button type="submit" class="button button-primary" th:text="#{logs.filter.apply}">Apply</button>
+          <a class="button button-link" th:href="@{/manager/browse/{scope}/users(scope=${scope})}" th:text="#{logs.filter.clear}">Clear</a>
+        </div>
+      </form>
+
+      <div class="table-wrapper">
+        <table class="table">
+          <thead>
+          <tr>
+            <th>
+              <a class="table-sort"
+                 th:href="@{/manager/browse/{scope}/users(scope=${scope},q=${query},sort='user',dir=${sort == 'user' ? nextSortDir : 'asc'})}">
+                <span th:text="#{users.user}">User</span>
+                <span class="sort-indicator" th:if="${sort == 'user'}" th:text="${dir == 'asc' ? '↑' : '↓'}">↑</span>
+              </a>
+            </th>
+            <th>
+              <a class="table-sort"
+                 th:href="@{/manager/browse/{scope}/users(scope=${scope},q=${query},sort='login',dir=${sort == 'login' ? nextSortDir : 'asc'})}">
+                <span th:text="#{users.login}">Login</span>
+                <span class="sort-indicator" th:if="${sort == 'login'}" th:text="${dir == 'asc' ? '↑' : '↓'}">↑</span>
+              </a>
+            </th>
+            <th>
+              <a class="table-sort"
+                 th:href="@{/manager/browse/{scope}/users(scope=${scope},q=${query},sort='organization',dir=${sort == 'organization' ? nextSortDir : 'asc'})}">
+                <span th:text="#{users.organization}">Organization</span>
+                <span class="sort-indicator" th:if="${sort == 'organization'}" th:text="${dir == 'asc' ? '↑' : '↓'}">↑</span>
+              </a>
+            </th>
+            <th>
+              <a class="table-sort"
+                 th:href="@{/manager/browse/{scope}/users(scope=${scope},q=${query},sort='email',dir=${sort == 'email' ? nextSortDir : 'asc'})}">
+                <span th:text="#{users.email}">Mail</span>
+                <span class="sort-indicator" th:if="${sort == 'email'}" th:text="${dir == 'asc' ? '↑' : '↓'}">↑</span>
+              </a>
+            </th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr th:each="user : ${users}">
+            <td>
+              <a th:href="${publicContextPath + '/manager/#!/users/' + user.uid + '/infos'}"
+                 th:text="${((user.surname ?: '') + ' ' + (user.givenName ?: '')).trim()}">
+                User name
+              </a>
+            </td>
+            <td th:text="${user.uid}">uid</td>
+            <td>
+              <a th:if="${user.orgId != null}"
+                 th:href="${publicContextPath + '/manager/#!/org/' + user.orgId + '/infos'}"
+                 th:text="${user.orgName}">
+                Organization
+              </a>
+              <span th:if="${user.orgId == null}" th:text="${user.orgName}">Organization</span>
+            </td>
+            <td th:text="${user.email}">mail@example.org</td>
+          </tr>
+          <tr th:if="${#lists.isEmpty(users)}">
+            <td colspan="4" class="empty" th:text="#{manager.users.noresults}">No users found</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </section>
+</main>
+</body>
+</html>

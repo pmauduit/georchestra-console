@@ -9,9 +9,13 @@ Current runtime target: Java 21.
 * Get rid of the `org.georchestra.console.ws.backoffice.utils.ResponseUtil` class
 * Get rid of `@Autowired` annotations and xml-based configurations
 * rewrite tests to remove IT / Tests ? `integration` package ?
-* Upgrade dependencies in pom.
 * Get rid of Junit4 & rewrite testsuite to Junit5
 * Add a maven formatter plugin
+
+## April, 2th 2026
+
+* Add missing template for new password
+* Add manager/browse/user
 
 # (B)log
 
