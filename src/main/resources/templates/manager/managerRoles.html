@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{manager.roles.title})}">
+  <meta charset="UTF-8">
+  <title>Roles</title>
+</head>
+<body>
+<th:block th:replace="~{fragments/layout :: appHeader('console')}"></th:block>
+<main class="page">
+  <section class="hero">
+    <div class="hero-inline">
+      <p class="hero-subtitle" th:text="#{manager.roles.title}">Roles</p>
+      <p class="hero-text" th:text="#{manager.roles.description}">
+        Browse roles available to the current administrator and filter the directory.
+      </p>
+    </div>
+  </section>
+
+  <nav class="manager-tabs">
+    <a class="manager-tab" th:href="@{/manager/browse/all/users}" th:text="#{nav.users}">Users</a>
+    <a class="manager-tab active" th:href="@{/manager/roles/all}" th:text="#{nav.roles}">Roles</a>
+    <a class="manager-tab" th:href="@{/manager/logs}" th:text="#{logs.title}">Logs</a>
+  </nav>
+
+  <section class="manager-grid">
+    <aside class="card manager-aside">
+      <div class="manager-aside-header">
+        <h2 th:text="#{manager.roles.scope.title}">Browse</h2>
+        <a class="button button-link"
+           th:if="${isSuperuser}"
+           th:href="${publicContextPath + '/manager/#!/roles/all?new=role'}"
+           th:text="#{roles.newrole}">
+          New role
+        </a>
+      </div>
+      <nav class="role-list">
+        <a class="role-link is-active" th:href="@{/manager/roles/all}">
+          <span th:text="#{roles.allroles}">All roles</span>
+          <span class="role-count" th:text="${roleCount}">0</span>
+        </a>
+      </nav>
+    </aside>
+
+    <section class="card">
+      <div class="manager-panel-header">
+        <div>
+          <h2 th:text="#{roles.allroles}">All roles</h2>
+          <p class="muted" th:text="#{manager.roles.subtitle(${roleCount})}">0 roles</p>
+        </div>
+      </div>
+
+      <form class="filters" method="get" th:action="@{/manager/roles/all}">
+        <div class="form-grid manager-users-filter-grid">
+          <div class="field">
+            <label for="q" th:text="#{roles.filter_roles}">Filter</label>
+            <input id="q" type="search" name="q" th:value="${query}" th:placeholder="#{roles.filter_roles}">
+          </div>
+        </div>
+        <div class="actions">
+          <button type="submit" class="button button-primary" th:text="#{logs.filter.apply}">Apply</button>
+          <a class="button button-link" th:href="@{/manager/roles/all}" th:text="#{logs.filter.clear}">Clear</a>
+        </div>
+      </form>
+
+      <div class="table-wrapper">
+        <table class="table">
+          <thead>
+          <tr>
+            <th th:text="#{role.cn}">Id</th>
+            <th th:text="#{role.description}">Description</th>
+            <th th:text="#{role.membersCount}">Members</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr th:each="role : ${roles}">
+            <td>
+              <a th:href="${publicContextPath + '/manager/#!/roles/' + role.cn + '/infos'}"
+                 th:title="${role.description}">
+                <span th:text="${role.cn}">ROLE</span>
+              </a>
+              <span class="muted" th:if="${role.favorite}">★</span>
+            </td>
+            <td th:text="${role.description}">Description</td>
+            <td th:text="${role.usersCount}">0</td>
+          </tr>
+          <tr th:if="${#lists.isEmpty(roles)}">
+            <td colspan="3" class="empty" th:text="#{manager.roles.empty}">No roles found</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </section>
+</main>
+</body>
+</html>
