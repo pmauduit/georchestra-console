@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" th:lang="${#locale.toLanguageTag()}" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/layout :: head(#{manager.roleusers.title})}">
   <meta charset="UTF-8">
   <title>Role users</title>
 </head>
 <body>
 <th:block th:replace="~{fragments/layout :: appHeader('console')}"></th:block>
-<main class="page">
+<main id="main-content" tabindex="-1" class="page">
   <section class="hero">
     <div class="hero-inline">
       <p class="hero-subtitle" th:text="#{manager.roleusers.title}">Role members</p>

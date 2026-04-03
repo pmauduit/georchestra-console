@@ -4,44 +4,7 @@ A rewrite of geOrchestra's console webapp using updated versions of the dependen
 
 Current runtime target: Java 21.
 
-# TODOs
-
-* Get rid of the `org.georchestra.console.ws.backoffice.utils.ResponseUtil` class
-* Get rid of `@Autowired` annotations and xml-based configurations
-* rewrite tests to remove IT / Tests ? `integration` package ?
-* Get rid of Junit4 & rewrite testsuite to Junit5
-* Add a maven formatter plugin
-
-## April, 2th 2026
-
-* Add missing template for new password
-* Add manager for users, orgs, roles, delegation ( add sort feature )
-* remove ActiveMq link to https://github.com/georchestra/georchestra/pull/4644/
-* Change manager angular to thymeleaf, but adding role to user need validation click. In current version non click needed ( perhaps to do but not the time in the community sprint, same fonctionnality different step to do it )
-* remove all temporary Angularjs
-* We also finished the keg of beer
-
-On the frontend side, the zone skills feature still needs to be redone (no migration done), and the UI needs a general polish across all interfaces. I haven’t deployed it to a server—only locally using the dev Docker Compose setup. The configuration files still need to be placed in the data directory; we’ll probably need to convert the console.properties file to YAML and add all the new email templates into the data directory. We should also check whether the small amount of JavaScript is properly minified.
-The GDPR-related features for data deletion and data export have not been tested.
-
-# (B)log
-
-## April, 1st 2026
-
-End migration JSP in Thymeleaf
-Start migration Angular in Thymeleaf, for the moment some angular are copied in project to test quickly, to be removed
-exemple http://localhost:8080/console/manager/logs Style need to be review
-In createAccoutForm, new org with areas is not working
-
-## March, 31th 2026
-
-Added a dedicated development environment:
-
-* `spring-boot-devtools` for local development
-* a dedicated Docker stack in `docker/dev/docker-compose-dev.yaml`
-* a dedicated development datadir in `docker/dev/datadir`
-* a some Thymleaf template for userdetail and changingemail
-* New feature add localisation for mail body
+# Run 
 
 To run the app in dev:
 
@@ -64,6 +27,53 @@ Then:
 
 * direct access: `http://localhost:8081/console`
 * through the gateway: `http://localhost:8080/console`
+
+# TODOs
+
+* Get rid of the `org.georchestra.console.ws.backoffice.utils.ResponseUtil` class
+* Get rid of `@Autowired` annotations and xml-based configurations
+* rewrite tests to remove IT / Tests ? `integration` package ?
+* Get rid of Junit4 & rewrite testsuite to Junit5
+* Add a maven formatter plugin
+ 
+# (B)log
+
+## April, 3th 2026 
+
+* Work done in the train to come back to Brittany, try to make some changes to be more RGAA compliant 
+    see - https://www.info.gouv.fr/accessibilite/tests-et-audits
+    add html lang and make it dynamics, add main-content, change hero.p to h1, add skip informations, use aria-describedby/aria-invalid for form error
+    add Integration test with jsoup and séparate Unit Test and Integration Test ( Ignore legacy IT test)
+  Need to quit train quickly, I might have introduce an error /manager/home and /manager/logs won't work anymore ( erreur in database ERROR: relation "console.admin_log" does not exist)
+
+## April, 2th 2026
+
+* Add missing template for new password
+* Add manager for users, orgs, roles, delegation ( add sort feature )
+* remove ActiveMq link to https://github.com/georchestra/georchestra/pull/4644/
+* Change manager angular to thymeleaf, but adding role to user need validation click. In current version non click needed ( perhaps to do but not the time in the community sprint, same fonctionnality different step to do it )
+* remove all temporary Angularjs
+* We also finished the keg of beer
+
+On the frontend side, the zone skills feature still needs to be redone (no migration done), and the UI needs a general polish across all interfaces. I haven’t deployed it to a server—only locally using the dev Docker Compose setup. The configuration files still need to be placed in the data directory; we’ll probably need to convert the console.properties file to YAML and add all the new email templates into the data directory. We should also check whether the small amount of JavaScript is properly minified.
+The GDPR-related features for data deletion and data export have not been tested.
+
+## April, 1st 2026
+
+End migration JSP in Thymeleaf
+Start migration Angular in Thymeleaf, for the moment some angular are copied in project to test quickly, to be removed
+exemple http://localhost:8080/console/manager/logs Style need to be review
+In createAccoutForm, new org with areas is not working
+
+## March, 31th 2026
+
+Added a dedicated development environment:
+
+* `spring-boot-devtools` for local development
+* a dedicated Docker stack in `docker/dev/docker-compose-dev.yaml`
+* a dedicated development datadir in `docker/dev/datadir`
+* a some Thymleaf template for userdetail and changingemail
+* New feature add localisation for mail body
 
 
 ## July, 9th 2025
@@ -133,3 +143,26 @@ to thymeleaf ? How far should I go to make sure we are isofunctional ? Either im
 coverage of each controller, or trying to get a frontend part somehow ?
 
 The rabbitMq part is still broken though, but not my priority.
+
+
+## Tests
+
+Tests follow the standard Maven layout:
+
+* unit and slice tests in `src/test/java`
+* integration tests in `src/test/java`, named `*IT`
+* test fixtures in `src/test/resources`
+
+Maven execution is split as follows:
+
+* `./mvnw test` runs fast tests only, through Surefire
+* `./mvnw verify` runs fast tests and integration tests, with `*IT` executed through Failsafe
+
+Useful commands:
+
+```bash
+./mvnw test
+./mvnw verify
+./mvnw -Dtest=org.georchestra.console.boot.ConsoleApplicationTests test
+./mvnw -Dit.test=org.georchestra.console.boot.AxeCoreAccessibilityIT verify
+```

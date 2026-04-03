@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" th:lang="${#locale.toLanguageTag()}" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/layout :: head(#{account.editOrg.title})}">
   <meta charset="UTF-8">
   <title>Edit organization.</title>
 </head>
 <body>
 <th:block th:replace="~{fragments/layout :: appHeader('console')}"></th:block>
-<main class="page">
+<main id="main-content" tabindex="-1" class="page">
   <section class="hero">
     <div class="hero-inline">
-      <p class="hero-subtitle" th:text="${name}">Organization name</p>
+      <h1 class="hero-subtitle" th:text="${name}">Organization name</h1>
       <p class="hero-text" th:text="#{account.editOrg.description}">
         Update your organization information.
       </p>

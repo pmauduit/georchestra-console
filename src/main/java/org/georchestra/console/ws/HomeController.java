@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -141,8 +142,9 @@ public class HomeController {
         roles.sort(Comparator.comparing(Role::getName, Comparator.nullsLast(String::compareToIgnoreCase)));
 
         Set<String> expiredUsers = roles.stream()
+                .filter(Objects::nonNull)
                 .filter(role -> "EXPIRED".equals(role.getName()))
-                .flatMap(role -> role.getUserList().stream())
+                .flatMap(role -> safeUserList(role).stream())
                 .collect(Collectors.toSet());
 
         List<AdminLogEntry> recentLogs = superuser
@@ -181,5 +183,9 @@ public class HomeController {
             return Set.of();
         }
         return Arrays.stream(delegationEntry.getRoles()).collect(Collectors.toSet());
+    }
+
+    private List<String> safeUserList(Role role) {
+        return role.getUserList() == null ? List.of() : role.getUserList();
     }
 }

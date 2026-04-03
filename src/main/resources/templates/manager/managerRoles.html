@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" th:lang="${#locale.toLanguageTag()}" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/layout :: head(#{manager.roles.title})}">
   <meta charset="UTF-8">
   <title>Roles</title>
 </head>
 <body>
 <th:block th:replace="~{fragments/layout :: appHeader('console')}"></th:block>
-<main class="page">
+<main id="main-content" tabindex="-1" class="page">
   <section class="hero">
     <div class="hero-inline">
-      <p class="hero-subtitle" th:text="#{manager.roles.title}">Roles</p>
+      <h1 class="hero-subtitle" th:text="#{manager.roles.title}">Roles</h1>
       <p class="hero-text" th:text="#{manager.roles.description}">
         Browse roles available to the current administrator and filter the directory.
       </p>
@@ -69,23 +69,24 @@
 
       <div class="table-wrapper">
         <table class="table">
+          <caption class="visually-hidden" th:text="#{manager.roles.title}">Roles</caption>
           <thead>
           <tr>
-            <th>
+            <th th:attr="aria-sort=${sort == 'cn' ? (dir == 'asc' ? 'ascending' : 'descending') : 'none'}">
               <a class="table-sort"
                  th:href="@{/manager/roles/all(q=${query},sort='cn',dir=${sort == 'cn' ? nextSortDir : 'asc'})}">
                 <span th:text="#{manager.role.cn}">Id</span>
                 <span class="sort-indicator" th:if="${sort == 'cn'}" th:text="${dir == 'asc' ? '↑' : '↓'}">↑</span>
               </a>
             </th>
-            <th>
+            <th th:attr="aria-sort=${sort == 'description' ? (dir == 'asc' ? 'ascending' : 'descending') : 'none'}">
               <a class="table-sort"
                  th:href="@{/manager/roles/all(q=${query},sort='description',dir=${sort == 'description' ? nextSortDir : 'asc'})}">
                 <span th:text="#{manager.role.description}">Description</span>
                 <span class="sort-indicator" th:if="${sort == 'description'}" th:text="${dir == 'asc' ? '↑' : '↓'}">↑</span>
               </a>
             </th>
-            <th>
+            <th th:attr="aria-sort=${sort == 'members' ? (dir == 'asc' ? 'ascending' : 'descending') : 'none'}">
               <a class="table-sort"
                  th:href="@{/manager/roles/all(q=${query},sort='members',dir=${sort == 'members' ? nextSortDir : 'asc'})}">
                 <span th:text="#{manager.role.membersCount}">Members</span>

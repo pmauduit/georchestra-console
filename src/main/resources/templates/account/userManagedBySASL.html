@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" th:lang="${#locale.toLanguageTag()}" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/layout :: head(#{account.saslManaged.pageTitle})}">
   <meta charset="UTF-8">
   <title>Account managed externally</title>
 </head>
 <body>
 <th:block th:replace="~{fragments/layout :: appHeader('console')}"></th:block>
-<main class="page page-narrow">
+<main id="main-content" tabindex="-1" class="page page-narrow">
   <section class="hero">
     <div class="hero-inline">
-      <p class="hero-subtitle" th:text="#{account.saslManaged.title}">Account managed externally</p>
+      <h1 class="hero-subtitle" th:text="#{account.saslManaged.title}">Account managed externally</h1>
       <p class="hero-text" th:text="#{account.saslManaged.body}">
         Your account is managed by an external authentication service.
       </p>

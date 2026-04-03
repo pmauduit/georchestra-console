@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" th:lang="${#locale.toLanguageTag()}" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/layout :: head(#{manager.orgs.title})}">
   <meta charset="UTF-8">
   <title>Organizations</title>
 </head>
 <body>
 <th:block th:replace="~{fragments/layout :: appHeader('console')}"></th:block>
-<main class="page">
+<main id="main-content" tabindex="-1" class="page">
   <section class="hero">
     <div class="hero-inline">
-      <p class="hero-subtitle" th:text="#{manager.orgs.title}">Organizations</p>
+      <h1 class="hero-subtitle" th:text="#{manager.orgs.title}">Organizations</h1>
       <p class="hero-text" th:text="#{manager.orgs.description}">
         Browse organizations available to the current administrator and filter the directory.
       </p>
@@ -75,21 +75,22 @@
 
       <div class="table-wrapper">
         <table class="table">
+          <caption class="visually-hidden" th:text="#{manager.orgs.title}">Organizations</caption>
           <thead>
           <tr>
-            <th>
+            <th th:attr="aria-sort=${sort == 'name' ? (dir == 'asc' ? 'ascending' : 'descending') : 'none'}">
               <a th:href="${scope == 'pending'} ? @{/manager/orgs/pending(q=${query},sort='name',dir=${sort == 'name' ? nextSortDir : 'asc'})} : @{/manager/orgs/(q=${query},sort='name',dir=${sort == 'name' ? nextSortDir : 'asc'})}">
                 <span th:text="#{manager.org.name}">Name</span>
                 <span th:if="${sort == 'name'}" th:text="${dir == 'asc' ? '↑' : '↓'}">↑</span>
               </a>
             </th>
-            <th>
+            <th th:attr="aria-sort=${sort == 'shortName' ? (dir == 'asc' ? 'ascending' : 'descending') : 'none'}">
               <a th:href="${scope == 'pending'} ? @{/manager/orgs/pending(q=${query},sort='shortName',dir=${sort == 'shortName' ? nextSortDir : 'asc'})} : @{/manager/orgs/(q=${query},sort='shortName',dir=${sort == 'shortName' ? nextSortDir : 'asc'})}">
                 <span th:text="#{manager.org.shortName}">Short name</span>
                 <span th:if="${sort == 'shortName'}" th:text="${dir == 'asc' ? '↑' : '↓'}">↑</span>
               </a>
             </th>
-            <th>
+            <th th:attr="aria-sort=${sort == 'membersCount' ? (dir == 'asc' ? 'ascending' : 'descending') : 'none'}">
               <a th:href="${scope == 'pending'} ? @{/manager/orgs/pending(q=${query},sort='membersCount',dir=${sort == 'membersCount' ? nextSortDir : 'asc'})} : @{/manager/orgs/(q=${query},sort='membersCount',dir=${sort == 'membersCount' ? nextSortDir : 'asc'})}">
                 <span th:text="#{manager.org.membersCount}">Members</span>
                 <span th:if="${sort == 'membersCount'}" th:text="${dir == 'asc' ? '↑' : '↓'}">↑</span>

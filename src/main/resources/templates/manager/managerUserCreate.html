@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" th:lang="${#locale.toLanguageTag()}" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/layout :: head(#{manager.usercreate.title})}">
   <meta charset="UTF-8">
   <title>Create user</title>
 </head>
 <body>
 <th:block th:replace="~{fragments/layout :: appHeader('console')}"></th:block>
-<main class="page">
+<main id="main-content" tabindex="-1" class="page">
   <section class="hero">
     <div class="hero-inline">
-      <p class="hero-subtitle" th:text="#{manager.usercreate.title}">Create user</p>
+      <h1 class="hero-subtitle" th:text="#{manager.usercreate.title}">Create user</h1>
       <p class="hero-text" th:text="#{manager.usercreate.description}">
         Create a new account directly from the manager without going through the legacy Angular form.
       </p>

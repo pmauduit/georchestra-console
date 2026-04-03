@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" th:lang="${#locale.toLanguageTag()}" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/layout :: head(#{account.create.title})}">
   <meta charset="UTF-8">
   <title>New account.</title>
@@ -7,10 +7,10 @@
 </head>
 <body>
 <th:block th:replace="~{fragments/layout :: appHeader('console')}"></th:block>
-<main class="page">
+<main id="main-content" tabindex="-1" class="page">
   <section class="hero">
     <div class="hero-inline">
-      <p class="hero-subtitle" th:text="#{account.create.title}">New account.</p>
+      <h1 class="hero-subtitle" th:text="#{account.create.title}">New account.</h1>
       <p class="hero-text" th:text="#{account.create.subtitle}">Create your account.</p>
     </div>
     <p class="hero-text" th:text="#{account.create.description}">

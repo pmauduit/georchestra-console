@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" th:lang="${#locale.toLanguageTag()}" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/layout :: head(#{manager.users.title})}">
   <meta charset="UTF-8">
   <title>Users</title>
 </head>
 <body>
 <th:block th:replace="~{fragments/layout :: appHeader('console')}"></th:block>
-<main class="page">
+<main id="main-content" tabindex="-1" class="page">
   <section class="hero">
     <div class="hero-inline">
-      <p class="hero-subtitle" th:text="#{manager.users.title}">Users</p>
+      <h1 class="hero-subtitle" th:text="#{manager.users.title}">Users</h1>
       <p class="hero-text" th:text="#{manager.users.description}">
         Browse and filter the accounts available to the current administrator.
       </p>
@@ -74,30 +74,31 @@
 
       <div class="table-wrapper">
         <table class="table">
+          <caption class="visually-hidden" th:text="#{manager.users.title}">Users</caption>
           <thead>
           <tr>
-            <th>
+            <th th:attr="aria-sort=${sort == 'user' ? (dir == 'asc' ? 'ascending' : 'descending') : 'none'}">
               <a class="table-sort"
                  th:href="@{/manager/browse/{scope}/users(scope=${scope},q=${query},sort='user',dir=${sort == 'user' ? nextSortDir : 'asc'})}">
                 <span th:text="#{manager.users.user}">User</span>
                 <span class="sort-indicator" th:if="${sort == 'user'}" th:text="${dir == 'asc' ? '↑' : '↓'}">↑</span>
               </a>
             </th>
-            <th>
+            <th th:attr="aria-sort=${sort == 'login' ? (dir == 'asc' ? 'ascending' : 'descending') : 'none'}">
               <a class="table-sort"
                  th:href="@{/manager/browse/{scope}/users(scope=${scope},q=${query},sort='login',dir=${sort == 'login' ? nextSortDir : 'asc'})}">
                 <span th:text="#{manager.users.login}">Login</span>
                 <span class="sort-indicator" th:if="${sort == 'login'}" th:text="${dir == 'asc' ? '↑' : '↓'}">↑</span>
               </a>
             </th>
-            <th>
+            <th th:attr="aria-sort=${sort == 'organization' ? (dir == 'asc' ? 'ascending' : 'descending') : 'none'}">
               <a class="table-sort"
                  th:href="@{/manager/browse/{scope}/users(scope=${scope},q=${query},sort='organization',dir=${sort == 'organization' ? nextSortDir : 'asc'})}">
                 <span th:text="#{manager.users.organization}">Organization</span>
                 <span class="sort-indicator" th:if="${sort == 'organization'}" th:text="${dir == 'asc' ? '↑' : '↓'}">↑</span>
               </a>
             </th>
-            <th>
+            <th th:attr="aria-sort=${sort == 'email' ? (dir == 'asc' ? 'ascending' : 'descending') : 'none'}">
               <a class="table-sort"
                  th:href="@{/manager/browse/{scope}/users(scope=${scope},q=${query},sort='email',dir=${sort == 'email' ? nextSortDir : 'asc'})}">
                 <span th:text="#{manager.users.email}">Mail</span>

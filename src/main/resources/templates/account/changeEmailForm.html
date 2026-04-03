@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" th:lang="${#locale.toLanguageTag()}" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/layout :: head(#{account.changeEmail.title})}">
   <meta charset="UTF-8">
   <title>Change e-mail.</title>
 </head>
 <body>
 <th:block th:replace="~{fragments/layout :: appHeader('console')}"></th:block>
-<main class="page page-narrow">
+<main id="main-content" tabindex="-1" class="page page-narrow">
   <section class="hero">
     <div class="hero-inline">
-      <p class="hero-subtitle" th:text="#{account.changeEmail.title}">Change e-mail.</p>
+      <h1 class="hero-subtitle" th:text="#{account.changeEmail.title}">Change e-mail.</h1>
       <p class="hero-text" th:text="#{account.changeEmail.description}">
         You will receive a validation link to your new e-mail address to confirm this change.
       </p>
