@@ -56,8 +56,8 @@ docker compose -f docker-compose-dev.yaml up -d
 
 ```bash
 mvn spring-boot:run \
-  -Dspring-boot.run.jvmArguments="-Dgeorchestra.datadir=$(pwd)/docker/dev/datadir -DpgsqlHost=localhost -DpgsqlPort=15432 -DldapHost=localhost -DldapPort=1389" \
-  -Dspring-boot.run.arguments=--server.port=8081
+  -Dspring-boot.run.jvmArguments="-Dgeorchestra.datadir=$(pwd)/docker/dev/datadir \
+  -Dspring-boot.run.arguments=--server.port=8081"
 ```
 
 Then:
