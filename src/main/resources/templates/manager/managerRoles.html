@@ -57,6 +57,8 @@
           <div class="field">
             <label for="q" th:text="#{roles.filter_roles}">Filter</label>
             <input id="q" type="search" name="q" th:value="${query}" th:placeholder="#{roles.filter_roles}">
+            <input type="hidden" name="sort" th:value="${sort}">
+            <input type="hidden" name="dir" th:value="${dir}">
           </div>
         </div>
         <div class="actions">
@@ -69,9 +71,27 @@
         <table class="table">
           <thead>
           <tr>
-            <th th:text="#{role.cn}">Id</th>
-            <th th:text="#{role.description}">Description</th>
-            <th th:text="#{role.membersCount}">Members</th>
+            <th>
+              <a class="table-sort"
+                 th:href="@{/manager/roles/all(q=${query},sort='cn',dir=${sort == 'cn' ? nextSortDir : 'asc'})}">
+                <span th:text="#{role.cn}">Id</span>
+                <span class="sort-indicator" th:if="${sort == 'cn'}" th:text="${dir == 'asc' ? '↑' : '↓'}">↑</span>
+              </a>
+            </th>
+            <th>
+              <a class="table-sort"
+                 th:href="@{/manager/roles/all(q=${query},sort='description',dir=${sort == 'description' ? nextSortDir : 'asc'})}">
+                <span th:text="#{role.description}">Description</span>
+                <span class="sort-indicator" th:if="${sort == 'description'}" th:text="${dir == 'asc' ? '↑' : '↓'}">↑</span>
+              </a>
+            </th>
+            <th>
+              <a class="table-sort"
+                 th:href="@{/manager/roles/all(q=${query},sort='members',dir=${sort == 'members' ? nextSortDir : 'asc'})}">
+                <span th:text="#{role.membersCount}">Members</span>
+                <span class="sort-indicator" th:if="${sort == 'members'}" th:text="${dir == 'asc' ? '↑' : '↓'}">↑</span>
+              </a>
+            </th>
           </tr>
           </thead>
           <tbody>

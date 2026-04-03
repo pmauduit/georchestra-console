@@ -83,7 +83,11 @@ public class ManagerRolesController {
 
     @GetMapping("/roles/{scope}")
     @PreAuthorize("hasAnyRole('SUPERUSER','ORGADMIN')")
-    public String roles(@PathVariable String scope, @RequestParam(required = false) String q, Model model)
+    public String roles(@PathVariable String scope,
+            @RequestParam(required = false) String q,
+            @RequestParam(required = false, defaultValue = "cn") String sort,
+            @RequestParam(required = false, defaultValue = "asc") String dir,
+            Model model)
             throws DataServiceException {
         Authentication auth = authentication();
         boolean superuser = isSuperuser(auth);
@@ -97,9 +101,15 @@ public class ManagerRolesController {
                             || contains(role.description(), normalizedQuery))
                     .collect(Collectors.toList());
         }
+        String normalizedSort = normalizeSort(sort);
+        String normalizedDirection = normalizeDirection(dir);
+        roles = sortRoleEntries(roles, normalizedSort, normalizedDirection);
 
         model.addAttribute("scope", normalizedScope);
         model.addAttribute("query", q == null ? "" : q);
+        model.addAttribute("sort", normalizedSort);
+        model.addAttribute("dir", normalizedDirection);
+        model.addAttribute("nextSortDir", "asc".equals(normalizedDirection) ? "desc" : "asc");
         model.addAttribute("roles", roles);
         model.addAttribute("roleCount", roles.size());
         model.addAttribute("isSuperuser", superuser);
@@ -206,6 +216,23 @@ public class ManagerRolesController {
                 .collect(Collectors.toList());
     }
 
+    private List<RoleListEntry> sortRoleEntries(List<RoleListEntry> roles, String sort, String dir) {
+        Comparator<String> stringComparator = Comparator.nullsLast(String::compareToIgnoreCase);
+        Comparator<RoleListEntry> comparator = switch (sort) {
+            case "description" -> Comparator.comparing(RoleListEntry::description, stringComparator)
+                    .thenComparing(RoleListEntry::cn, stringComparator);
+            case "members" -> Comparator.comparingInt(RoleListEntry::usersCount)
+                    .thenComparing(RoleListEntry::cn, stringComparator);
+            case "cn" -> Comparator.comparing(RoleListEntry::cn, stringComparator);
+            default -> Comparator.comparing(RoleListEntry::cn, stringComparator);
+        };
+
+        if ("desc".equals(dir)) {
+            comparator = comparator.reversed();
+        }
+        return roles.stream().sorted(comparator).collect(Collectors.toList());
+    }
+
     private List<Role> findVisibleRoles(Authentication auth, boolean superuser) throws DataServiceException {
         Set<String> delegatedRoles = delegatedRoles(auth, superuser);
         Set<String> delegatedUsers = delegatedUsers(auth, superuser);
@@ -276,6 +303,20 @@ public class ManagerRolesController {
             return 0;
         }
         return (total + pageSize - 1) / pageSize;
+    }
+
+    private String normalizeSort(String sort) {
+        if (sort == null || sort.isBlank()) {
+            return "cn";
+        }
+        return switch (sort) {
+            case "description", "members" -> sort;
+            default -> "cn";
+        };
+    }
+
+    private String normalizeDirection(String dir) {
+        return "desc".equalsIgnoreCase(dir) ? "desc" : "asc";
     }
 
     private boolean isSuperuser(Authentication auth) {
