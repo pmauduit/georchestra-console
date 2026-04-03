@@ -22,7 +22,7 @@
     <a class="manager-tab" th:href="@{/manager/orgs/}" th:text="#{nav.orgs}">Orgs</a>
     <a class="manager-tab active" th:href="@{/manager/roles/all}" th:text="#{nav.roles}">Roles</a>
     <a class="manager-tab" th:if="${isSuperuserView}" th:href="@{/manager/delegations}" th:text="#{nav.delegations}">Delegations</a>
-    <a class="manager-tab" th:href="@{/manager/logs}" th:text="#{logs.title}">Logs</a>
+    <a class="manager-tab" th:href="@{/manager/logs}" th:text="#{manager.logs.title}">Logs</a>
   </nav>
 
   <div class="layout">
@@ -44,23 +44,23 @@
       <form class="filters" method="get" th:action="@{/manager/roles/{cn}/users(cn=${role.cn})}">
         <div class="form-grid manager-users-filter-grid">
           <div class="field">
-            <label for="q" th:text="#{role.filter_users}">Filter</label>
-            <input id="q" type="search" name="q" th:value="${query}" th:placeholder="#{role.filter_users}">
+            <label for="q" th:text="#{manager.role.filterUsers}">Filter</label>
+            <input id="q" type="search" name="q" th:value="${query}" th:placeholder="#{manager.role.filterUsers}">
           </div>
         </div>
         <div class="actions">
-          <button type="submit" class="button button-primary" th:text="#{logs.filter.apply}">Apply</button>
+          <button type="submit" class="button button-primary" th:text="#{manager.logs.filter.apply}">Apply</button>
           <a class="button button-link" th:href="@{/manager/roles/{cn}/users(cn=${role.cn})}"
-             th:text="#{logs.filter.clear}">Clear</a>
+             th:text="#{manager.logs.filter.clear}">Clear</a>
         </div>
       </form>
 
       <form id="manager-role-associate-form" class="manager-user-form" th:if="${!readonly}">
         <fieldset class="fieldset">
-          <legend th:text="#{role.userlabel}">Add</legend>
+          <legend th:text="#{manager.role.userLabel}">Add</legend>
           <div class="form-grid manager-users-filter-grid">
             <div class="field">
-              <label for="newUserUid" th:text="#{role.userlabel}">Add</label>
+              <label for="newUserUid" th:text="#{manager.role.userLabel}">Add</label>
               <select id="newUserUid" name="uid">
                 <option value="" th:text="#{manager.roleusers.selectUser}">Select a user</option>
                 <option th:each="user : ${availableUsers}" th:value="${user.uid()}" th:text="${user.displayName()}"></option>
@@ -68,7 +68,7 @@
             </div>
           </div>
           <div class="actions">
-            <button type="submit" class="button button-primary" th:text="#{role.userlabel}">Add</button>
+            <button type="submit" class="button button-primary" th:text="#{manager.role.userLabel}">Add</button>
           </div>
         </fieldset>
       </form>
@@ -77,8 +77,8 @@
         <table class="table">
           <thead>
           <tr>
-            <th th:text="#{users.user}">User</th>
-            <th th:text="#{user.action}">Action</th>
+            <th th:text="#{manager.users.user}">User</th>
+            <th th:text="#{manager.user.action}">Action</th>
           </tr>
           </thead>
           <tbody>
@@ -89,7 +89,7 @@
             </td>
             <td>
               <button type="button" class="button button-link text-danger role-user-remove"
-                      th:if="${!readonly}" th:attr="data-uid=${user.uid()}" th:text="#{user.remove}">Remove</button>
+                      th:if="${!readonly}" th:attr="data-uid=${user.uid()}" th:text="#{manager.user.remove}">Remove</button>
             </td>
           </tr>
           <tr th:if="${#lists.isEmpty(managedUsers)}">
@@ -129,8 +129,8 @@
   const roleUsersFeedback = document.getElementById('manager-role-users-feedback');
   const roleUsersUpdateUrl = /*[[@{/private/roles_users}]]*/ '/private/roles_users';
   const managedRoleCn = /*[[${role.cn}]]*/ 'ROLE';
-  const roleUserAdded = /*[[#{role.useradded}]]*/ 'User has been added to role.';
-  const roleUserRemoved = /*[[#{role.userremoved}]]*/ 'User has been removed from role.';
+  const roleUserAdded = /*[[#{manager.role.userAdded}]]*/ 'User has been added to role.';
+  const roleUserRemoved = /*[[#{manager.role.userRemoved}]]*/ 'User has been removed from role.';
   const roleUsersError = /*[[#{manager.roleusers.updateError}]]*/ 'Unable to update role users.';
 
   const showRoleUsersFeedback = (message, type) => {

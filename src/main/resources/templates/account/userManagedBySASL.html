@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/layout :: head(#{userManagedBySASL.pageTitle})}">
+<head th:replace="~{fragments/layout :: head(#{account.saslManaged.pageTitle})}">
   <meta charset="UTF-8">
   <title>Account managed externally</title>
 </head>
@@ -9,8 +9,8 @@
 <main class="page page-narrow">
   <section class="hero">
     <div class="hero-inline">
-      <p class="hero-subtitle" th:text="#{userManagedBySASL.title}">Account managed externally</p>
-      <p class="hero-text" th:text="#{userManagedBySASL.body}">
+      <p class="hero-subtitle" th:text="#{account.saslManaged.title}">Account managed externally</p>
+      <p class="hero-text" th:text="#{account.saslManaged.body}">
         Your account is managed by an external authentication service.
       </p>
     </div>

@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/layout :: head(#{editUserDetailsForm.title})}">
+<head th:replace="~{fragments/layout :: head(#{account.editUser.title})}">
   <meta charset="UTF-8">
   <title>User details.</title>
 </head>
@@ -9,8 +9,8 @@
 <main class="page">
   <section class="hero">
     <div class="hero-inline">
-      <p class="hero-subtitle" th:text="#{editUserDetailsForm.title}">User details.</p>
-      <p class="hero-text" th:text="#{editUserDetailsForm.description}">
+      <p class="hero-subtitle" th:text="#{account.editUser.title}">User details.</p>
+      <p class="hero-text" th:text="#{account.editUser.description}">
         In this page you can manage your account informations and modify your password.
       </p>
     </div>
@@ -18,7 +18,7 @@
 
   <div class="layout">
     <section class="card">
-      <div th:if="${success}" class="alert alert-success" th:text="#{editUserDetailsForm.success}">
+      <div th:if="${success}" class="alert alert-success" th:text="#{account.editUser.success}">
         User details updated successfully
       </div>
 
@@ -28,7 +28,7 @@
         </div>
 
         <fieldset class="fieldset">
-          <legend th:text="#{editUserDetailsForm.fieldset.userDetails}">User details</legend>
+          <legend th:text="#{account.editUser.fieldset.userDetails}">User details</legend>
           <div class="form-grid">
             <th:block th:if="${editUserDetailsFormBean.isOAuth2}">
               <div class="static-field">
@@ -47,8 +47,7 @@
                   <span th:text="#{firstName.label}">First Name</span>
                   <span th:if="${session.firstNameRequired}" class="required-marker">*</span>
                 </label>
-                <input id="firstName" type="text" th:field="*{firstName}"
-                       th:placeholder="#{firstName.placeholder}">
+                <input id="firstName" type="text" th:field="*{firstName}">
               </div>
 
               <div class="field">
@@ -56,15 +55,14 @@
                   <span th:text="#{surname.label}">Surname</span>
                   <span th:if="${session.surnameRequired}" class="required-marker">*</span>
                 </label>
-                <input id="surname" type="text" th:field="*{surname}"
-                       th:placeholder="#{surname.placeholder}">
+                <input id="surname" type="text" th:field="*{surname}">
               </div>
             </th:block>
 
             <div class="static-field">
               <div class="label" th:text="#{email.label}">E-mail</div>
               <p class="static-value" th:text="*{email}"></p>
-              <a th:href="@{/account/changeEmail}" th:text="#{editUserDetailsForm.changeEmail.link}">Change e-mail</a>
+              <a th:href="@{/account/changeEmail}" th:text="#{account.editUser.changeEmail.link}">Change e-mail</a>
             </div>
 
             <div class="field">
@@ -73,7 +71,6 @@
                 <span th:if="${session.phoneRequired}" class="required-marker">*</span>
               </label>
               <input id="phone" type="tel" th:field="*{phone}"
-                     th:placeholder="#{phone.placeholder}"
                      inputmode="tel"
                      autocomplete="tel"
                      pattern="(?:[0-9]|\+|\(|\)|\.|-| )*"
@@ -87,7 +84,6 @@
                 <span th:if="${session.facsimileRequired}" class="required-marker">*</span>
               </label>
               <input id="facsimile" type="tel" th:field="*{facsimile}"
-                     th:placeholder="#{facsimile.placeholder}"
                      inputmode="tel"
                      autocomplete="tel"
                      pattern="(?:[0-9]|\+|\(|\)|\.|-| )*"
@@ -106,8 +102,7 @@
                 <span th:text="#{title.label}">Job title</span>
                 <span th:if="${session.titleRequired}" class="required-marker">*</span>
               </label>
-              <input id="title" type="text" th:field="*{title}"
-                     th:placeholder="#{title.placeholder}">
+              <input id="title" type="text" th:field="*{title}">
             </div>
 
             <div class="field">
@@ -115,8 +110,7 @@
                 <span th:text="#{description.label}">Description</span>
                 <span th:if="${session.descriptionRequired}" class="required-marker">*</span>
               </label>
-              <textarea id="description" th:field="*{description}"
-                        th:placeholder="#{description.placeholder}"></textarea>
+              <textarea id="description" th:field="*{description}"></textarea>
             </div>
 
             <div class="field">
@@ -124,15 +118,14 @@
                 <span th:text="#{postalAddress.label}">Postal address</span>
                 <span th:if="${session.postalAddressRequired}" class="required-marker">*</span>
               </label>
-              <textarea id="postalAddress" th:field="*{postalAddress}"
-                        th:placeholder="#{postalAddress.placeholder}"></textarea>
+              <textarea id="postalAddress" th:field="*{postalAddress}"></textarea>
             </div>
           </div>
         </fieldset>
 
         <fieldset class="fieldset"
                   th:if="${!editUserDetailsFormBean.isOAuth2 and !editUserDetailsFormBean.isExternalAuth}">
-          <legend th:text="#{editUserDetailsForm.fieldset.credentials}">Credentials</legend>
+          <legend th:text="#{account.editUser.fieldset.credentials}">Credentials</legend>
           <div class="form-grid">
             <div class="static-field">
               <div class="label" th:text="#{uid.label}">User ID</div>
@@ -141,7 +134,7 @@
 
             <div class="static-field">
               <div class="label" th:text="#{password.label}">Password</div>
-              <a th:href="@{/account/changePassword}" th:text="#{editUserDetailsForm.changePassword.link}">
+              <a th:href="@{/account/changePassword}" th:text="#{account.editUser.changePassword.link}">
                 Change Password
               </a>
             </div>
@@ -158,11 +151,11 @@
       <section class="card" th:if="${organization != null}">
         <div class="org-header">
           <div>
-            <p class="muted" th:text="#{editUserDetailsForm.organisation}">Organization</p>
+            <p class="muted" th:text="#{account.editUser.organisation}">Organization</p>
             <h2 class="org-title" th:text="${organization.name}">Organization name</h2>
           </div>
           <a class="button button-link" th:if="${isReferentOrSuperUser}" th:href="@{/account/orgdetails}"
-             th:text="#{editUserDetailsForm.editOrg}">
+             th:text="#{account.editUser.editOrg}">
             Edit Organization
           </a>
         </div>
@@ -171,14 +164,14 @@
 
         <p th:if="${organization.url}">
           <a th:href="${organization.url}" target="_blank" rel="noopener"
-             th:text="#{editUserDetailsForm.url}">Website</a>
+             th:text="#{account.editUser.url}">Website</a>
         </p>
 
         <img class="org-logo" th:if="${organization.logo}"
              th:src="'data:image/jpeg;base64,' + ${organization.logo}" alt="Organization logo">
 
         <div th:if="${!#lists.isEmpty(organizationMembers)}">
-          <h3 th:text="|#{editUserDetailsForm.members} (${#lists.size(organizationMembers)})|">Members (0)</h3>
+          <h3 th:text="|#{account.editUser.members} (${#lists.size(organizationMembers)})|">Members (0)</h3>
           <ul class="org-members">
             <li th:each="member : ${organizationMembers}">
               <span th:text="${member.surname ?: member.uid}">Surname</span>
@@ -189,22 +182,22 @@
       </section>
 
       <section class="card gdpr-card">
-        <h2 class="org-title" th:text="#{editUserDetailsForm.gdpr}">GDPR</h2>
-        <p th:text="#{editUserDetailsForm.downloadMsg}">
+        <h2 class="org-title" th:text="#{account.editUser.gdpr}">GDPR</h2>
+        <p th:text="#{account.editUser.downloadMsg}">
           In accordance with the European General Data Protection Regulation, you are able to download your data on this
           platform at any time.
         </p>
         <p>
           <a class="button button-primary" th:href="@{/account/gdpr/download}" target="_blank"
-             th:text="#{editUserDetailsForm.download}">Download my data</a>
+             th:text="#{account.editUser.download}">Download my data</a>
         </p>
 
         <th:block th:if="${gdprAllowAccountDeletion}">
-          <p th:text="#{editUserDetailsForm.deleteMsg}">
+          <p th:text="#{account.editUser.deleteMsg}">
             You may also permanently delete your account. WARNING: this cannot be undone !
           </p>
           <button id="delete-account-button" type="button" class="button button-danger"
-                  th:text="#{editUserDetailsForm.delete}">Delete my account</button>
+                  th:text="#{account.editUser.delete}">Delete my account</button>
         </th:block>
       </section>
     </aside>
@@ -240,8 +233,8 @@
   const deleteButton = document.getElementById('delete-account-button');
   if (deleteButton) {
     deleteButton.addEventListener('click', async () => {
-      const confirmMessage = /*[[#{editUserDetailsForm.deleteConfirm}]]*/ 'Delete your account?';
-      const failureMessage = /*[[#{editUserDetailsForm.deleteFail}]]*/ 'Unable to delete your account.';
+      const confirmMessage = /*[[#{account.editUser.deleteConfirm}]]*/ 'Delete your account?';
+      const failureMessage = /*[[#{account.editUser.deleteFail}]]*/ 'Unable to delete your account.';
       if (!window.confirm(confirmMessage)) {
         return;
       }

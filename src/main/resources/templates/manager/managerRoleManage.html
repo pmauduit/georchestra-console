@@ -22,7 +22,7 @@
     <a class="manager-tab" th:href="@{/manager/orgs/}" th:text="#{nav.orgs}">Orgs</a>
     <a class="manager-tab active" th:href="@{/manager/roles/all}" th:text="#{nav.roles}">Roles</a>
     <a class="manager-tab" th:if="${isSuperuserView}" th:href="@{/manager/delegations}" th:text="#{nav.delegations}">Delegations</a>
-    <a class="manager-tab" th:href="@{/manager/logs}" th:text="#{logs.title}">Logs</a>
+    <a class="manager-tab" th:href="@{/manager/logs}" th:text="#{manager.logs.title}">Logs</a>
   </nav>
 
   <div class="layout">
@@ -39,11 +39,11 @@
       <div id="manager-role-manage-feedback" class="alert" hidden aria-live="polite"></div>
 
       <div class="alert alert-error">
-        <p th:text="#{role.warning}">Warning, this action cannot be undone.</p>
+        <p th:text="#{manager.role.warning}">Warning, this action cannot be undone.</p>
       </div>
 
       <div class="actions">
-        <button type="button" id="delete-role-button" class="button button-danger" th:text="#{role.delete}">Delete role</button>
+        <button type="button" id="delete-role-button" class="button button-danger" th:text="#{manager.role.delete}">Delete role</button>
         <a class="button button-link" th:href="@{/manager/roles/{cn}/infos(cn=${role.cn})}" th:text="#{manager.userinfo.cancel}">Cancel</a>
       </div>
     </section>
@@ -67,7 +67,7 @@
   const deleteRoleButton = document.getElementById('delete-role-button');
   const roleManageFeedback = document.getElementById('manager-role-manage-feedback');
   const managedRole = /*[[${role.cn}]]*/ 'ROLE';
-  const deleteRoleError = /*[[#{role.deleteError}]]*/ 'Error deleting role';
+  const deleteRoleError = /*[[#{manager.role.deleteError}]]*/ 'Error deleting role';
   const rolesBaseUrl = /*[[@{/manager/roles/all}]]*/ '/manager/roles/all';
   const deleteUrlBase = /*[[@{/private/roles/}]]*/ '/private/roles/';
 

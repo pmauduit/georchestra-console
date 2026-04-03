@@ -400,7 +400,7 @@ public class ManagerUsersController {
         entries.add(new RoleEntry("all", resolve("manager.users.scope.all"),
                 resolve("manager.users.scope.all.description"),
                 (int) visibleUsers.stream().filter(user -> !user.isPending()).count()));
-        entries.add(new RoleEntry("pending", resolve("users.PENDING"),
+        entries.add(new RoleEntry("pending", resolve("manager.users.pending"),
                 resolve("manager.users.scope.pending.description"),
                 (int) visibleUsers.stream().filter(SimpleAccount::isPending).count()));
 

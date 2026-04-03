@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/layout :: head(#{editOrgDetailsForm.title})}">
+<head th:replace="~{fragments/layout :: head(#{account.editOrg.title})}">
   <meta charset="UTF-8">
   <title>Edit organization.</title>
 </head>
@@ -10,7 +10,7 @@
   <section class="hero">
     <div class="hero-inline">
       <p class="hero-subtitle" th:text="${name}">Organization name</p>
-      <p class="hero-text" th:text="#{editOrgDetailsForm.description}">
+      <p class="hero-text" th:text="#{account.editOrg.description}">
         Update your organization information.
       </p>
     </div>
@@ -18,7 +18,7 @@
 
   <div class="layout">
     <section class="card">
-      <div th:if="${success}" class="alert alert-success" th:text="#{editOrgDetailsForm.success}">
+      <div th:if="${success}" class="alert alert-success" th:text="#{account.editOrg.success}">
         Organization updated successfully
       </div>
 
@@ -29,7 +29,7 @@
         </div>
 
         <fieldset class="fieldset">
-          <legend th:text="#{editOrgDetailsForm.fieldset.orgDetails}">Organization details</legend>
+          <legend th:text="#{account.editOrg.fieldset.orgDetails}">Organization details</legend>
           <input type="hidden" th:field="*{id}">
 
           <div class="form-grid">

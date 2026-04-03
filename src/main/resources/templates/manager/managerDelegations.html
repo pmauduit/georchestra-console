@@ -22,20 +22,20 @@
     <a class="manager-tab" th:href="@{/manager/orgs/}" th:text="#{nav.orgs}">Orgs</a>
     <a class="manager-tab" th:href="@{/manager/roles/all}" th:text="#{nav.roles}">Roles</a>
     <a class="manager-tab active" th:href="@{/manager/delegations}" th:text="#{nav.delegations}">Delegations</a>
-    <a class="manager-tab" th:href="@{/manager/logs}" th:text="#{logs.title}">Logs</a>
+    <a class="manager-tab" th:href="@{/manager/logs}" th:text="#{manager.logs.title}">Logs</a>
   </nav>
 
   <section class="card">
     <form class="filters" method="get" th:action="@{/manager/delegations}">
       <div class="form-grid manager-users-filter-grid">
         <div class="field">
-          <label for="q" th:text="#{delegations.filter}">Filter</label>
-          <input id="q" type="search" name="q" th:value="${query}" th:placeholder="#{delegations.filter}">
+          <label for="q" th:text="#{manager.delegations.filter}">Filter</label>
+          <input id="q" type="search" name="q" th:value="${query}" th:placeholder="#{manager.delegations.filter}">
         </div>
       </div>
       <div class="actions">
-        <button type="submit" class="button button-primary" th:text="#{logs.filter.apply}">Apply</button>
-        <a class="button button-link" th:href="@{/manager/delegations}" th:text="#{logs.filter.clear}">Clear</a>
+        <button type="submit" class="button button-primary" th:text="#{manager.logs.filter.apply}">Apply</button>
+        <a class="button button-link" th:href="@{/manager/delegations}" th:text="#{manager.logs.filter.clear}">Clear</a>
       </div>
     </form>
 
@@ -47,7 +47,7 @@
       <table class="table">
         <thead>
         <tr>
-          <th th:text="#{home.user}">User</th>
+          <th th:text="#{manager.user.label}">User</th>
           <th th:text="#{nav.orgs}">Orgs</th>
           <th th:text="#{nav.roles}">Roles</th>
         </tr>

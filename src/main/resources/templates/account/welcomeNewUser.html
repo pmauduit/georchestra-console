@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/layout :: head(${moderatedSignup} ? #{newUserWelcome.title} : #{newUserWelcomeNoModeration.title})}">
+<head th:replace="~{fragments/layout :: head(${moderatedSignup} ? #{account.welcome.pending.title} : #{account.welcome.direct.title})}">
   <meta charset="UTF-8">
   <title>Welcome</title>
 </head>
@@ -10,18 +10,18 @@
   <section class="hero">
     <div class="hero-inline">
       <p class="hero-subtitle"
-         th:text="${moderatedSignup} ? #{newUserWelcome.title} : #{newUserWelcomeNoModeration.title}">
+         th:text="${moderatedSignup} ? #{account.welcome.pending.title} : #{account.welcome.direct.title}">
         Request submitted
       </p>
       <p class="hero-text"
-         th:text="${moderatedSignup} ? #{newUserWelcome.body} : #{newUserWelcomeNoModeration.body}">
+         th:text="${moderatedSignup} ? #{account.welcome.pending.body} : #{account.welcome.direct.body}">
         Your request has been submitted and should be processed in the next hours. Watch your e-mail box.
       </p>
     </div>
   </section>
 
   <section class="card">
-    <a class="button button-primary" th:href="@{/}" th:text="#{newUserWelcome.link}">Log in</a>
+    <a class="button button-primary" th:href="@{/}" th:text="#{account.welcome.pending.link}">Log in</a>
   </section>
 </main>
 </body>

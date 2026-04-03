@@ -22,7 +22,7 @@
     <a class="manager-tab" th:href="@{/manager/orgs/}" th:text="#{nav.orgs}">Orgs</a>
     <a class="manager-tab" th:href="@{/manager/roles/all}" th:text="#{nav.roles}">Roles</a>
     <a class="manager-tab" th:if="${isSuperuserView}" th:href="@{/manager/delegations}" th:text="#{nav.delegations}">Delegations</a>
-    <a class="manager-tab" th:href="@{/manager/logs}" th:text="#{logs.title}">Logs</a>
+    <a class="manager-tab" th:href="@{/manager/logs}" th:text="#{manager.logs.title}">Logs</a>
   </nav>
 
   <div class="layout">
@@ -47,12 +47,12 @@
         <fieldset class="fieldset">
           <legend th:text="#{manager.userroles.system}">System roles</legend>
           <div class="form-grid manager-role-grid">
-            <label class="checkbox manager-role-option" th:each="role : ${adminRoles}" th:title="${role.description()}">
-              <input type="checkbox" name="systemRoles" th:value="${role.cn()}" th:checked="${role.assigned()}">
+            <label class="checkbox manager-role-option" th:each="roleOption : ${adminRoles}" th:title="${roleOption.description()}">
+              <input type="checkbox" name="systemRoles" th:value="${roleOption.cn()}" th:checked="${roleOption.assigned()}">
               <span>
-                <strong th:text="${role.label()}">Role</strong>
-                <small class="muted" th:if="${role.description() != null and !#strings.isEmpty(role.description())}"
-                       th:text="${role.description()}">Description</small>
+                <strong th:text="${roleOption.label()}">Role</strong>
+                <small class="muted" th:if="${roleOption.description() != null and !#strings.isEmpty(roleOption.description())}"
+                       th:text="${roleOption.description()}">Description</small>
               </span>
             </label>
             <p class="muted" th:if="${#lists.isEmpty(adminRoles)}" th:text="#{manager.userroles.none}">
@@ -64,12 +64,12 @@
         <fieldset class="fieldset">
           <legend th:text="#{manager.userroles.app}">Application roles</legend>
           <div class="form-grid manager-role-grid">
-            <label class="checkbox manager-role-option" th:each="role : ${appRoles}" th:title="${role.description()}">
-              <input type="checkbox" name="appRoles" th:value="${role.cn()}" th:checked="${role.assigned()}">
+            <label class="checkbox manager-role-option" th:each="roleOption : ${appRoles}" th:title="${roleOption.description()}">
+              <input type="checkbox" name="appRoles" th:value="${roleOption.cn()}" th:checked="${roleOption.assigned()}">
               <span>
-                <strong th:text="${role.label()}">Role</strong>
-                <small class="muted" th:if="${role.description() != null and !#strings.isEmpty(role.description())}"
-                       th:text="${role.description()}">Description</small>
+                <strong th:text="${roleOption.label()}">Role</strong>
+                <small class="muted" th:if="${roleOption.description() != null and !#strings.isEmpty(roleOption.description())}"
+                       th:text="${roleOption.description()}">Description</small>
               </span>
             </label>
             <p class="muted" th:if="${#lists.isEmpty(appRoles)}" th:text="#{manager.userroles.none}">

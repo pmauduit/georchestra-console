@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/layout :: head(#{changeEmailForm.title})}">
+<head th:replace="~{fragments/layout :: head(#{account.changeEmail.title})}">
   <meta charset="UTF-8">
   <title>Change e-mail.</title>
 </head>
@@ -9,8 +9,8 @@
 <main class="page page-narrow">
   <section class="hero">
     <div class="hero-inline">
-      <p class="hero-subtitle" th:text="#{changeEmailForm.title}">Change e-mail.</p>
-      <p class="hero-text" th:text="#{changeEmailForm.description}">
+      <p class="hero-subtitle" th:text="#{account.changeEmail.title}">Change e-mail.</p>
+      <p class="hero-text" th:text="#{account.changeEmail.description}">
         You will receive a validation link to your new e-mail address to confirm this change.
       </p>
     </div>
@@ -25,7 +25,7 @@
       </div>
 
       <fieldset class="fieldset">
-        <legend th:text="#{changeEmailForm.fieldset.email}">New e-mail address</legend>
+        <legend th:text="#{account.changeEmail.fieldset.email}">New e-mail address</legend>
         <div class="form-grid">
           <div class="field">
             <label for="newEmail">
@@ -33,7 +33,6 @@
               <span class="required-marker">*</span>
             </label>
             <input id="newEmail" type="email" th:field="*{newEmail}"
-                   th:placeholder="#{email.placeholder}"
                    autocomplete="email"
                    required>
             <p class="field-error"

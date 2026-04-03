@@ -22,7 +22,7 @@
     <a class="manager-tab" th:href="@{/manager/orgs/}" th:text="#{nav.orgs}">Orgs</a>
     <a class="manager-tab" th:href="@{/manager/roles/all}" th:text="#{nav.roles}">Roles</a>
     <a class="manager-tab" th:if="${isSuperuserView}" th:href="@{/manager/delegations}" th:text="#{nav.delegations}">Delegations</a>
-    <a class="manager-tab" th:href="@{/manager/logs}" th:text="#{logs.title}">Logs</a>
+    <a class="manager-tab" th:href="@{/manager/logs}" th:text="#{manager.logs.title}">Logs</a>
   </nav>
 
   <section class="manager-grid">
@@ -31,17 +31,17 @@
         <h2 th:text="#{manager.users.browse.title}">Browse</h2>
         <a class="button button-link"
            th:href="@{/manager/users/add}"
-           th:text="#{role.newuser}">New user</a>
+           th:text="#{manager.role.newUser}">New user</a>
       </div>
 
       <nav class="role-list">
-        <a th:each="role : ${browseRoles}"
+        <a th:each="browseRole : ${browseRoles}"
            class="role-link"
-           th:classappend="${scope == role.cn()} ? ' is-active' : ''"
-           th:href="@{/manager/browse/{scope}/users(scope=${role.cn()})}"
-           th:title="${role.description()}">
-          <span th:text="${role.label()}">Role</span>
-          <span class="role-count" th:text="${role.count()}">0</span>
+           th:classappend="${scope == browseRole.cn()} ? ' is-active' : ''"
+           th:href="@{/manager/browse/{scope}/users(scope=${browseRole.cn()})}"
+           th:title="${browseRole.description()}">
+          <span th:text="${browseRole.label()}">Role</span>
+          <span class="role-count" th:text="${browseRole.count()}">0</span>
         </a>
       </nav>
     </aside>
@@ -60,15 +60,15 @@
       <form class="filters" method="get" th:action="@{/manager/browse/{scope}/users(scope=${scope})}">
         <div class="form-grid manager-users-filter-grid">
           <div class="field">
-            <label for="q" th:text="#{role.filter_users}">Filter</label>
-            <input id="q" type="search" name="q" th:value="${query}" th:placeholder="#{role.filter_users}">
+            <label for="q" th:text="#{manager.role.filterUsers}">Filter</label>
+            <input id="q" type="search" name="q" th:value="${query}" th:placeholder="#{manager.role.filterUsers}">
             <input type="hidden" name="sort" th:value="${sort}">
             <input type="hidden" name="dir" th:value="${dir}">
           </div>
         </div>
         <div class="actions">
-          <button type="submit" class="button button-primary" th:text="#{logs.filter.apply}">Apply</button>
-          <a class="button button-link" th:href="@{/manager/browse/{scope}/users(scope=${scope})}" th:text="#{logs.filter.clear}">Clear</a>
+          <button type="submit" class="button button-primary" th:text="#{manager.logs.filter.apply}">Apply</button>
+          <a class="button button-link" th:href="@{/manager/browse/{scope}/users(scope=${scope})}" th:text="#{manager.logs.filter.clear}">Clear</a>
         </div>
       </form>
 
@@ -79,28 +79,28 @@
             <th>
               <a class="table-sort"
                  th:href="@{/manager/browse/{scope}/users(scope=${scope},q=${query},sort='user',dir=${sort == 'user' ? nextSortDir : 'asc'})}">
-                <span th:text="#{users.user}">User</span>
+                <span th:text="#{manager.users.user}">User</span>
                 <span class="sort-indicator" th:if="${sort == 'user'}" th:text="${dir == 'asc' ? '↑' : '↓'}">↑</span>
               </a>
             </th>
             <th>
               <a class="table-sort"
                  th:href="@{/manager/browse/{scope}/users(scope=${scope},q=${query},sort='login',dir=${sort == 'login' ? nextSortDir : 'asc'})}">
-                <span th:text="#{users.login}">Login</span>
+                <span th:text="#{manager.users.login}">Login</span>
                 <span class="sort-indicator" th:if="${sort == 'login'}" th:text="${dir == 'asc' ? '↑' : '↓'}">↑</span>
               </a>
             </th>
             <th>
               <a class="table-sort"
                  th:href="@{/manager/browse/{scope}/users(scope=${scope},q=${query},sort='organization',dir=${sort == 'organization' ? nextSortDir : 'asc'})}">
-                <span th:text="#{users.organization}">Organization</span>
+                <span th:text="#{manager.users.organization}">Organization</span>
                 <span class="sort-indicator" th:if="${sort == 'organization'}" th:text="${dir == 'asc' ? '↑' : '↓'}">↑</span>
               </a>
             </th>
             <th>
               <a class="table-sort"
                  th:href="@{/manager/browse/{scope}/users(scope=${scope},q=${query},sort='email',dir=${sort == 'email' ? nextSortDir : 'asc'})}">
-                <span th:text="#{users.email}">Mail</span>
+                <span th:text="#{manager.users.email}">Mail</span>
                 <span class="sort-indicator" th:if="${sort == 'email'}" th:text="${dir == 'asc' ? '↑' : '↓'}">↑</span>
               </a>
             </th>

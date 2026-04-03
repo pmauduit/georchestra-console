@@ -22,7 +22,7 @@
     <a class="manager-tab" th:href="@{/manager/orgs/}" th:text="#{nav.orgs}">Orgs</a>
     <a class="manager-tab" th:href="@{/manager/roles/all}" th:text="#{nav.roles}">Roles</a>
     <a class="manager-tab" th:if="${isSuperuserView}" th:href="@{/manager/delegations}" th:text="#{nav.delegations}">Delegations</a>
-    <a class="manager-tab" th:href="@{/manager/logs}" th:text="#{logs.title}">Logs</a>
+    <a class="manager-tab" th:href="@{/manager/logs}" th:text="#{manager.logs.title}">Logs</a>
   </nav>
 
   <section class="manager-dashboard-grid">
@@ -69,7 +69,7 @@
     </a>
 
     <a class="card dashboard-card" th:href="@{/manager/logs}">
-      <span class="dashboard-label" th:text="#{logs.title}">Logs</span>
+      <span class="dashboard-label" th:text="#{manager.logs.title}">Logs</span>
       <strong class="dashboard-value" th:text="${#lists.size(recentLogs)}">0</strong>
       <span class="muted" th:text="#{manager.home.logs.caption}">Recent entries loaded</span>
     </a>
@@ -90,10 +90,10 @@
       <table class="table">
         <thead>
         <tr>
-          <th th:text="#{logs.date}">Date</th>
-          <th th:text="#{logs.sender}">Author</th>
-          <th th:text="#{logs.target}">Target</th>
-          <th th:text="#{logs.type}">Action</th>
+          <th th:text="#{manager.logs.date}">Date</th>
+          <th th:text="#{manager.logs.sender}">Author</th>
+          <th th:text="#{manager.logs.target}">Target</th>
+          <th th:text="#{manager.logs.type}">Action</th>
         </tr>
         </thead>
         <tbody>
@@ -104,7 +104,7 @@
           <td th:text="${log.type}">ACTION</td>
         </tr>
         <tr th:if="${#lists.isEmpty(recentLogs)}">
-          <td colspan="4" class="empty" th:text="#{logs.noresults}">No results</td>
+          <td colspan="4" class="empty" th:text="#{manager.logs.noresults}">No results</td>
         </tr>
         </tbody>
       </table>

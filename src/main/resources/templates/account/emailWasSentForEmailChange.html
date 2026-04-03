@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/layout :: head(#{emailWasSent.title})}">
+<head th:replace="~{fragments/layout :: head(#{account.emailSent.title})}">
   <meta charset="UTF-8">
   <title>E-mail sent</title>
 </head>
@@ -9,15 +9,15 @@
 <main class="page page-narrow">
   <section class="hero">
     <div class="hero-inline">
-      <p class="hero-subtitle" th:text="#{emailWasSent.title}">E-mail sent</p>
-      <p class="hero-text" th:text="#{emailWasSentForEmailChange.body}">
+      <p class="hero-subtitle" th:text="#{account.emailSent.title}">E-mail sent</p>
+      <p class="hero-text" th:text="#{account.emailSent.emailChange.body}">
         A validation link has been sent to your new e-mail address. Please, check your e-mail box.
       </p>
     </div>
   </section>
 
   <section class="card">
-    <a class="button button-primary" th:href="@{/}" th:text="#{emailWasSent.link}">Home</a>
+    <a class="button button-primary" th:href="@{/}" th:text="#{account.emailSent.link}">Home</a>
   </section>
 </main>
 </body>

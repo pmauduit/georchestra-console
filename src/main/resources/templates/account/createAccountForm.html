@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/layout :: head(#{createAccountForm.title})}">
+<head th:replace="~{fragments/layout :: head(#{account.create.title})}">
   <meta charset="UTF-8">
   <title>New account.</title>
   <script th:if="${recaptchaActivated}" src="https://www.google.com/recaptcha/api.js" async defer></script>
@@ -10,10 +10,10 @@
 <main class="page">
   <section class="hero">
     <div class="hero-inline">
-      <p class="hero-subtitle" th:text="#{createAccountForm.title}">New account.</p>
-      <p class="hero-text" th:text="#{createAccountForm.subtitle}">Create your account.</p>
+      <p class="hero-subtitle" th:text="#{account.create.title}">New account.</p>
+      <p class="hero-text" th:text="#{account.create.subtitle}">Create your account.</p>
     </div>
-    <p class="hero-text" th:text="#{createAccountForm.description}">
+    <p class="hero-text" th:text="#{account.create.description}">
       An email will be sent to the above address to confirm the account creation.
     </p>
   </section>
@@ -40,7 +40,7 @@
       </div>
 
       <fieldset class="fieldset">
-        <legend th:text="#{createAccountForm.fieldset.userDetails}">User details</legend>
+        <legend th:text="#{account.create.fieldset.userDetails}">User details</legend>
 
         <div class="form-grid">
           <div class="field">
@@ -49,7 +49,6 @@
               <span class="required-marker">*</span>
             </label>
             <input id="firstName" type="text" th:field="*{firstName}"
-                   th:placeholder="#{firstName.placeholder}"
                    required>
             <p class="field-error" th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}">
               Invalid first name
@@ -62,7 +61,6 @@
               <span class="required-marker">*</span>
             </label>
             <input id="surname" type="text" th:field="*{surname}"
-                   th:placeholder="#{surname.placeholder}"
                    required>
             <p class="field-error" th:if="${#fields.hasErrors('surname')}" th:errors="*{surname}">
               Invalid surname
@@ -75,7 +73,6 @@
               <span th:if="${session.emailRequired}" class="required-marker">*</span>
             </label>
             <input id="email" type="email" th:field="*{email}"
-                   th:placeholder="#{email.placeholder}"
                    autocomplete="email"
                    th:required="${session.emailRequired}">
             <p class="field-error" th:if="${#fields.hasErrors('email')}"
@@ -90,7 +87,6 @@
               <span th:if="${session.phoneRequired}" class="required-marker">*</span>
             </label>
             <input id="phone" type="tel" th:field="*{phone}"
-                   th:placeholder="#{phone.placeholder}"
                    th:required="${session.phoneRequired}"
                    pattern="^[0-9+(). ]*(?:-[0-9+(). ]*)*$"
                    th:attr="title=#{phone.error.invalidFormat}">
@@ -105,7 +101,7 @@
               <span th:if="${session.orgRequired}" class="required-marker">*</span>
             </label>
             <select id="org" th:field="*{org}" th:required="${session.orgRequired}">
-              <option value="-" th:text="#{org.placeholder}">Organization</option>
+              <option value="-" th:text="#{account.create.org.placeholder}">Organization</option>
               <option th:each="orgEntry : ${orgs}"
                       th:value="${orgEntry.key}"
                       th:text="${orgEntry.value}">
@@ -121,7 +117,7 @@
         <div class="field">
           <label class="checkbox">
             <input id="createOrg" type="checkbox" th:field="*{createOrg}">
-            <span th:text="#{org.cannot_find_org_in_list}">My organization is not present</span>
+            <span th:text="#{account.create.org.missing}">My organization is not present</span>
           </label>
         </div>
 
@@ -129,7 +125,7 @@
           <div class="form-grid">
             <div class="field">
               <label for="orgName">
-                <span th:text="#{org.creation.label}">Organization Name</span>
+                <span th:text="#{account.create.org.name}">Organization Name</span>
                 <span th:if="${session.orgNameRequired}" class="required-marker">*</span>
               </label>
               <input id="orgName" type="text" th:field="*{orgName}"
@@ -141,13 +137,13 @@
 
             <div class="field">
               <label for="orgShortName">
-                <span th:text="#{org.creation.shortLabel}">Short Name</span>
+                <span th:text="#{account.create.org.shortName}">Short Name</span>
                 <span th:if="${session.orgShortNameRequired}" class="required-marker">*</span>
               </label>
             <input id="orgShortName" type="text" th:field="*{orgShortName}"
                      pattern="[A-Za-z0-9_]*"
                      th:required="${session.orgShortNameRequired}"
-                     th:attr="title=#{org.shortNameFormat}">
+                     th:attr="title=#{account.create.org.shortNameFormat}">
               <p class="field-error" th:if="${#fields.hasErrors('orgShortName')}" th:errors="*{orgShortName}">
                 Invalid short name
               </p>
@@ -155,7 +151,7 @@
 
             <div class="field">
               <label for="orgUniqueId">
-                <span th:text="#{org.creation.orgUniqueId}">Identification number</span>
+                <span th:text="#{account.create.org.uniqueId}">Identification number</span>
                 <span th:if="${session.orgUniqueIdRequired}" class="required-marker">*</span>
               </label>
               <input id="orgUniqueId" type="text" th:field="*{orgUniqueId}"
@@ -167,7 +163,7 @@
 
             <div class="field">
               <label for="orgAddress">
-                <span th:text="#{org.creation.address}">Address</span>
+                <span th:text="#{account.create.org.address}">Address</span>
                 <span th:if="${session.orgAddressRequired}" class="required-marker">*</span>
               </label>
               <textarea id="orgAddress" rows="3" th:field="*{orgAddress}"
@@ -179,7 +175,7 @@
 
             <div class="field">
               <label for="orgType">
-                <span th:text="#{org.creation.orgType}">Organization type</span>
+                <span th:text="#{account.create.org.type}">Organization type</span>
                 <span th:if="${session.orgTypeRequired}" class="required-marker">*</span>
               </label>
               <select id="orgType" th:field="*{orgType}" th:required="${session.orgTypeRequired}">
@@ -196,7 +192,7 @@
 
             <div class="field">
               <label for="orgDescription">
-                <span th:text="#{org.creation.orgDescription}">Description</span>
+                <span th:text="#{account.create.org.description}">Description</span>
                 <span th:if="${session.orgDescriptionRequired}" class="required-marker">*</span>
               </label>
               <textarea id="orgDescription" rows="3" th:field="*{orgDescription}"
@@ -208,7 +204,7 @@
 
             <div class="field">
               <label for="orgUrl">
-                <span th:text="#{org.creation.orgUrl}">Url</span>
+                <span th:text="#{account.create.org.url}">Url</span>
                 <span th:if="${session.orgUrlRequired}" class="required-marker">*</span>
               </label>
               <input id="orgUrl" type="url" th:field="*{orgUrl}"
@@ -220,7 +216,7 @@
 
             <div class="field">
               <label for="orgMail">
-                <span th:text="#{org.creation.orgMail}">Mail</span>
+                <span th:text="#{account.create.org.email}">Mail</span>
                 <span th:if="${session.orgMailRequired}" class="required-marker">*</span>
               </label>
               <input id="orgMail" type="email" th:field="*{orgMail}"
@@ -232,7 +228,7 @@
 
             <div class="field">
               <label for="orgLogo">
-                <span th:text="#{org.creation.orgLogo}">Logo</span>
+                <span th:text="#{account.create.org.logo}">Logo</span>
                 <span th:if="${session.orgLogoRequired}" class="required-marker">*</span>
               </label>
               <input id="orgLogo" type="file" name="orgLogoFile" accept="image/*"
@@ -249,7 +245,6 @@
               <span th:if="${session.titleRequired}" class="required-marker">*</span>
             </label>
             <input id="title" type="text" th:field="*{title}"
-                   th:placeholder="#{title.placeholder}"
                    th:required="${session.titleRequired}">
             <p class="field-error" th:if="${#fields.hasErrors('title')}" th:errors="*{title}">
               Invalid title
@@ -262,7 +257,6 @@
               <span th:if="${session.descriptionRequired}" class="required-marker">*</span>
             </label>
             <textarea id="description" rows="4" th:field="*{description}"
-                      th:placeholder="#{description.placeholder}"
                       th:required="${session.descriptionRequired}"></textarea>
             <p class="field-error" th:if="${#fields.hasErrors('description')}" th:errors="*{description}">
               Invalid description
@@ -272,7 +266,7 @@
       </fieldset>
 
       <fieldset class="fieldset">
-        <legend th:text="#{createAccountForm.fieldset.credentials}">Credentials</legend>
+        <legend th:text="#{account.create.fieldset.credentials}">Credentials</legend>
 
         <div class="form-grid">
           <div class="field">
@@ -281,7 +275,6 @@
               <span th:if="${session.uidRequired}" class="required-marker">*</span>
             </label>
             <input id="uid" type="text" th:field="*{uid}"
-                   th:placeholder="#{uid.placeholder}"
                    pattern="[A-Za-z][A-Za-z0-9_.-]*"
                    autocomplete="username"
                    th:required="${session.uidRequired}"
@@ -297,7 +290,6 @@
               <span th:if="${session.passwordRequired}" class="required-marker">*</span>
             </label>
             <input id="password" type="password" th:field="*{password}"
-                   th:placeholder="#{password.placeholder}"
                    autocomplete="new-password"
                    th:required="${session.passwordRequired}"
                    th:attr="minlength=${pwdUtils.minimumLength},pattern=${passwordPattern}">
@@ -320,7 +312,6 @@
               <span th:if="${session.confirmPasswordRequired}" class="required-marker">*</span>
             </label>
             <input id="confirmPassword" type="password" th:field="*{confirmPassword}"
-                   th:placeholder="#{confirmPassword.placeholder}"
                    autocomplete="new-password"
                    th:required="${session.confirmPasswordRequired}">
             <p id="confirm-password-client-error" class="field-error" aria-live="polite"
@@ -354,13 +345,13 @@
       </fieldset>
 
       <fieldset th:if="${privacyPolicyAgreementActivated}" class="fieldset">
-        <legend th:text="#{createAccountForm.fieldset.privacyPolicyAgreement}">Terms and conditions</legend>
+        <legend th:text="#{account.create.fieldset.privacyPolicyAgreement}">Terms and conditions</legend>
         <div class="field">
           <label class="checkbox">
             <input type="checkbox" th:field="*{privacyPolicyAgreed}" required>
-            <span th:text="#{privacyPolicyAgreed.label}">Conditions</span>
+            <span th:text="#{account.create.privacy.label}">Conditions</span>
           </label>
-          <p class="help-text" th:utext="#{privacyPolicyAgreed.checkboxLabel(${privacyPolicyAgreementUrl})}">
+          <p class="help-text" th:utext="#{account.create.privacy.checkboxLabel(${privacyPolicyAgreementUrl})}">
             I read and agree to the conditions
           </p>
           <p class="field-error" th:if="${#fields.hasErrors('privacyPolicyAgreed')}"
@@ -371,13 +362,13 @@
       </fieldset>
 
       <fieldset th:if="${consentAgreementActivated}" class="fieldset">
-        <legend th:text="#{createAccountForm.fieldset.consentAgreement}">Consent</legend>
+        <legend th:text="#{account.create.fieldset.consentAgreement}">Consent</legend>
         <div class="field">
           <label class="checkbox">
             <input type="checkbox" th:field="*{consentAgreed}" required>
-            <span th:text="#{consentAgreed.label}">Consent</span>
+            <span th:text="#{account.create.consent.label}">Consent</span>
           </label>
-          <p class="help-text" th:utext="#{consentAgreed.checkboxLabel(${consentAgreementUrl})}">
+          <p class="help-text" th:utext="#{account.create.consent.checkboxLabel(${consentAgreementUrl})}">
             I consent to my personal information being processed.
           </p>
           <p class="field-error" th:if="${#fields.hasErrors('consentAgreed')}" th:errors="*{consentAgreed}">

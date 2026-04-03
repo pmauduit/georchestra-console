@@ -23,7 +23,7 @@
     <a class="manager-tab" th:href="@{/manager/orgs/}" th:text="#{nav.orgs}">Orgs</a>
     <a class="manager-tab active" th:href="@{/manager/roles/all}" th:text="#{nav.roles}">Roles</a>
     <a class="manager-tab" th:if="${isSuperuserView}" th:href="@{/manager/delegations}" th:text="#{nav.delegations}">Delegations</a>
-    <a class="manager-tab" th:href="@{/manager/logs}" th:text="#{logs.title}">Logs</a>
+    <a class="manager-tab" th:href="@{/manager/logs}" th:text="#{manager.logs.title}">Logs</a>
   </nav>
 
   <div class="layout">
@@ -33,7 +33,7 @@
           <p class="muted">
             <a th:href="@{/manager/roles/all}" th:text="#{manager.roleinfo.back}">Back to roles</a>
           </p>
-          <h1 th:text="${creating} ? #{roles.newrole} : ${role.cn}">Role name</h1>
+          <h1 th:text="${creating} ? #{manager.roles.new} : ${role.cn}">Role name</h1>
           <p class="muted" th:if="${!creating}" th:text="${role.cn}">ROLE</p>
         </div>
         <div class="manager-user-statuses" th:if="${readonly}">
@@ -48,14 +48,14 @@
           <legend th:text="#{manager.roleinfo.fieldset}">Role definition</legend>
           <div class="form-grid manager-user-form-grid">
             <div class="field">
-              <label for="cn" th:text="#{role.cn}">Identifier</label>
+              <label for="cn" th:text="#{manager.role.cn}">Identifier</label>
               <input id="cn" name="cn" type="text" required pattern="^[A-Z0-9_-]+$"
                      th:readonly="${readonly}" th:value="${role.cn}">
-              <p class="help-text" th:text="#{role.helpFormat}">Identifier should only contain uppercased alphanumerical characters</p>
+              <p class="help-text" th:text="#{manager.role.helpFormat}">Identifier should only contain uppercased alphanumerical characters</p>
             </div>
 
             <div class="field field-span-2">
-              <label for="description" th:text="#{role.description}">Description</label>
+              <label for="description" th:text="#{manager.role.description}">Description</label>
               <textarea id="description" name="description" th:readonly="${readonly}"
                         th:text="${role.description}"></textarea>
             </div>
@@ -63,7 +63,7 @@
             <label class="checkbox manager-role-option" th:if="${!readonly}">
               <input id="favorite" name="favorite" type="checkbox" th:checked="${role.favorite}">
               <span>
-                <strong th:text="#{role.favorite}">Favorite</strong>
+                <strong th:text="#{manager.role.favorite}">Favorite</strong>
               </span>
             </label>
           </div>
@@ -71,7 +71,7 @@
 
         <div class="actions" th:if="${!readonly}">
           <button type="submit" class="button button-primary"
-                  th:text="${creating} ? #{manager.rolecreate.submit} : #{role.save}">Save</button>
+                  th:text="${creating} ? #{manager.rolecreate.submit} : #{manager.role.save}">Save</button>
           <a class="button button-link" th:href="@{/manager/roles/all}" th:text="#{manager.userinfo.cancel}">Cancel</a>
         </div>
       </form>
@@ -93,11 +93,11 @@
         <h2 class="org-title" th:text="#{manager.roleinfo.summary}">Summary</h2>
         <dl class="summary-list">
           <div>
-            <dt th:text="#{role.cn}">Identifier</dt>
+            <dt th:text="#{manager.role.cn}">Identifier</dt>
             <dd th:text="${role.cn}">ROLE</dd>
           </div>
           <div>
-            <dt th:text="#{role.membersCount}">Members</dt>
+            <dt th:text="#{manager.role.membersCount}">Members</dt>
             <dd th:text="${roleMembersCount}">0</dd>
           </div>
         </dl>
@@ -113,9 +113,9 @@
     const creating = /*[[${creating}]]*/ false;
     const readonly = /*[[${readonly}]]*/ false;
     const originalCn = /*[[${role.cn}]]*/ '';
-    const roleCreated = /*[[#{role.created}]]*/ 'Role created';
-    const roleUpdated = /*[[#{role.updated}]]*/ 'Role updated';
-    const roleError = /*[[#{role.error}]]*/ 'Error creating role';
+    const roleCreated = /*[[#{manager.role.created}]]*/ 'Role created';
+    const roleUpdated = /*[[#{manager.role.updated}]]*/ 'Role updated';
+    const roleError = /*[[#{manager.role.error}]]*/ 'Error creating role';
     const roleUpdateError = /*[[#{manager.roleinfo.updateError}]]*/ 'Error updating role';
     const createUrl = /*[[@{/private/roles}]]*/ '/private/roles';
     const infosBaseUrl = /*[[@{/manager/roles/}]]*/ '/manager/roles/';
