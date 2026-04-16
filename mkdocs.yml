@@ -1,4 +1,4 @@
-site_name: Template pour la documentation d'un composant geOrchestra
+site_name: geOrchestra Console documentation
 
 repo_url: https://github.com/georchestra/georchestra-console
 repo_name: georchestra-console
@@ -109,11 +109,11 @@ plugins:
             default: true
             name: English
             build: true
-            site_name: "Documentation template for a geOrchestra component"
+            site_name: "geOchestra console documentation"
           - locale: fr
             name: Français
             build: true
-            site_name: "Template pour la documentation d'un composant geOrchestra"
+            site_name: "Documentation du composant console de geOrchestra"
             nav_translations:
               Home: "Accueil"
               User guide: "Guide utilisateur"

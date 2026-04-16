@@ -8,13 +8,11 @@ hide:
 
 ## C'est quoi ?
 
-Le composant Mon composant permet de faire la fonctionnalité XXXX.
+Le composant Console permet l'administration des utilisateurs de la solution geOrchestra.
 
 </br>
 
-![image info](./images/joyeux-collegues-utilisant-ordinateurs-portables.jpg)
-
-[Freepik](https://fr.freepik.com/photos-gratuite/joyeux-collegues-utilisant-ordinateurs-portables_2317379.htm#query=people%20working%20office)
+![image info](./images/illustration_droits_utilisateurs.png)
 
 
 Je sais faire / Je sais PAS faire (périmètre fonctionnel)

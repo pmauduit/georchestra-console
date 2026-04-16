@@ -12,8 +12,7 @@ This componant can do.... pancakes !
 
 </br>
 
-![image info](./images/joyeux-collegues-utilisant-ordinateurs-portables.jpg)
+![image info](./images/illustration_droits_utilisateurs.png)
 
-[Freepik](https://fr.freepik.com/photos-gratuite/joyeux-collegues-utilisant-ordinateurs-portables_2317379.htm#query=people%20working%20office)
 
 
