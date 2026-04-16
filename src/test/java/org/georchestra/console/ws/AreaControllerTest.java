@@ -42,6 +42,7 @@ public class AreaControllerTest {
     @Before
     public void setupTest() {
         ctrl = new AreaController();
+        ReflectionTestUtils.setField(ctrl, "areasUrl", "area.geojson");
     }
 
     @Test
@@ -110,5 +111,14 @@ public class AreaControllerTest {
         assertEquals(ret, "{\"error\": \"area.geojson not found\"}");
         assertEquals(response.getStatus(), 404);
 
+    }
+
+    @Test
+    public void testAreaUrlDefaultsToClasspathAreaGeojson() throws IOException {
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        ReflectionTestUtils.setField(ctrl, "datadir", tempFolder.getRoot().toString());
+        String ret = ctrl.serveArea(response);
+        assertEquals(new JSONObject(ret).getString("type"), "FeatureCollection");
+        assertEquals(response.getStatus(), 200);
     }
 }

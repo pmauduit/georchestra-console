@@ -44,6 +44,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -62,6 +63,8 @@ public class ManagerOrgsController {
     private final AdvancedDelegationDao advancedDelegationDao;
     private final AccountDao accountDao;
     private final ProtectedUserFilter protectedUserFilter;
+    @Value("${competenceAreaEnabled:false}")
+    private boolean competenceAreaEnabled;
 
     @Autowired
     public ManagerOrgsController(OrgsDao orgDao, DelegationDao delegationDao, AdvancedDelegationDao advancedDelegationDao,
@@ -132,6 +135,8 @@ public class ManagerOrgsController {
         model.addAttribute("delegations", List.of());
         model.addAttribute("isSuperuser", true);
         model.addAttribute("creating", true);
+        model.addAttribute("competenceAreaEnabled", competenceAreaEnabled);
+        model.addAttribute("managedOrgCitiesCsv", "");
         return "manager/managerOrgInfo";
     }
 
@@ -156,6 +161,8 @@ public class ManagerOrgsController {
         model.addAttribute("delegations", delegations);
         model.addAttribute("isSuperuser", superuser);
         model.addAttribute("creating", false);
+        model.addAttribute("competenceAreaEnabled", competenceAreaEnabled);
+        model.addAttribute("managedOrgCitiesCsv", toCsv(org.getCities()));
         return "manager/managerOrgInfo";
     }
 
@@ -258,6 +265,13 @@ public class ManagerOrgsController {
         return value != null && value.toLowerCase().contains(query);
     }
 
+    private String toCsv(List<String> values) {
+        if (values == null || values.isEmpty()) {
+            return "";
+        }
+        return String.join(",", values);
+    }
+
     private List<OrgListEntry> sortOrganizations(List<OrgListEntry> organizations, String sort, String dir) {
         Comparator<OrgListEntry> comparator = switch (sort) {
         case "shortName" -> Comparator.comparing(OrgListEntry::shortName, Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER));
@@ -336,6 +350,7 @@ public class ManagerOrgsController {
             String url,
             String mail,
             String orgUniqueId,
+            List<String> cities,
             boolean pending,
             int membersCount) {
         static OrgInfoView from(Org org) {
@@ -350,12 +365,13 @@ public class ManagerOrgsController {
                     org.getUrl(),
                     org.getMail(),
                     org.getOrgUniqueId(),
+                    org.getCities() == null ? List.of() : List.copyOf(org.getCities()),
                     org.isPending(),
                     org.getMembers() == null ? 0 : org.getMembers().size());
         }
 
         static OrgInfoView blank() {
-            return new OrgInfoView("", "", "", "", "", "", "", "", "", "", false, 0);
+            return new OrgInfoView("", "", "", "", "", "", "", "", "", "", List.of(), false, 0);
         }
     }
 

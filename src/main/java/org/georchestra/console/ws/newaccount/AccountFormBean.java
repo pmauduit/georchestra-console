@@ -81,6 +81,7 @@ public class AccountFormBean implements Serializable {
     private @Getter @Setter String orgShortName;
     private @Getter @Setter String orgAddress;
     private @Getter @Setter String orgType;
+    private @Getter @Setter String orgCities;
     private @Getter @Setter String orgDescription;
     private @Getter @Setter String orgUrl;
     private @Getter @Setter String orgLogo;

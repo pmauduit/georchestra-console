@@ -112,6 +112,17 @@
           </div>
         </fieldset>
 
+        <fieldset class="fieldset" th:if="${competenceAreaEnabled}">
+          <legend th:text="#{area.title}">Area of competence</legend>
+          <th:block th:replace="~{fragments/areaSelector :: areaSelector(
+              'managerOrgCities',
+              'cities',
+              ${managedOrgCitiesCsv},
+              '',
+              #{manager.org.area.description})}">
+          </th:block>
+        </fieldset>
+
         <div class="actions">
           <button type="submit" class="button button-primary" th:text="${creating} ? #{manager.orgcreate.submit} : #{manager.org.save}">Save</button>
           <a class="button button-link" th:href="@{/manager/orgs/}" th:text="#{manager.userinfo.cancel}">Cancel</a>
@@ -152,6 +163,8 @@
   </div>
 </main>
 
+<script th:src="@{/vendor/openlayers/ol-10.8.0.min.js}"></script>
+<script th:src="@{/js/area-selector.js}"></script>
 <script th:inline="javascript">
   const orgForm = document.getElementById('manager-org-info-form');
   const orgFeedback = document.getElementById('manager-org-feedback');
@@ -179,6 +192,10 @@
     url: document.getElementById('url').value.trim(),
     mail: document.getElementById('mail').value.trim(),
     orgUniqueId: document.getElementById('orgUniqueId').value.trim(),
+    cities: (document.getElementById('managerOrgCities')?.value || '')
+      .split(',')
+      .map((value) => value.trim())
+      .filter((value) => value.length > 0),
     pending: forcePending
   });
 

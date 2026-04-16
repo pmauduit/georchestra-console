@@ -114,12 +114,41 @@
           </div>
         </div>
 
-        <div class="field">
-          <label class="checkbox">
-            <input id="createOrg" type="checkbox" th:field="*{createOrg}">
-            <span th:text="#{account.create.org.missing}">My organization is not present</span>
-          </label>
+        <div class="field create-org-launcher">
+          <input id="createOrg" type="checkbox" th:field="*{createOrg}" class="visually-hidden" tabindex="-1" aria-hidden="true">
+          <div class="create-org-launcher-actions">
+            <button id="open-create-org-modal" type="button" class="button button-secondary"
+                    aria-haspopup="dialog"
+                    th:attr="data-open-label=#{account.create.org.openAction},data-edit-label=#{account.create.org.editAction}"
+                    th:text="${accountFormBean.createOrg} ? #{account.create.org.editAction} : #{account.create.org.openAction}">
+              Create my organization
+            </button>
+            <button id="clear-create-org" type="button" class="button button-link"
+                    th:attr="hidden=${!accountFormBean.createOrg}"
+                    th:text="#{account.create.org.clearAction}">
+              Use an existing organization instead
+            </button>
+          </div>
+          <p id="create-org-help" class="help-text"
+             th:attr="data-default-help=#{account.create.org.missing},data-active-help=#{account.create.org.activeHelp}"
+             th:text="${accountFormBean.createOrg} ? #{account.create.org.activeHelp} : #{account.create.org.missing}">
+            My organization is not present
+          </p>
         </div>
+
+        <dialog id="create-org-dialog" class="app-dialog" aria-labelledby="create-org-dialog-title">
+          <div class="app-dialog-header">
+            <div>
+              <h2 id="create-org-dialog-title" class="org-title" th:text="#{account.create.org.dialogTitle}">
+                Create an organization
+              </h2>
+              <p class="muted" th:text="#{account.create.org.dialogHelp}">
+                Fill in the organization details, then continue with your account request.
+              </p>
+            </div>
+            <button id="close-create-org-modal" type="button" class="button button-link"
+                    th:text="#{close.label}">Close</button>
+          </div>
 
         <div id="create-org-section" class="create-org-section" th:attr="hidden=${!accountFormBean.createOrg}">
           <div class="form-grid">
@@ -236,7 +265,25 @@
             </div>
           </div>
 
+          <div th:if="${competenceAreaEnabled}">
+            <th:block th:replace="~{fragments/areaSelector :: areaSelector(
+                'orgCities',
+                'orgCities',
+                ${accountFormBean.orgCities},
+                #{area.title},
+                #{account.create.org.area.description})}">
+            </th:block>
+          </div>
+
         </div>
+          <div class="actions">
+            <button id="save-create-org-modal" type="button" class="button button-primary"
+                    disabled
+                    th:text="#{account.create.org.confirmAction}">
+              Continue with this organization
+            </button>
+          </div>
+        </dialog>
 
         <div class="form-grid">
           <div class="field">
@@ -394,6 +441,8 @@
     </form>
   </section>
 </main>
+<script th:src="@{/vendor/openlayers/ol-10.8.0.min.js}"></script>
+<script th:src="@{/js/area-selector.js}"></script>
 <script th:src="@{/js/console-form-utils.js}"></script>
 <script type="text/javascript">
   (function () {
@@ -434,7 +483,73 @@
 
     const createOrg = document.getElementById("createOrg");
     const createOrgSection = document.getElementById("create-org-section");
+    const createOrgDialog = document.getElementById("create-org-dialog");
+    const openCreateOrgModal = document.getElementById("open-create-org-modal");
+    const closeCreateOrgModal = document.getElementById("close-create-org-modal");
+    const saveCreateOrgModal = document.getElementById("save-create-org-modal");
+    const clearCreateOrg = document.getElementById("clear-create-org");
     const orgSelect = document.getElementById("org");
+    const createOrgHelp = document.getElementById("create-org-help");
+    const getCreateOrgFields = () => Array.from(
+      createOrgSection?.querySelectorAll("input, textarea, select") || []
+    ).filter((field) => {
+      if (field.disabled || !field.willValidate) {
+        return false;
+      }
+      return field.id !== "orgCities";
+    });
+    const updateCreateOrgConfirmState = () => {
+      if (!saveCreateOrgModal) {
+        return;
+      }
+      const active = !!createOrg?.checked;
+      if (!active) {
+        saveCreateOrgModal.disabled = true;
+        return;
+      }
+      const fields = getCreateOrgFields();
+      saveCreateOrgModal.disabled = !fields.every((field) => field.checkValidity());
+    };
+    const focusFirstCreateOrgField = () => {
+      const firstField = createOrgSection?.querySelector("input:not([type='hidden']):not([disabled]), textarea:not([disabled]), select:not([disabled])");
+      firstField?.focus();
+    };
+    const openDialog = () => {
+      if (!createOrgDialog) {
+        return;
+      }
+      if (typeof createOrgDialog.showModal === "function" && !createOrgDialog.open) {
+        createOrgDialog.showModal();
+      } else {
+        createOrgDialog.setAttribute("open", "open");
+      }
+      window.setTimeout(() => focusFirstCreateOrgField(), 0);
+    };
+    const closeDialog = () => {
+      if (!createOrgDialog) {
+        return;
+      }
+      if (typeof createOrgDialog.close === "function" && createOrgDialog.open) {
+        createOrgDialog.close();
+      } else {
+        createOrgDialog.removeAttribute("open");
+      }
+    };
+    const hasCreateOrgData = () => {
+      if (!createOrgSection) {
+        return false;
+      }
+      return Array.from(createOrgSection.querySelectorAll("input, textarea, select"))
+        .some((field) => {
+          if (!field.name || field.id === "orgCities" || field.type === "file") {
+            return false;
+          }
+          if (field instanceof HTMLSelectElement) {
+            return field.value !== "";
+          }
+          return field.value.trim() !== "";
+        });
+    };
     const toggleCreateOrg = () => {
       if (!createOrg || !createOrgSection) {
         return;
@@ -458,6 +573,16 @@
           field.setCustomValidity("");
         }
       });
+      openCreateOrgModal.textContent = active
+        ? (openCreateOrgModal.dataset.editLabel || openCreateOrgModal.textContent)
+        : (openCreateOrgModal.dataset.openLabel || openCreateOrgModal.textContent);
+      clearCreateOrg.hidden = !active;
+      if (createOrgHelp) {
+        createOrgHelp.textContent = active
+          ? (createOrgHelp.dataset.activeHelp || createOrgHelp.textContent)
+          : (createOrgHelp.dataset.defaultHelp || createOrgHelp.textContent);
+      }
+      updateCreateOrgConfirmState();
     };
 
     firstName?.addEventListener("input", () => {
@@ -469,8 +594,49 @@
     uid?.addEventListener("input", () => {
       uidLocked = uid.value.trim() !== "";
     });
-    createOrg?.addEventListener("change", () => {
+    openCreateOrgModal?.addEventListener("click", () => {
+      if (createOrg) {
+        createOrg.checked = true;
+      }
       toggleCreateOrg();
+      openDialog();
+    });
+    closeCreateOrgModal?.addEventListener("click", () => {
+      closeDialog();
+      if (!hasCreateOrgData() && createOrg) {
+        createOrg.checked = false;
+        toggleCreateOrg();
+      }
+      openCreateOrgModal?.focus();
+    });
+    saveCreateOrgModal?.addEventListener("click", () => {
+      const invalidField = getCreateOrgFields().find((field) => !field.checkValidity());
+      if (invalidField) {
+        invalidField.reportValidity();
+        invalidField.focus();
+        updateCreateOrgConfirmState();
+        return;
+      }
+      closeDialog();
+      openCreateOrgModal?.focus();
+    });
+    clearCreateOrg?.addEventListener("click", () => {
+      if (createOrg) {
+        createOrg.checked = false;
+      }
+      toggleCreateOrg();
+      closeDialog();
+      openCreateOrgModal?.focus();
+    });
+    createOrgDialog?.addEventListener("cancel", (event) => {
+      event.preventDefault();
+      closeCreateOrgModal?.click();
+    });
+    createOrgSection?.addEventListener("input", () => {
+      updateCreateOrgConfirmState();
+    });
+    createOrgSection?.addEventListener("change", () => {
+      updateCreateOrgConfirmState();
     });
 
     if (window.ConsoleFormUtils) {
@@ -486,6 +652,10 @@
     }
 
     toggleCreateOrg();
+    if (createOrg?.checked) {
+      openDialog();
+    }
+    updateCreateOrgConfirmState();
   }());
 </script>
 </body>
