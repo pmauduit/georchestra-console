@@ -31,3 +31,10 @@ build/
 
 ### VS Code ###
 .vscode/
+
+
+## MkDocs ##
+venv_mkdocs/
+.venv_mkdocs/
+docs_modules/
+docs/tableofcontent.md
