@@ -43,7 +43,6 @@ import jakarta.servlet.http.HttpSession;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.google.common.annotations.VisibleForTesting;
-import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -70,6 +69,7 @@ import org.georchestra.ds.users.DuplicatedUidException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.StringUtils;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
@@ -242,14 +242,21 @@ public final class NewAccountFormController {
         if (formBean.getCreateOrg()) {
             try {
                 Org org = new Org();
+                String orgShortName = validation.normalizeOrgShortName(formBean.getOrgShortName());
+                if (!StringUtils.hasLength(orgShortName)) {
+                    orgShortName = validation.generateUniqueOrgShortName(orgDao, formBean.getOrgName(), null);
+                    formBean.setOrgShortName(orgShortName);
+                } else {
+                    formBean.setOrgShortName(orgShortName);
+                }
 
                 // Generate textual identifier based on name
-                String orgId = orgDao.generateId(formBean.getOrgShortName());
+                String orgId = orgDao.generateId(orgShortName);
                 org.setId(orgId);
 
                 // Store name, short name, orgType and address
                 org.setName(formBean.getOrgName());
-                org.setShortName(formBean.getOrgShortName());
+                org.setShortName(orgShortName);
                 org.setAddress(formBean.getOrgAddress());
                 org.setOrgType(formBean.getOrgType());
                 org.setDescription(formBean.getOrgDescription());
@@ -362,7 +369,7 @@ public final class NewAccountFormController {
     }
 
     public @VisibleForTesting List<String> getSuperUserEmailAddresses() throws DataServiceException {
-        return accountDao.findByRole("SUPERUSER").stream().map(Account::getEmail).filter(StringUtils::isNotEmpty)
+        return accountDao.findByRole("SUPERUSER").stream().map(Account::getEmail).filter(StringUtils::hasLength)
                 .collect(Collectors.toCollection(LinkedList::new));
     }
 
@@ -414,7 +421,11 @@ public final class NewAccountFormController {
 
         if (formBean.getCreateOrg() && !result.hasErrors()) {
             validation.validateOrgField("name", formBean.getOrgName(), result);
-            validation.validateOrgField("shortName", formBean.getOrgShortName(), result);
+            formBean.setOrgShortName(validation.normalizeOrgShortName(formBean.getOrgShortName()));
+            if (StringUtils.hasLength(formBean.getOrgShortName())
+                    && !validation.validateOrgShortNameFormat(formBean.getOrgShortName())) {
+                result.rejectValue("orgShortName", "account.create.org.shortNameFormat", "badFormat");
+            }
             validation.validateOrgField("address", formBean.getOrgAddress(), result);
             validation.validateOrgField("type", formBean.getOrgType(), result);
             validation.validateOrgField("url", formBean.getOrgUrl(), result);
@@ -422,6 +433,10 @@ public final class NewAccountFormController {
             validation.validateOrgField("logo", formBean.getOrgLogo(), result);
             validation.validateOrgField("orgUniqueId", formBean.getOrgUniqueId(), result);
             validation.validateUrlFieldWithSpecificMsg("orgUrl", formBean.getOrgUrl(), result);
+            if (StringUtils.hasLength(formBean.getOrgShortName())) {
+                validation.validateOrgShortNameField(this.orgDao, formBean.getOrgShortName(), null, result,
+                        "orgShortName");
+            }
 
             JSONObject orgToValidate = new JSONObject().put("orgUniqueId", formBean.getOrgUniqueId());
             validation.validateOrgUniqueIdField(this.orgDao, orgToValidate, result);

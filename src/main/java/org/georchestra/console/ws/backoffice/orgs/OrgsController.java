@@ -65,12 +65,16 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 
 import com.google.common.collect.Sets;
 
@@ -204,11 +208,27 @@ public class OrgsController {
 
         this.checkOrgAuthorization(commonName);
 
+        Org currentOrg = this.orgDao.findByCommonName(commonName);
+
         // Parse Json
         JSONObject json = this.parseRequest(request);
 
         if (!this.validation.validateOrgUnicity(orgDao, json)) {
             throw new IOException("Organization : already exists");
+        }
+
+        json.put(Org.JSON_SHORT_NAME, this.validation.normalizeOrgShortName(json.optString(Org.JSON_SHORT_NAME)));
+
+        if (!this.validation.validateOrgField("shortName", json)) {
+            throw new IOException("required field : shortName");
+        }
+
+        if (!this.validation.validateOrgShortNameFormat(json.optString(Org.JSON_SHORT_NAME))) {
+            throw new IOException("Short name must contain only uppercase ASCII letters and digits.");
+        }
+
+        if (!this.validation.validateOrgUnicityByShortName(orgDao, json.optString(Org.JSON_SHORT_NAME), commonName)) {
+            throw new IOException("An organization with this short name already exists.");
         }
 
         // Validate request against required fields for admin part
@@ -221,7 +241,7 @@ public class OrgsController {
         }
 
         // Retrieve current orgs state from ldap
-        Org org = this.orgDao.findByCommonName(commonName);
+        Org org = currentOrg;
         final Org initialOrg = org.clone();
 
         // get default pending status
@@ -277,9 +297,22 @@ public class OrgsController {
             throw new IOException("An organization with this identification number already exists.");
         }
 
-        // Validate request against required fields for admin part
+        json.put(Org.JSON_SHORT_NAME, this.validation.normalizeOrgShortName(json.optString(Org.JSON_SHORT_NAME)));
+
         if (!this.validation.validateOrgField("shortName", json)) {
-            throw new IOException("required field : shortName");
+            String generatedShortName = this.validation.generateUniqueOrgShortName(orgDao, json.optString("name"), null);
+            if (!StringUtils.hasLength(generatedShortName)) {
+                throw new IOException("required field : shortName");
+            }
+            json.put(Org.JSON_SHORT_NAME, generatedShortName);
+        }
+
+        if (!this.validation.validateOrgShortNameFormat(json.optString(Org.JSON_SHORT_NAME))) {
+            throw new IOException("Short name must contain only uppercase ASCII letters and digits.");
+        }
+
+        if (!this.validation.validateOrgUnicityByShortName(orgDao, json.optString(Org.JSON_SHORT_NAME), null)) {
+            throw new IOException("An organization with this short name already exists.");
         }
 
         if (!this.validation.validateUrl(json.optString(Org.JSON_URL))) {
@@ -332,6 +365,12 @@ public class OrgsController {
     @ResponseBody
     public Set<String> getRequiredFieldsForOrgCreation() {
         return validation.getRequiredOrgFields();
+    }
+
+    @ExceptionHandler(IOException.class)
+    @ResponseBody
+    public ResponseEntity<String> handleIOException(IOException exception) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exception.getMessage());
     }
 
     @GetMapping(value=PUBLIC_REQUEST_MAPPING + "/orgTypeValues", produces="application/json; charset=utf-8")

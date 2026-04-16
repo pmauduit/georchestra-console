@@ -167,12 +167,10 @@
             <div class="field">
               <label for="orgShortName">
                 <span th:text="#{account.create.org.shortName}">Short Name</span>
-                <span th:if="${session.orgShortNameRequired}" class="required-marker">*</span>
               </label>
             <input id="orgShortName" type="text" th:field="*{orgShortName}"
-                     pattern="[A-Za-z0-9_]*"
-                     th:required="${session.orgShortNameRequired}"
-                     th:attr="title=#{account.create.org.shortNameFormat}">
+                     pattern="[A-Z0-9]*"
+                     th:attr="title=#{account.create.org.shortNameFormat},placeholder=#{account.create.org.shortNamePlaceholder}">
               <p class="field-error" th:if="${#fields.hasErrors('orgShortName')}" th:errors="*{orgShortName}">
                 Invalid short name
               </p>
@@ -453,19 +451,18 @@
     const password = document.getElementById("password");
     const confirmPassword = document.getElementById("confirmPassword");
     const indicator = document.getElementById("pwdQuality");
+    const orgName = document.getElementById("orgName");
+    const orgShortName = document.getElementById("orgShortName");
 
     if (!form || !password || !confirmPassword || !indicator) {
       return;
     }
 
     let uidLocked = uid && uid.value.trim() !== "";
-    const deaccentuate = (value) => value
-      .replace(/ç/g, "c")
-      .replace(/(á|à|ä|â|å|Â|Ä|Á|À|Ã)/g, "a")
-      .replace(/(é|è|ë|ê|Ê|Ë|É|È|Ę)/g, "e")
-      .replace(/(í|ì|ï|î|Î|Ï|Í|Ì|Į)/g, "i")
-      .replace(/(ó|ò|ö|ô|ø|Ô|Ö|Ó|Ò)/g, "o")
-      .replace(/(ú|ù|ü|û|Û|Ü|Ú|Ù|Ų)/g, "u");
+    let orgShortNameLocked = orgShortName && orgShortName.value.trim() !== "";
+    const normalizeAscii = (value) => (value || "")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "");
 
     const makeUid = () => {
       if (!uid || uidLocked) {
@@ -477,8 +474,30 @@
         return;
       }
       const seed = `${name.charAt(0)}${last}`.toLowerCase();
-      const normalized = deaccentuate(seed).replace(/[^a-z0-9_.-]*/gi, "");
+      const normalized = normalizeAscii(seed).replace(/[^a-z0-9_.-]+/gi, "");
       uid.value = normalized;
+    };
+    const makeOrgShortName = () => {
+      if (!orgShortName || orgShortNameLocked) {
+        return;
+      }
+      const source = (orgName?.value || "").trim();
+      if (!source) {
+        return;
+      }
+      const words = normalizeAscii(source)
+        .toUpperCase()
+        .split(/[^A-Z0-9]+/)
+        .filter((word) => word.length > 0);
+      if (words.length === 0) {
+        orgShortName.value = "";
+        return;
+      }
+      if (words.length === 1) {
+        orgShortName.value = words[0].slice(0, 4);
+        return;
+      }
+      orgShortName.value = words.map((word) => word.slice(0, 2)).join("");
     };
 
     const createOrg = document.getElementById("createOrg");
@@ -594,6 +613,15 @@
     uid?.addEventListener("input", () => {
       uidLocked = uid.value.trim() !== "";
     });
+    orgName?.addEventListener("input", () => {
+      makeOrgShortName();
+      updateCreateOrgConfirmState();
+    });
+    orgShortName?.addEventListener("input", () => {
+      orgShortName.value = normalizeAscii(orgShortName.value).toUpperCase().replace(/[^A-Z0-9]/g, "");
+      orgShortNameLocked = orgShortName.value.trim() !== "";
+      updateCreateOrgConfirmState();
+    });
     openCreateOrgModal?.addEventListener("click", () => {
       if (createOrg) {
         createOrg.checked = true;
@@ -610,6 +638,7 @@
       openCreateOrgModal?.focus();
     });
     saveCreateOrgModal?.addEventListener("click", () => {
+      makeOrgShortName();
       const invalidField = getCreateOrgFields().find((field) => !field.checkValidity());
       if (invalidField) {
         invalidField.reportValidity();

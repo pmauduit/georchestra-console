@@ -203,4 +203,20 @@ public class ValidationTest {
         Assert.assertTrue(v.validateOrgUnicityByUniqueId(mockOrgsDao, mockChanges));
 
     }
+
+    @Test
+    public void buildOrgShortNameCandidateUsesSingleWordRule() {
+        Validation validation = new Validation("");
+
+        Assert.assertEquals("GEOR", validation.buildOrgShortNameCandidate("géôrchestra"));
+        Assert.assertEquals("AB1", validation.buildOrgShortNameCandidate("ab1"));
+    }
+
+    @Test
+    public void buildOrgShortNameCandidateUsesTwoCharsPerWordRule() {
+        Validation validation = new Validation("");
+
+        Assert.assertEquals("OFNADEFO", validation.buildOrgShortNameCandidate("Office national des forêts"));
+        Assert.assertEquals("AG12BE", validation.buildOrgShortNameCandidate("Agence 12 Beta"));
+    }
 }

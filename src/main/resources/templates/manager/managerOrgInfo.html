@@ -68,8 +68,13 @@
             </div>
 
             <div class="field">
-              <label for="shortName" th:text="#{manager.org.shortName}">Short name</label>
-              <input id="shortName" name="shortName" type="text" th:value="${managedOrg.shortName}">
+              <label for="shortName">
+                <span th:text="#{manager.org.shortName}">Short name</span>
+                <span class="required-marker">*</span>
+              </label>
+              <input id="shortName" name="shortName" type="text" pattern="[A-Z0-9]*"
+                     th:attr="title=#{manager.org.shortNameFormat},placeholder=#{manager.org.shortNamePlaceholder}"
+                     th:value="${managedOrg.shortName}">
             </div>
 
             <div class="field">
@@ -178,11 +183,42 @@
   const updateOrgUrl = /*[[@{/private/orgs/{id}(id=${managedOrg.id})}]]*/ '/private/orgs/org';
   const createOrgUrl = /*[[@{/private/orgs}]]*/ '/private/orgs';
   const orgInfosBaseUrl = /*[[@{/manager/org/}]]*/ '/manager/org/';
+  const orgNameField = document.getElementById('name');
+  const orgShortNameField = document.getElementById('shortName');
+  let orgShortNameLocked = !!orgShortNameField?.value.trim();
+
+  const normalizeOrgShortName = (value) => value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, '');
 
   const showOrgFeedback = (message, type) => {
     orgFeedback.hidden = false;
     orgFeedback.className = `alert ${type === 'success' ? 'alert-success' : 'alert-error'}`;
     orgFeedback.textContent = message;
+  };
+
+  const autofillOrgShortName = () => {
+    if (!orgNameField || !orgShortNameField || orgShortNameLocked) {
+      return;
+    }
+    const words = orgNameField.value
+      .trim()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toUpperCase()
+      .split(/[^A-Z0-9]+/)
+      .filter((word) => word.length > 0);
+    if (words.length === 0) {
+      orgShortNameField.value = '';
+      return;
+    }
+    if (words.length === 1) {
+      orgShortNameField.value = words[0].slice(0, 4);
+      return;
+    }
+    orgShortNameField.value = words.map((word) => word.slice(0, 2)).join('');
   };
 
   const formPayload = (forcePending) => ({
@@ -212,7 +248,8 @@
       body: JSON.stringify(formPayload(pendingValue))
     });
     if (!response.ok) {
-      throw new Error(`HTTP ${response.status}`);
+      const message = (await response.text()).trim();
+      throw new Error(message || `HTTP ${response.status}`);
     }
     return response.json();
   };
@@ -227,7 +264,7 @@
         showOrgFeedback(orgSaveSuccess, 'success');
       }
     } catch (error) {
-      showOrgFeedback(orgSaveError, 'error');
+      showOrgFeedback(error.message || orgSaveError, 'error');
     }
   });
 
@@ -236,8 +273,16 @@
       await updateOrg(false);
       window.location.reload();
     } catch (error) {
-      showOrgFeedback(orgSaveError, 'error');
+      showOrgFeedback(error.message || orgSaveError, 'error');
     }
+  });
+
+  orgNameField?.addEventListener('input', () => {
+    autofillOrgShortName();
+  });
+  orgShortNameField?.addEventListener('input', () => {
+    orgShortNameField.value = normalizeOrgShortName(orgShortNameField.value);
+    orgShortNameLocked = !!orgShortNameField.value.trim();
   });
 </script>
 </body>
