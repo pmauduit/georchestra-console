@@ -962,13 +962,16 @@ input.is-invalid {
 .actions {
   display: flex;
   justify-content: flex-end;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .button,
 button {
   border: 0;
   border-radius: 999px;
-  padding: 12px 18px;
+  padding: 10px 16px;
   font: inherit;
   font-weight: 700;
   cursor: pointer;
