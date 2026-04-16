@@ -43,6 +43,12 @@ Then:
 Add an area selector for the organization. I tried to minimize dependencies on other frameworks.
 Also removed the information used to center and zoom the map; this is now handled directly based on the data extent.
 
+Add mandatory field and add validation on uniq org shortname
+
+Try to add optimisation on ldap query, but modification are to be made in georchestra-ldap-account-management 
+
+Init doc template
+
 ## April, 3th 2026 
 
 * Work done in the train to come back to Brittany, try to make some changes to be more RGAA compliant 

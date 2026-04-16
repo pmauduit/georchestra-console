@@ -25,11 +25,11 @@ import java.text.Normalizer;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.lang.reflect.Method;
 
 import org.georchestra.ds.orgs.Org;
 import org.georchestra.ds.orgs.OrgsDao;
@@ -321,14 +321,29 @@ public class Validation {
         if (!StringUtils.hasLength(shortName)) {
             return true;
         }
-        Optional<Org> existing = orgDao.findAll().stream()
-                .filter(org -> StringUtils.hasLength(org.getShortName()))
-                .filter(org -> shortName.equalsIgnoreCase(org.getShortName()))
-                .findFirst();
-        if (existing.isEmpty()) {
+        Org existing = lookupOrgByShortName(orgDao, shortName);
+        if (existing == null) {
             return true;
         }
-        return StringUtils.hasLength(currentOrgId) && currentOrgId.equals(existing.get().getId());
+        return StringUtils.hasLength(currentOrgId) && currentOrgId.equals(existing.getId());
+    }
+
+    private Org lookupOrgByShortName(OrgsDao orgDao, String shortName) {
+        try {
+            Method method = orgDao.getClass().getMethod("findByShortName", String.class);
+            Object result = method.invoke(orgDao, shortName);
+            if (result instanceof Org org) {
+                return org;
+            }
+        } catch (ReflectiveOperationException ignored) {
+            // Older ldap-account-management versions do not expose a direct short-name
+            // lookup yet. Keep a compatibility fallback for these deployments.
+        }
+        return orgDao.findAll().stream()
+                .filter(org -> StringUtils.hasLength(org.getShortName()))
+                .filter(org -> shortName.equalsIgnoreCase(org.getShortName()))
+                .findFirst()
+                .orElse(null);
     }
 
     public boolean validateOrgShortNameField(OrgsDao orgDao, String shortName, String currentOrgId, Errors errors,
