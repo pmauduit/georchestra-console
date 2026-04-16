@@ -43,22 +43,34 @@
           </div>
 
           <div class="field">
-            <label for="sn" th:text="#{surname.label}">Surname</label>
+            <label for="sn">
+              <span th:text="#{surname.label}">Surname</span>
+              <span class="required-marker">*</span>
+            </label>
             <input id="sn" name="sn" type="text" required>
           </div>
 
           <div class="field">
-            <label for="givenName" th:text="#{firstName.label}">First name</label>
+            <label for="givenName">
+              <span th:text="#{firstName.label}">First name</span>
+              <span class="required-marker">*</span>
+            </label>
             <input id="givenName" name="givenName" type="text" required>
           </div>
 
           <div class="field">
-            <label for="mail" th:text="#{email.label}">E-mail</label>
+            <label for="mail">
+              <span th:text="#{email.label}">E-mail</span>
+              <span class="required-marker">*</span>
+            </label>
             <input id="mail" name="mail" type="email" required>
           </div>
 
           <div class="field">
-            <label for="org" th:text="#{org.label}">Organization</label>
+            <label for="org">
+              <span th:text="#{org.label}">Organization</span>
+              <span class="required-marker">*</span>
+            </label>
             <select id="org" name="org" required>
               <option value="" th:text="#{account.create.org.placeholder}">Organization</option>
               <option th:each="org : ${organizations}" th:value="${org.id()}" th:text="${org.label()}">Organization</option>

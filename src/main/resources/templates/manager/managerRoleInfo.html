@@ -6,7 +6,7 @@
 </head>
 <body>
 <th:block th:replace="~{fragments/layout :: appHeader('console')}"></th:block>
-<main id="main-content" tabindex="-1" class="page">
+<main id="main-content" tabindex="-1" class="page" th:classappend="${creating} ? ' page-wide'">
   <section class="hero">
     <div class="hero-inline">
       <p class="hero-subtitle" th:text="${creating} ? #{manager.rolecreate.title} : #{manager.roleinfo.title}">Role details</p>
@@ -48,7 +48,10 @@
           <legend th:text="#{manager.roleinfo.fieldset}">Role definition</legend>
           <div class="form-grid manager-user-form-grid">
             <div class="field">
-              <label for="cn" th:text="#{manager.role.cn}">Identifier</label>
+              <label for="cn">
+                <span th:text="#{manager.role.cn}">Identifier</span>
+                <span class="required-marker">*</span>
+              </label>
               <input id="cn" name="cn" type="text" required pattern="^[A-Z0-9_-]+$"
                      th:readonly="${readonly}" th:value="${role.cn}">
               <p class="help-text" th:text="#{manager.role.helpFormat}">Identifier should only contain uppercased alphanumerical characters</p>

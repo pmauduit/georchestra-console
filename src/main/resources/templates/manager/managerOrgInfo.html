@@ -6,7 +6,7 @@
 </head>
 <body>
 <th:block th:replace="~{fragments/layout :: appHeader('console')}"></th:block>
-<main id="main-content" tabindex="-1" class="page">
+<main id="main-content" tabindex="-1" class="page" th:classappend="${creating} ? ' page-wide'">
   <section class="hero">
     <div class="hero-inline">
       <p class="hero-subtitle" th:text="${creating} ? #{manager.orgcreate.title} : #{manager.orginfo.title}">Organization details</p>
@@ -60,7 +60,10 @@
           <legend th:text="#{manager.orginfo.fieldset}">Organization definition</legend>
           <div class="form-grid manager-user-form-grid">
             <div class="field">
-              <label for="name" th:text="#{manager.org.name}">Name</label>
+              <label for="name">
+                <span th:text="#{manager.org.name}">Name</span>
+                <span class="required-marker">*</span>
+              </label>
               <input id="name" name="name" type="text" required th:value="${managedOrg.name}">
             </div>
 
