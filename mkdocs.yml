@@ -57,7 +57,8 @@ nav:
         - Getting started: user_guide/getting_started.md
         - Global overview: user_guide/global_overview.md
         - Menus and toolbars: user_guide/tools.md
-        - Syntax help: user_guide/syntax_help.md
+        - User administration: user_guide/user_administration.md
+        - Functional rules: user_guide/syntax_help.md
     - Technical guides:
         - Index: technical_guides/index.md
         - Administration:
@@ -120,8 +121,9 @@ plugins:
               Index: "Sommaire"
               Getting started: "Prendre en main"
               Global overview: "Vue globale"
-              Menus and toolbars: "Barres ou menus d''outils"
-              Syntax help: "Aide syntaxe"
+              Menus and toolbars: "Menus et outils"
+              User administration: "Administration des utilisateurs"
+              Functional rules: "Règles fonctionnelles"
               Technical guides: "Guides techniques"
               Administration: "Administrer"
               Installation: "Installer"
@@ -130,4 +132,3 @@ plugins:
 
   - git-revision-date-localized:
       enable_creation_date: true
-

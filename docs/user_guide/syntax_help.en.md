@@ -1,57 +1,45 @@
-# Syntax Help
+# Functional Rules
 
-This page is here to help writers get acquainted with the markdown syntax itself enhanced by mkdocs and its plugins.
+This page summarizes the functional rules to understand before changing access rights in the Console.
 
-Refer to [this site](https://www.markdownguide.org/basic-syntax/) for more comprehensive examples of Markdown syntax.
+## Rights Model
 
+The Console mainly manages three objects:
 
+- a **user**, identified by a `uid`;
+- an **organization**, which defines the user's functional affiliation;
+- a **role**, which grants rights in geOrchestra or in a connected application.
 
-## Headings and Hierarchy
+Roles are stored in LDAP. geOrchestra applications then consume these roles to authorize or deny actions.
 
+## Common Roles
 
-## Images
+- `SUPERUSER`: global Console administration;
+- `ORGADMIN`: administration of a delegated scope;
+- `USER`: standard user;
+- `PENDING`: account waiting for validation;
+- `EXPIRED`: expired account;
+- `TEMPORARY`: virtual role for temporary users;
+- `REFERENT`: functional role that can identify a referent.
 
-Place images in the `images` directory at the same level as the markdown file.
+Application roles can be specific to each platform and should be documented locally.
 
-`![georchestra logo](images/georchestra-logo.svg)`
+## Delegations
 
-![georchestra logo](images/georchestra-logo.svg)
+A delegation gives an organization administrator the right to act on a defined scope.
 
+It contains:
 
+- manageable organizations;
+- roles that can be granted or removed.
 
-## Links
+A delegated administrator should only see and modify users belonging to delegated organizations, and only the roles included in the delegation.
 
+## Protected Accounts
 
-## Notes, Warnings
+Some technical accounts can be protected against modification or deletion.
 
-To obtain specific blocks to draw the reader's attention, you need to:
+The list is configured with `protectedUsersList`.
 
-- Install the Python module `mkdocs-callouts`
-- In the `mkdocs.yml` file: add `markdown_extensions` and a `plugin` (default declared)
-
-See [https://squidfunk.github.io/mkdocs-material/reference/admonitions/](https://squidfunk.github.io/mkdocs-material/reference/admonitions/) for more information.
-
-Examples below, check the markdown file for the source code.
-
-
-!!! note "Note"
-
-    Logoden biniou welcome. December or huzh. Some specific number. Ler ugent ma. Meurzh understanding koll. Dreuz Egineg an. An kas gortoz. C’higer mouezh Gerveur. Nor ur alies. Drezoc'h gwengolo kuzuliañ.
-    
-    Mestr kemmañ talvezout. Anezhañ kenavo tasenn. Neud laezh tarv. Warnomp an bleun. Vuoc’h da Plouneour-Menez. Bouton votez ac’hano. Huñvre c’hof poazhañ. Da pevar muiañ. Doñjer gouel alc’houez. Pluenn siminal hed.
-
-
-
-!!! tip "Tip"
-
-    Logoden biniou welcome. December or huzh. Some specific number. Ler ugent ma. Meurzh understanding koll. Dreuz Egineg an. An kas gortoz. C’higer mouezh Gerveur. Nor ur alies. Drezoc'h gwengolo kuzuliañ.
-    
-    Mestr kemmañ talvezout. Anezhañ kenavo tasenn. Neud laezh tarv. Warnomp an bleun. Vuoc’h da Plouneour-Menez. Bouton votez ac’hano. Huñvre c’hof poazhañ. Da pevar muiañ. Doñjer gouel alc’houez. Pluenn siminal hed.
-
-
-!!! warning "Warning"
-
-    Logoden biniou welcome. December or huzh. Some specific number. Ler ugent ma. Meurzh understanding koll. Dreuz Egineg an. An kas gortoz. C’higer mouezh Gerveur. Nor ur alies. Drezoc'h gwengolo kuzuliañ.
-    
-    Mestr kemmañ talvezout. Anezhañ kenavo tasenn. Neud laezh tarv. Warnomp an bleun. Vuoc’h da Plouneour-Menez. Bouton votez ac’hano. Huñvre c’hof poazhañ. Da pevar muiañ. Doñjer gouel alc’houez. Pluenn siminal hed.
-
+!!! warning "Irreversible action"
+    Deleting users, organizations or roles can immediately affect access rights. Check the scope and dependencies before deleting.

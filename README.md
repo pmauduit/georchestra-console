@@ -177,3 +177,16 @@ Useful commands:
 ./mvnw -Dtest=org.georchestra.console.boot.ConsoleApplicationTests test
 ./mvnw -Dit.test=org.georchestra.console.boot.AxeCoreAccessibilityIT verify
 ```
+
+## Local documentation
+
+The documentation is built with MkDocs. To run it locally:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r mkdocs_requirements.txt
+mkdocs serve
+```
+
+It is then available at `http://127.0.0.1:8000/`.

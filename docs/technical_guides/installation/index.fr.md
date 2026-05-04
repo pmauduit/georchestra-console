@@ -1,21 +1,31 @@
 # Sommaire
 
-
-Sommaire de la partie Installer
-
-
+Cette section décrit l'installation et la configuration technique de la Console.
 
 ## [Présentation](presentation.md#presentation)
-### [Architecture composant](presentation.md#architecture-composant)
-### [Recommandation](presentation.md#recommandation)
+
+Architecture générale du composant, dépendances et mode d'intégration dans geOrchestra.
+
 ## [Prérequis](prerequisites.md#prerequis)
-### [Matériel](prerequisites.md#materiel)
-### [Logiciel](prerequisites.md#logiciel)
+
+Logiciels nécessaires pour exécuter la Console et lancer l'environnement de développement.
+
 ## [Préparation](preparation.md#preparation)
+
+Préparation du datadir, des services externes et des fichiers de configuration.
+
 ## [Installation](installation.md#installation)
+
+Lancement local, lancement via le gateway et principes de déploiement.
+
 ## [Configuration](configuration.md#configuration)
+
+Paramètres applicatifs, zones de compétence, SMTP, modèles de mails, sécurité et RGPD.
+
 ## [Debug](debug.md#debug)
-### [Debug](debug.md#debug_1)
-### [Log](debug.md#log)
+
+Pistes de diagnostic pour les problèmes courants.
+
 ## [Tests](tests.md#tests)
 
+Commandes de test et vérifications fonctionnelles.

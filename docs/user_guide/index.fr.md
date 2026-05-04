@@ -1,23 +1,26 @@
 # Sommaire du guide utilisateur
 
-Cette page est dédiée au sommaire du guide utilisateur du composant, c'est-à-dire à la documentation de référence qui décrit toutes les fonctionnalités et outils du composant à destination des **utilisateurs**.
-La table des matières pour le guide est intégrée ici.
+Ce guide s'adresse aux administrateurs fonctionnels de la Console geOrchestra.
 
-**Recommandations**:
+Il décrit ce qui peut être fait depuis l'interface graphique : consultation des comptes, gestion des organisations, attribution des rôles, validation des demandes et suivi des actions d'administration.
 
-- Après cette page, commencer par une partie "Vue globale" de l'outil qui présente la fenêtre principale du composant.
-- Ajouter un maximum de captures d'écran pour illustrer. Les images sont stockées dans le répertoire `images`.
+## À qui s'adresse ce guide ?
 
-Exemple d'arborescence du guide pour Mapstore2 :
+Le guide concerne principalement :
 
-- Vue globale du composant
-- Gérer les paramètres des couches
-- La table attributaire
-- La barre de menus
-- Imprimer une carte
-...
+- les **super-administrateurs**, qui disposent d'une vue globale sur les utilisateurs, organisations, rôles et délégations ;
+- les **administrateurs d'organisation**, qui administrent uniquement les utilisateurs, organisations et rôles compris dans leur périmètre de délégation ;
+- les référents fonctionnels qui doivent comprendre comment les droits sont représentés dans geOrchestra.
 
+## Contenu
 
+Les pages suivantes couvrent les principaux parcours :
 
+- **Prendre en main rapidement** : accéder au manager et repérer les actions essentielles.
+- **Vue globale** : comprendre l'organisation générale de l'interface.
+- **Barre ou menu d'outils** : utiliser les onglets `Users`, `Orgs`, `Roles`, `Delegations` et `Logs`.
+- **Administration des utilisateurs** : gérer le cycle de vie d'un compte et ses droits.
+- **Règles fonctionnelles** : comprendre les rôles, les statuts et les limites de délégation.
 
+Les opérations qui nécessitent une modification de fichiers, une configuration d'environnement ou une intégration API sont documentées dans les guides techniques.
 

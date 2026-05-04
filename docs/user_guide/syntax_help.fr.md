@@ -1,63 +1,61 @@
-# Aide à la syntaxe
+# Règles fonctionnelles
 
-Cette page n'est là que pour aider les rédacteur à prendre en main la syntaxe markdown elle-même enrichie par mkdocs et ses plugins.
+Cette page résume les règles fonctionnelles à connaître avant de modifier des droits dans la Console.
 
-Se reporter à [ce site](https://www.markdownguide.org/basic-syntax/) pour des exemples plus fournis de syntaxe en Markdown.
+## Modèle de droits
 
+La Console manipule principalement trois objets :
 
+- un **utilisateur**, identifié par un `uid` ;
+- une **organisation**, qui représente le rattachement fonctionnel de l'utilisateur ;
+- un **rôle**, qui ouvre des droits dans geOrchestra ou dans une application connectée.
 
-## Titres et hiérarchisation
+Les rôles sont stockés dans le LDAP. Les applications geOrchestra consomment ensuite ces rôles pour autoriser ou refuser les actions.
 
+## Rôles courants
 
-## Images
+Les rôles suivants ont une signification particulière :
 
-Mettre les images dans le répertoire `images` du même niveau que le fichier markdown.
+- `SUPERUSER` : administration globale de la Console ;
+- `ORGADMIN` : administration d'un périmètre délégué ;
+- `USER` : utilisateur standard ;
+- `PENDING` : compte en attente de validation ;
+- `EXPIRED` : compte expiré ;
+- `TEMPORARY` : rôle virtuel utilisé pour regrouper certains comptes temporaires ;
+- `REFERENT` : rôle fonctionnel pouvant être utilisé pour identifier un référent.
 
-`![logo georchestra](images/georchestra-logo.svg)`
+Les rôles applicatifs peuvent être propres à chaque plateforme. Ils doivent rester explicites et documentés côté organisation.
 
-![logo georchestra](images/georchestra-logo.svg)
+## Délégations
 
+Une délégation donne à un administrateur d'organisation le droit d'agir sur un périmètre précis.
 
+Elle contient :
 
-## Liens
+- des organisations administrables ;
+- des rôles attribuables ou retirables.
 
+Un administrateur délégué ne doit voir et modifier que les utilisateurs appartenant aux organisations déléguées, et seulement les rôles inclus dans la délégation.
 
-## Notes, avertissements
+## Organisations en attente
 
-Pour obtenir des blocs spécifique pour attirer l'attention du lecteur, il faut :
+Quand la modération des inscriptions est activée, une demande de compte peut créer ou référencer une organisation en attente.
 
-- installer le module Python `mkdocs-callouts`
-- dans le fichier `mkdocs.yml` : rajouter des `markdown_extensions` et un `plugin` (déclarés par défaut)
+Un compte rattaché à une organisation en attente ne doit pas être validé avant validation de l'organisation.
 
-Voir [https://squidfunk.github.io/mkdocs-material/reference/admonitions/](https://squidfunk.github.io/mkdocs-material/reference/admonitions/) pour plus d'informations.
+## Comptes protégés
 
-Exemples ci-dessous, regarder le fichier markdown pour le code source.
+Certains comptes techniques peuvent être protégés contre la modification ou la suppression.
 
+La liste est configurée techniquement avec `protectedUsersList`.
 
-!!! note "Note"
+## Bonnes pratiques
 
-	Logoden biniou degemer. Kerzu pe c’huzh. Niverenn skrijañ bennak. Ler ugent ma. Meurzh kompren koll. Dreuz Egineg an. An kas gortoz. C’higer mouezh Gerveur. Nor ur alies. Drezoc'h gwengolo kuzuliañ.
-	
-	Mestr kemmañ talvezout. Anezhañ kenavo tasenn. Neud laezh tarv. Warnomp an bleun. Vuoc’h da Plouneour-Menez. Bouton votez ac’hano. Huñvre c’hof poazhañ. Da pevar muiañ. Doñjer gouel alc’houez. Pluenn siminal hed.
+- Créer des rôles applicatifs lisibles, en majuscules, par exemple `MAPSTORE_ADMIN`.
+- Éviter de donner `SUPERUSER` pour un besoin limité à une organisation.
+- Préférer une délégation `ORGADMIN` ciblée lorsqu'un administrateur ne doit gérer qu'un périmètre.
+- Vérifier les logs après une action sensible.
+- Documenter localement la signification des rôles spécifiques à la plateforme.
 
-
-
-!!! tip "Astuce"
-
-	Logoden biniou degemer. Kerzu pe c’huzh. Niverenn skrijañ bennak. Ler ugent ma. Meurzh kompren koll. Dreuz Egineg an. An kas gortoz. C’higer mouezh Gerveur. Nor ur alies. Drezoc'h gwengolo kuzuliañ.
-	
-	Mestr kemmañ talvezout. Anezhañ kenavo tasenn. Neud laezh tarv. Warnomp an bleun. Vuoc’h da Plouneour-Menez. Bouton votez ac’hano. Huñvre c’hof poazhañ. Da pevar muiañ. Doñjer gouel alc’houez. Pluenn siminal hed.
-
-
-!!! warning "Attention"
-
-	Logoden biniou degemer. Kerzu pe c’huzh. Niverenn skrijañ bennak. Ler ugent ma. Meurzh kompren koll. Dreuz Egineg an. An kas gortoz. C’higer mouezh Gerveur. Nor ur alies. Drezoc'h gwengolo kuzuliañ.
-	
-	Mestr kemmañ talvezout. Anezhañ kenavo tasenn. Neud laezh tarv. Warnomp an bleun. Vuoc’h da Plouneour-Menez. Bouton votez ac’hano. Huñvre c’hof poazhañ. Da pevar muiañ. Doñjer gouel alc’houez. Pluenn siminal hed.
-
- 
-
-
-
-
-
+!!! warning "Action irréversible"
+    Les suppressions de comptes, d'organisations ou de rôles peuvent avoir des effets immédiats sur les accès. Vérifiez le périmètre et les dépendances avant de supprimer.
