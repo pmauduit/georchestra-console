@@ -32,7 +32,7 @@ Une fiche utilisateur regroupe plusieurs onglets :
 
 - `Infos` pour l'identité, l'e-mail, l'organisation, l'expiration et les métadonnées du compte ;
 - `Roles` pour ajouter ou retirer des rôles ;
-- `Messages` pour consulter les messages envoyés à l'utilisateur ;
+- `Messages` pour consulter les messages envoyés à l'utilisateur et envoyer un message lorsque l'envoi de mails est activé dans la configuration ;
 - `Logs` pour consulter les actions d'administration liées à ce compte ;
 - `Manage` pour supprimer le compte si l'action est autorisée.
 
@@ -87,7 +87,15 @@ Les filtres disponibles permettent de retrouver une action par :
 - type d'action ;
 - période.
 
-Les logs sont importants pour comprendre qui a créé, modifié, validé ou supprimé un compte, une organisation ou un rôle.
+Les logs permettent de tracer les changements effectués dans le manager. Ils sont importants pour comprendre qui a créé, modifié, validé ou supprimé un compte, une organisation ou un rôle.
+
+## Messages et mails
+
+L'onglet `Messages` d'une fiche utilisateur donne accès aux messages associés au compte.
+
+Lorsque l'envoi de mails est activé dans la configuration technique, la Console peut envoyer des messages liés aux principaux événements du cycle de vie d'un compte, par exemple la création, la validation, le changement d'adresse e-mail ou la récupération de mot de passe.
+
+Les messages envoyés restent consultables depuis la fiche utilisateur, ce qui permet à un administrateur de vérifier ce qui a été transmis à l'utilisateur.
 
 ## Pages de compte
 

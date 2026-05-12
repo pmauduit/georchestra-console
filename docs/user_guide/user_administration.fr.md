@@ -93,4 +93,5 @@ La suppression retire le compte du LDAP, retire ses rôles et supprime sa délé
 - Certains comptes protégés ne sont pas modifiables.
 - Les comptes externes ou OAuth2 ne permettent pas toujours de modifier l'identifiant ou le mot de passe.
 - Certaines actions dépendent des délégations d'administration et pas uniquement du rôle global.
-- Les actions importantes sont consignées dans les logs d'administration.
+- Les actions importantes sont consignées dans les logs d'administration afin de tracer les changements effectués.
+- L'envoi de mails dépend de la configuration technique ; lorsqu'il est activé, les messages envoyés à un utilisateur sont consultables depuis sa fiche.

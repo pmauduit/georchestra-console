@@ -16,7 +16,7 @@ Préparation du datadir, des services externes et des fichiers de configuration.
 
 ## [Installation](installation.md#installation)
 
-Lancement local, lancement via le gateway et principes de déploiement.
+Lancement local, lancement via le gateway, paquet Debian et principes de déploiement sous forme de service systemd.
 
 ## [Configuration](configuration.md#configuration)
 

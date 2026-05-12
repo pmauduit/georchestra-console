@@ -28,16 +28,28 @@ Depuis l'interface graphique, un administrateur peut notamment :
 - modifier les informations d'un compte ;
 - affecter ou retirer des rôles ;
 - gérer les organisations ;
-- consulter les journaux d'administration ;
+- consulter les journaux d'administration afin de tracer les changements effectués ;
+- consulter les messages envoyés aux utilisateurs et déclencher l'envoi de mails lorsque cette fonctionnalité est activée dans la configuration ;
 - vérifier les délégations accordées à des administrateurs d'organisation.
 
 La configuration technique, comme les paramètres LDAP, PostgreSQL, SMTP, les règles de mot de passe, les modèles de mails ou les API internes, est décrite dans les guides techniques.
 
+
+## Multi-langue
+
+L'application est disponible nativement en Français, Anglais, Allemand, Espagne et Néerlandais.
+
+
 ## Accès rapide
 
-En développement local, l'application est généralement accessible :
+L'application console est accessible une fois connecté avec le contexte /console
 
+En développement local, l'application est généralement accessible :
 - directement : `http://localhost:8081/console`
 - via le gateway geOrchestra : `http://localhost:8080/console`
+
+En environnement final, ajouter /console à votre nom de domaine pour y accéder.
+
+Exemple https://demo.georchestra.org/console
 
 L'espace d'administration fonctionnelle se trouve dans `Console > Manager`, ou directement sur `/console/manager`.

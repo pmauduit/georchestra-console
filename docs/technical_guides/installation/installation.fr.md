@@ -55,3 +55,24 @@ Pour un déploiement intégré à geOrchestra, conservez les principes suivants 
 - placer l'application derrière le gateway ou un reverse proxy compatible avec les en-têtes de sécurité geOrchestra ;
 - configurer LDAP, PostgreSQL et SMTP avec des comptes techniques dédiés ;
 - vérifier que `publicUrl` correspond à l'URL publique utilisée dans les mails.
+
+## Paquet Debian et service systemd
+
+La Console peut être construite sous forme de paquet Debian. Ce paquet installe l'application Spring Boot, le fichier d'unité systemd et les scripts Debian nécessaires au rechargement de systemd.
+
+Le paquet prépare un service `georchestra-console.service`. Celui-ci lance le jar avec le datadir geOrchestra :
+
+```ini
+ExecStart=/usr/bin/java -Dgeorchestra.datadir=/etc/georchestra -jar /srv/apps/georchestra-console/georchestra-console.jar
+```
+
+Le service est prévu pour s'exécuter avec l'utilisateur système `georchestra`. L'installation du paquet crée cet utilisateur s'il n'existe pas déjà.
+
+Après installation, le service peut être activé et démarré avec systemd :
+
+```bash
+sudo systemctl enable georchestra-console.service
+sudo systemctl start georchestra-console.service
+```
+
+Ce mode de déploiement est utile lorsque la Console est exploitée comme application autonome derrière le gateway geOrchestra ou derrière un reverse proxy, sans conteneur applicatif Java externe.

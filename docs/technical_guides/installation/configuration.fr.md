@@ -70,6 +70,36 @@ logoUrl=https://www.georchestra.org/public/georchestra-logo.svg
 
 `publicUrl` doit correspondre à l'URL publique utilisée dans les liens envoyés par mail.
 
+## Personnalisation des couleurs
+
+La Console peut reprendre les couleurs d'une feuille de style externe si la propriété `georchestraStylesheet` est renseignée.
+
+```properties
+georchestraStylesheet=https://static.example.org/georchestra/stylesheet.css
+```
+
+Cette feuille est chargée avant le style interne de la Console. Elle est également transmise au composant d'en-tête geOrchestra. Si la propriété est vide ou si le fichier n'est pas disponible, la Console utilise ses couleurs par défaut.
+
+Le fichier de style peut définir les variables CSS suivantes :
+
+```css
+body {
+  --georchestra-primary: #850774;
+  --georchestra-secondary: rgb(137, 142, 153);
+  --georchestra-primary-light: rgb(236, 216, 238);
+  --georchestra-secondary-light: #dde1e2;
+}
+```
+
+Ces variables permettent notamment de personnaliser :
+
+- la couleur principale des boutons, liens actifs et éléments d'action ;
+- la couleur secondaire utilisée pour les bordures et certains fonds ;
+- les variantes claires utilisées pour les fonds de page, les zones de contraste et les états survolés ;
+- la cohérence visuelle entre la Console et le header geOrchestra lorsque le même fichier est utilisé.
+
+La valeur de `georchestraStylesheet` peut pointer vers une URL absolue servie par le portail, le reverse proxy ou un serveur statique. En développement, le fichier `docker/dev/nginx/html/stylesheet.css` donne un exemple minimal.
+
 ## Création de compte
 
 Paramètres utiles :
