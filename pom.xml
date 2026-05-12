@@ -315,6 +315,84 @@
             </plugin>
 		</plugins>
 	</build>
+	<profiles>
+		<profile>
+			<id>debianPackage</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-resources-plugin</artifactId>
+						<version>3.3.1</version>
+						<executions>
+							<execution>
+								<id>copy-deb-resources</id>
+								<phase>process-resources</phase>
+								<goals>
+									<goal>copy-resources</goal>
+								</goals>
+								<configuration>
+									<overwrite>true</overwrite>
+									<outputDirectory>${project.build.directory}/deb</outputDirectory>
+									<resources>
+										<resource>
+											<directory>src/deb/resources</directory>
+											<filtering>false</filtering>
+										</resource>
+									</resources>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-antrun-plugin</artifactId>
+						<version>3.1.0</version>
+						<executions>
+							<execution>
+								<id>prepare-deb-layout</id>
+								<phase>package</phase>
+								<goals>
+									<goal>run</goal>
+								</goals>
+								<configuration>
+									<target>
+										<mkdir dir="${project.build.directory}/deb/usr/share/lib/console-georchestra"/>
+										<mkdir dir="${project.build.directory}/deb/srv/apps/georchestra-console"/>
+										<copy file="${project.build.directory}/${project.build.finalName}.jar"
+											  tofile="${project.build.directory}/deb/usr/share/lib/console-georchestra/georchestra-console-${project.version}.jar"/>
+										<symlink link="${project.build.directory}/deb/srv/apps/georchestra-console/georchestra-console.jar"
+												 resource="/usr/share/lib/console-georchestra/georchestra-console-${project.version}.jar"
+												 overwrite="true"/>
+										<chmod perm="ugo+x">
+											<fileset dir="${project.build.directory}/deb">
+												<include name="DEBIAN/post*"/>
+												<include name="DEBIAN/pre*"/>
+											</fileset>
+										</chmod>
+									</target>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>net.sf.debian-maven</groupId>
+						<artifactId>debian-maven-plugin</artifactId>
+						<version>1.0.6</version>
+						<configuration>
+							<packageName>georchestra-console</packageName>
+							<packageDescription>geOrchestra Console Spring Boot application</packageDescription>
+							<packageVersion>${project.version}</packageVersion>
+							<projectOrganization>geOrchestra</projectOrganization>
+							<maintainerName>PSC</maintainerName>
+							<maintainerEmail>psc@georchestra.org</maintainerEmail>
+							<excludeAllDependencies>true</excludeAllDependencies>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 	<repositories>
 		<repository>
             <snapshots>

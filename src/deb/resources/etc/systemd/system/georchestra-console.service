@@ -1,0 +1,16 @@
+[Unit]
+Description=geOrchestra Console
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=georchestra
+Group=georchestra
+WorkingDirectory=/srv/apps/georchestra-console
+ExecStart=/usr/bin/java -Dgeorchestra.datadir=/etc/georchestra -jar /srv/apps/georchestra-console/georchestra-console.jar
+SuccessExitStatus=143
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
