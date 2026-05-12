@@ -14,6 +14,18 @@
 	<name>console</name>
 	<description>Console webapp for geOrchestra (NG)</description>
 	<url/>
+	<distributionManagement>
+		<repository>
+			<id>geOrchestra-artifactory</id>
+			<name>geOrchestra Maven repository</name>
+			<url>https://artifactory.georchestra.org/artifactory/georchestra/</url>
+		</repository>
+		<snapshotRepository>
+			<id>geOrchestra-artifactory</id>
+			<name>geOrchestra Maven repository</name>
+			<url>https://artifactory.georchestra.org/artifactory/georchestra/</url>
+		</snapshotRepository>
+	</distributionManagement>
 	<licenses>
 		<license>
 			<name>GPL</name>
