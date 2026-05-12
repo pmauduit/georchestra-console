@@ -1,71 +1,97 @@
 # User Administration
 
-This page describes functional account administration from the manager interface. It is intended for superusers and delegated organization administrators.
+This page describes functional account administration from the manager interface.
+
+It is intended for super administrators and organization administrators with a delegation.
 
 ## What the Interface Allows
 
-From `Users`, you can usually:
+From the `Users` tab, you can generally:
 
-- browse accounts visible under your permissions;
-- search for a user by name, login, organization or e-mail;
-- open a user details page;
+- browse accounts visible according to your permissions;
+- search for a user by name, identifier, organization or email;
+- open a detailed user record;
 - create a user;
 - update account information;
 - attach the user to an organization;
 - manage visible roles;
-- validate or reject a pending account;
-- review messages and logs related to a user;
-- delete an account when the action is allowed.
+- validate or refuse a pending account;
+- consult messages and logs related to the user;
+- delete an account if the action is authorized.
 
-![Navigating in the users list](../images/manager-browse-all.png)
+![Navigation in the user list](../images/manager-browse-all.png)
 
 ## Typical Workflow
 
-### Review a User
+### Consult a User
 
 1. Open the `Users` tab.
 2. Use search or sorting.
-3. Click the user name.
-4. Review the organization, roles, e-mail and account status.
+3. Click the user's name.
+4. Check the organization, roles, email and account status.
 
-![User details screen](../images/account-userdetails.png)
+![User detail record](../images/account-userdetails.png)
 
 ### Create a User
 
 1. Open `Users`.
 2. Click `New user`.
-3. Fill the required fields: surname, first name, e-mail, login and organization.
-4. Choose the target organization.
+3. Fill in the mandatory fields: last name, first name, email, identifier and organization.
+4. Choose the attached organization.
 5. Save.
 
-The `USER` role is added automatically at creation. Organization-related roles may also be applied depending on LDAP configuration.
+At creation, the `USER` role is added automatically. Roles linked to the organization can also be applied depending on LDAP configuration.
 
 ### Update a User
 
-Depending on permissions, you may:
+Depending on your rights, you can:
 
-- correct the name or e-mail address;
-- change the linked organization;
-- define an expiration date;
+- correct the last name, first name or email;
+- change the organization attachment;
+- set an expiration date;
 - add an internal note;
-- update the login when the account is not external;
+- update the identifier if the account is not external;
 - confirm a pending account;
-- manage visible roles.
+- act on visible roles.
 
-When the organization changes, roles linked to the previous organization are removed and roles linked to the new organization may be added.
+When the organization attachment changes, roles linked to the former organization are removed and roles from the new organization may be added.
 
-### Manage Roles
+### Manage a User's Roles
 
-The `Roles` tab usually separates system roles from application roles.
+The `Roles` tab of the user record generally separates:
 
-Check the roles to grant, uncheck the roles to remove, then save.
+- system or administration roles;
+- application roles.
+
+Check the roles to assign, uncheck those to remove, then save.
 
 A delegated administrator can only modify roles included in their delegation.
 
+### Process Pending Accounts
+
+Pending accounts appear in the `pending` view.
+
+Before validation, check:
+
+- the user's identity;
+- the requested organization;
+- the email;
+- any contact information;
+- the existence of an associated pending organization.
+
+A user cannot be confirmed if their organization is still pending validation.
+
+### Delete a User
+
+The `Manage` tab allows deleting a user if the action is authorized.
+
+Deletion removes the account from LDAP, removes its roles and deletes any associated delegation.
+
 ## Points of Attention
 
-- An organization administrator does not necessarily see every user.
+- An organization administrator does not necessarily see all users.
 - Some protected accounts cannot be modified.
-- External or OAuth2 accounts may prevent login or password changes.
-- Some actions depend on administration delegations, not only on the global role.
-- Important actions are recorded in administration logs.
+- External or OAuth2 accounts do not always allow changing the identifier or password.
+- Some actions depend on administration delegations and not only on the global role.
+- Important actions are recorded in administration logs to trace changes.
+- Mail sending depends on technical configuration; when enabled, messages sent to a user can be consulted from their record.

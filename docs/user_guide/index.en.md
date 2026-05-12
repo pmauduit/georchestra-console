@@ -1,22 +1,28 @@
-# User guide index
+# User Guide Index
 
-This page is dedicated to the summary of the component's user guide, that is to say the reference documentation which describes all the functionalities and tools of the component intended for **users**.
-The table of contents for the guide is embedded here.
+This guide is intended for functional administrators of the geOrchestra Console.
 
-**Recommendations**:
+It describes what can be done from the graphical interface: account browsing, organization management, role assignment, request validation, administration action tracking and consultation of messages sent to users.
 
-- After this page, start with a "Global View" part of the tool which presents the main window of the component.
-- Add as many screenshots as possible to illustrate. Images are stored in the `images` directory.
+## Who Is This Guide For?
 
-Example of guide tree for Mapstore2:
+The guide mainly concerns:
 
-- Global view of the component
-- Manage layer settings
-- The attribute table
-- The menu bar
-- Print a card
-...
+- **super administrators**, who have a global view of users, organizations, roles and delegations;
+- **organization administrators**, who administer only the users, organizations and roles included in their delegation scope;
+- functional contacts who need to understand how rights are represented in geOrchestra;
+- any user who needs to update their account or retrieve their GDPR-related data.
 
+## Contents
 
+The following pages cover the main workflows:
 
+- **Getting started quickly**: access the manager and identify the essential actions.
+- **Global overview**: understand the general organization of the interface.
+- **Toolbar or menu**: use the `Users`, `Orgs`, `Roles`, `Delegations` and `Logs` tabs.
+- **User administration**: manage an account lifecycle and its rights.
+- **Functional rules**: understand roles, statuses and delegation limits.
 
+The manager can also trace changes through administration logs. If mail sending is enabled in the configuration, messages related to account lifecycle events can be sent and consulted from the interface.
+
+Operations requiring file changes, environment configuration or API integration are documented in the technical guides.
