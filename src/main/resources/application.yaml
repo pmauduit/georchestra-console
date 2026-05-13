@@ -19,9 +19,9 @@ spring:
       ddl-auto: update
   ldap:
     urls: ${ldapScheme}://${ldapHost}:${ldapPort}
-    base: dc=georchestra,dc=org
-    username: cn=admin,dc=georchestra,dc=org
-    password: secret
+    base: ${ldapBaseDn}
+    username: ${ldapAdminDn}
+    password: ${ldapAdminPassword}
   servlet:
     multipart:
       max-file-size: 5MB

@@ -82,7 +82,7 @@ public class PasswordRecoveryFormController {
     private final UserTokenDao userTokenDao;
     private final ReCaptchaParameters reCaptchaParameters;
 
-    // TODO
+    @Value("${recaptcha.activated:false}")
     private boolean reCaptchaActivated = false;
 
     @Autowired

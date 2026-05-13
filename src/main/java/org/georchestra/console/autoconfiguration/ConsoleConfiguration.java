@@ -76,9 +76,11 @@ public class ConsoleConfiguration {
         return new RolesApiImpl();
     }
 
-    public @Bean ReCaptchaParameters reCaptchaParameters() {
-        // TODO
-        return new ReCaptchaParameters("aaaa", "secret", "http://localhost:6000/verify");
+    public @Bean ReCaptchaParameters reCaptchaParameters(
+            @Value("${publicKey:}") String publicKey,
+            @Value("${privateKey:}") String privateKey,
+            @Value("${verificationURL:https://www.google.com/recaptcha/api/siteverify}") String verifyUrl) {
+        return new ReCaptchaParameters(publicKey, privateKey, verifyUrl);
     }
 
     public @Bean PasswordUtils passwordUtils(
@@ -207,17 +209,19 @@ public class ConsoleConfiguration {
         return new AreasService(orgsDao, null, "/console/public/areas.json");
     }
 
-    public @Bean UserRule userRule() {
-        return new UserRule();
+    public @Bean UserRule userRule(
+            @Value("${protectedUsersList:geoserver_privileged_user}") String[] protectedUsersList) {
+        UserRule userRule = new UserRule();
+        userRule.setListOfprotectedUsers(protectedUsersList);
+        return userRule;
     }
 
     public @Bean LogUtils logUtils(AdminLogDao adminLogDao, RoleProtected roleProtected) {
         return new LogUtils(adminLogDao, roleProtected);
     }
 
-    public @Bean Validation validation() {
-        // TODO: rethink configuration with classes to map from the yaml files in resources and/or datadir
-        return new Validation("");
+    public @Bean Validation validation(@Value("${requiredFields:}") String requiredFields) {
+        return new Validation(requiredFields);
     }
 
     public @Bean AdvancedDelegationDao advancedDelegationDao() {
@@ -240,17 +244,22 @@ public class ConsoleConfiguration {
         return new OrgsDaoImpl();
     }
 
-    public @Bean LdapDaoProperties ldapDaoProperties() {
-        // TODO: 1. it's redundant with spring's LdapTemplate / LdapContextSource ?
-        // 2. should be configurable in console.yaml
+    public @Bean LdapDaoProperties ldapDaoProperties(
+            @Value("${ldapBaseDn:dc=georchestra,dc=org}") String baseDn,
+            @Value("${ldapOrgsRdn:ou=orgs}") String orgsRdn,
+            @Value("${orgTypeValues:georchestraOrg}") String orgTypeValues,
+            @Value("${ldapPendingOrgsRdn:ou=pendingorgs}") String pendingOrgsRdn,
+            @Value("${ldapRolesRdn:ou=roles}") String rolesRdn,
+            @Value("${ldapPendingUsersRdn:ou=pendingusers}") String pendingUsersRdn,
+            @Value("${ldapUsersRdn:ou=users}") String usersRdn) {
         return new LdapDaoProperties()
-                .setBasePath("dc=georchestra,dc=org")
-                .setOrgSearchBaseDN("ou=orgs")
-                .setOrgTypeValues("georchestraOrg")
-                .setPendingOrgSearchBaseDN("ou=pendingorgs")
-                .setRoleSearchBaseDN("ou=roles")
-                .setPendingUserSearchBaseDN("ou=pendingusers")
-                .setUserSearchBaseDN("ou=users");
+                .setBasePath(baseDn)
+                .setOrgSearchBaseDN(orgsRdn)
+                .setOrgTypeValues(orgTypeValues)
+                .setPendingOrgSearchBaseDN(pendingOrgsRdn)
+                .setRoleSearchBaseDN(rolesRdn)
+                .setPendingUserSearchBaseDN(pendingUsersRdn)
+                .setUserSearchBaseDN(usersRdn);
     }
 
     public @Bean AccountDaoImpl accountDao(LdapTemplate ldapTemplate, LdapDaoProperties daoProperties) {

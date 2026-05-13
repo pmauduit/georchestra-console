@@ -3,7 +3,6 @@
 <head th:replace="~{fragments/layout :: head(#{account.create.title})}">
   <meta charset="UTF-8">
   <title>New account.</title>
-  <script th:if="${recaptchaActivated}" src="https://www.google.com/recaptcha/api.js" async defer></script>
 </head>
 <body>
 <th:block th:replace="~{fragments/layout :: appHeader('console')}"></th:block>
@@ -323,6 +322,7 @@
                    pattern="[A-Za-z][A-Za-z0-9_.-]*"
                    autocomplete="username"
                    th:required="${session.uidRequired}"
+                   th:readonly="${readonlyUid}"
                    th:attr="title=#{uid.error.invalid}">
             <p class="field-error" th:if="${#fields.hasErrors('uid')}" th:errors="*{uid}">
               Invalid uid
@@ -439,12 +439,14 @@
     </form>
   </section>
 </main>
+<script th:if="${recaptchaActivated}" src="https://www.google.com/recaptcha/api.js" async defer></script>
 <script th:src="@{/vendor/openlayers/ol-10.8.0.min.js}"></script>
 <script th:src="@{/js/area-selector.js}"></script>
 <script th:src="@{/js/console-form-utils.js}"></script>
 <script type="text/javascript">
   (function () {
     const form = document.getElementById("form");
+    const recaptchaResponse = document.getElementById("recaptcha_response_field");
     const firstName = document.getElementById("firstName");
     const surname = document.getElementById("surname");
     const uid = document.getElementById("uid");
@@ -453,6 +455,12 @@
     const indicator = document.getElementById("pwdQuality");
     const orgName = document.getElementById("orgName");
     const orgShortName = document.getElementById("orgShortName");
+
+    form?.addEventListener("submit", () => {
+      if (recaptchaResponse && window.grecaptcha) {
+        recaptchaResponse.value = window.grecaptcha.getResponse();
+      }
+    });
 
     if (!form || !password || !confirmPassword || !indicator) {
       return;

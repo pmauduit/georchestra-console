@@ -20,6 +20,7 @@
 package org.georchestra.console.ws.newaccount;
 
 import java.io.IOException;
+import java.text.Normalizer;
 import java.sql.SQLException;
 import java.time.Clock;
 import java.time.Instant;
@@ -111,22 +112,26 @@ public final class NewAccountFormController {
     @Autowired
     protected PasswordUtils passwordUtils;
 
+    @Value("${moderatedSignup:true}")
     private boolean moderatedSignup = true;
 
-    // TODO
+    @Value("${readonlyUid:false}")
+    private boolean readonlyUid = false;
+
+    @Value("${recaptcha.activated:false}")
     protected boolean reCaptchaActivated = false;
     private ReCaptchaParameters reCaptchaParameters;
 
-    // TODO
+    @Value("${privacy.policy.agreement.activated:false}")
     protected boolean privacyPolicyAgreementActivated = false;
 
-    // TODO
+    @Value("${privacy.policy.agreement.url:https://${domainName}/policy.html}")
     protected String privacyPolicyAgreementUrl;
 
-    // TODO
+    @Value("${data.processing.agreement.activated:false}")
     protected boolean consentAgreementActivated = false;
 
-    // TODO
+    @Value("${data.processing.agreement.url:https://${domainName}/consent.html}")
     protected String consentAgreementUrl;
 
     @Value("${competenceAreaEnabled:false}")
@@ -233,6 +238,7 @@ public final class NewAccountFormController {
         populateOrgsAndOrgTypes(model);
         populateCommonModelAttributes(model);
         model.addAttribute("moderatedSignup", this.moderatedSignup);
+        applyReadonlyUid(formBean);
         validateFields(formBean, result);
 
         if (result.hasErrors()) {
@@ -463,6 +469,25 @@ public final class NewAccountFormController {
         model.addAttribute("recaptchaActivated", this.reCaptchaActivated);
         model.addAttribute("pwdUtils", passwordUtils);
         model.addAttribute("competenceAreaEnabled", this.competenceAreaEnabled);
+        model.addAttribute("readonlyUid", this.readonlyUid);
+    }
+
+    private void applyReadonlyUid(AccountFormBean formBean) {
+        if (!readonlyUid) {
+            return;
+        }
+        String firstName = formBean.getFirstName() == null ? "" : formBean.getFirstName().trim();
+        String surname = formBean.getSurname() == null ? "" : formBean.getSurname().trim();
+        if (firstName.isEmpty() || surname.isEmpty()) {
+            formBean.setUid("");
+            return;
+        }
+        String seed = firstName.substring(0, 1) + surname;
+        String normalized = Normalizer.normalize(seed, Normalizer.Form.NFD)
+                .replaceAll("\\p{M}", "")
+                .toLowerCase()
+                .replaceAll("[^a-z0-9_.-]+", "");
+        formBean.setUid(accountDao.generateUid(normalized));
     }
 
     /**
