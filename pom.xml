@@ -374,7 +374,7 @@
 										<copy file="${project.build.directory}/${project.build.finalName}.jar"
 											  tofile="${project.build.directory}/deb/usr/share/lib/console-georchestra/georchestra-console-${project.version}.jar"/>
 										<symlink link="${project.build.directory}/deb/srv/apps/georchestra-console/georchestra-console.jar"
-												 resource="/usr/share/lib/console-georchestra/georchestra-console-${project.version}.jar"
+												 resource="../../../usr/share/lib/console-georchestra/georchestra-console-${project.version}.jar"
 												 overwrite="true"/>
 										<chmod perm="ugo+x">
 											<fileset dir="${project.build.directory}/deb">
