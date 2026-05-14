@@ -92,13 +92,13 @@ public class ChangePasswordFormController {
             boolean isExternalAuth = Objects.nonNull(request.getHeader(SEC_EXTERNAL_AUTHENTICATION))
                     && Boolean.parseBoolean(SecurityHeaders.decode(request.getHeader(SEC_EXTERNAL_AUTHENTICATION)));
             if (isUserAuthenticatedBySASL(uid.get()) || isExternalAuth) {
-                return "userManagedBySASL";
+                return "account/userManagedBySASL";
             }
 
             ChangePasswordFormBean formBean = new ChangePasswordFormBean();
             model.addAttribute(formBean);
             model.addAttribute("pwdUtils", passwordUtils);
-            return "changePasswordForm";
+            return "account/changePasswordForm";
         }
         return "forbidden";
     }
@@ -121,13 +121,13 @@ public class ChangePasswordFormController {
         if (username.isPresent()) {
             String uid = username.get();
             if (isUserAuthenticatedBySASL(uid)) {
-                return "userManagedBySASL";
+                return "account/userManagedBySASL";
             }
 
             passwordUtils.validate(formBean.getPassword(), formBean.getConfirmPassword(), result);
             model.addAttribute("pwdUtils", passwordUtils);
             if (result.hasErrors()) {
-                return "changePasswordForm";
+                return "account/changePasswordForm";
             }
 
             // change the user's password
@@ -138,7 +138,7 @@ public class ChangePasswordFormController {
             // log that password was changed for this user
             logUtils.createLog(uid, AdminLogType.USER_PASSWORD_CHANGED, null);
 
-            return "changePasswordForm";
+            return "account/changePasswordForm";
         }
         return "forbidden";
     }

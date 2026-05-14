@@ -1,0 +1,9 @@
+Hallo {name},
+
+Diese Nachricht informiert Sie darüber, dass Ihr Kennung auf der Plattform
+{instanceName} geändert wurde.
+
+Ihr neuer Login lautet: {uid}
+
+---
+Gesendet von {instanceName} ({publicUrl}/)

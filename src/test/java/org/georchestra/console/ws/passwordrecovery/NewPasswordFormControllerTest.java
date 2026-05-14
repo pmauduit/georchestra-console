@@ -75,7 +75,7 @@ public class NewPasswordFormControllerTest {
         Mockito.when(request.getSession()).thenReturn(Mockito.mock(HttpSession.class));
 
         String ret = ctrl.setupForm("test", model, request);
-        assertTrue(ret.equals("newPasswordForm"));
+        assertTrue(ret.equals("account/newPasswordForm"));
     }
 
     @Test
@@ -115,7 +115,7 @@ public class NewPasswordFormControllerTest {
         formBean.setPassword("password");
 
         String ret = ctrl.newPassword(formBean, result, sessionStatus);
-        assertTrue(ret.equals("passwordUpdated"));
+        assertTrue(ret.equals("account/passwordUpdated"));
     }
 
     @Test
@@ -129,7 +129,7 @@ public class NewPasswordFormControllerTest {
         formBean.setPassword("password");
 
         String ret = ctrl.newPassword(formBean, result, sessionStatus);
-        assertTrue(ret.equals("newPasswordForm"));
+        assertTrue(ret.equals("account/newPasswordForm"));
     }
 
     @Test

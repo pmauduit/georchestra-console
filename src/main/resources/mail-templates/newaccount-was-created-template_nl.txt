@@ -1,0 +1,10 @@
+Beste {name},
+
+Uw account op {publicUrl}/ is succesvol aangemaakt.
+Ga naar {publicUrl}/console/ om in te loggen met identificatie "{uid}" en uw wachtwoord.
+
+Veel plezier met geOrchestra,
+
+Uw platformbeheerder
+---
+Verzonden door {instanceName} ({publicUrl}/)

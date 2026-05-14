@@ -24,6 +24,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -202,5 +203,103 @@ public class ValidationTest {
         mockChanges.put("uuid", fakeUUID.toString());
         Assert.assertTrue(v.validateOrgUnicityByUniqueId(mockOrgsDao, mockChanges));
 
+    }
+
+    @Test
+    public void buildOrgShortNameCandidateUsesSingleWordRule() {
+        Validation validation = new Validation("");
+
+        Assert.assertEquals("GEOR", validation.buildOrgShortNameCandidate("géôrchestra"));
+        Assert.assertEquals("AB1", validation.buildOrgShortNameCandidate("ab1"));
+    }
+
+    @Test
+    public void buildOrgShortNameCandidateUsesTwoCharsPerWordRule() {
+        Validation validation = new Validation("");
+
+        Assert.assertEquals("OFNADEFO", validation.buildOrgShortNameCandidate("Office national des forêts"));
+        Assert.assertEquals("AG12BE", validation.buildOrgShortNameCandidate("Agence 12 Beta"));
+    }
+
+    @Test
+    public void validateOrgUnicityByShortNameUsesDirectLookup() {
+        Validation validation = new Validation("");
+        Org existing = new Org();
+        existing.setId("org-1");
+        existing.setShortName("ABCD");
+
+        OrgsDao directLookupDao = new OrgsDao() {
+            @Override
+            public List<Org> findAll() {
+                return java.util.List.of();
+            }
+
+            @Override
+            public List<Org> findValidated() {
+                return java.util.List.of();
+            }
+
+            @Override
+            public Org findByCommonName(String commonName) {
+                return null;
+            }
+
+            public Org findByShortName(String shortName) {
+                return "ABCD".equals(shortName) ? existing : null;
+            }
+
+            @Override
+            public Org findByUser(org.georchestra.ds.users.Account user) {
+                return null;
+            }
+
+            @Override
+            public Org findByOrgUniqueId(String orgUniqueId) {
+                return null;
+            }
+
+            @Override
+            public Org findById(UUID uuid) {
+                return null;
+            }
+
+            @Override
+            public void insert(Org org) {
+            }
+
+            @Override
+            public void update(Org org) {
+            }
+
+            @Override
+            public void delete(Org org) {
+            }
+
+            @Override
+            public void linkUser(org.georchestra.ds.users.Account user) {
+            }
+
+            @Override
+            public void unlinkUser(org.georchestra.ds.users.Account user) {
+            }
+
+            @Override
+            public String reGenerateId(String orgName, String allowedId) {
+                return null;
+            }
+
+            @Override
+            public String generateId(String org_name) {
+                return null;
+            }
+
+            @Override
+            public String[] getOrgTypeValues() {
+                return new String[0];
+            }
+        };
+
+        Assert.assertFalse(validation.validateOrgUnicityByShortName(directLookupDao, "ABCD", null));
+        Assert.assertTrue(validation.validateOrgUnicityByShortName(directLookupDao, "ABCD", "org-1"));
     }
 }

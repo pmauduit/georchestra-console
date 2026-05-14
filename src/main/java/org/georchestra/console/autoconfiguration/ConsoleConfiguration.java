@@ -39,8 +39,12 @@ import org.georchestra.ds.users.UserRule;
 import org.georchestra.security.api.OrganizationsApi;
 import org.georchestra.security.api.RolesApi;
 import org.georchestra.security.api.UsersApi;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.boot.jdbc.DataSourceBuilder;
+
+import javax.sql.DataSource;
 import org.springframework.ldap.core.LdapTemplate;
 
 import javax.sql.DataSource;
@@ -72,17 +76,109 @@ public class ConsoleConfiguration {
         return new RolesApiImpl();
     }
 
-    public @Bean ReCaptchaParameters reCaptchaParameters() {
-        // TODO
-        return new ReCaptchaParameters("aaaa", "secret", "http://localhost:6000/verify");
+    public @Bean ReCaptchaParameters reCaptchaParameters(
+            @Value("${publicKey:}") String publicKey,
+            @Value("${privateKey:}") String privateKey,
+            @Value("${verificationURL:https://www.google.com/recaptcha/api/siteverify}") String verifyUrl) {
+        return new ReCaptchaParameters(publicKey, privateKey, verifyUrl);
     }
 
-    public @Bean PasswordUtils passwordUtils() {
-        return new PasswordUtils();
+    public @Bean PasswordUtils passwordUtils(
+            @Value("${password.minimumLength:8}") int minimumLength,
+            @Value("${password.requireLowers:false}") boolean requireLowers,
+            @Value("${password.requireUppers:false}") boolean requireUppers,
+            @Value("${password.requireDigits:false}") boolean requireDigits,
+            @Value("${password.requireSpecials:false}") boolean requireSpecials) {
+        PasswordUtils passwordUtils = new PasswordUtils();
+        passwordUtils.setMinimumLength(minimumLength);
+        passwordUtils.setRequireLowers(requireLowers);
+        passwordUtils.setRequireUppers(requireUppers);
+        passwordUtils.setRequireDigits(requireDigits);
+        passwordUtils.setRequireSpecials(requireSpecials);
+        return passwordUtils;
     }
 
-    public @Bean EmailFactory emailFactory() {
-        return new EmailFactory();
+    @Bean(name = "dataSourceGeonetwork")
+    public DataSource dataSourceGeonetwork(
+            @Value("${pgsqlGNHost:${pgsqlHost}}") String host,
+            @Value("${pgsqlGNPort:${pgsqlPort}}") int port,
+            @Value("${pgsqlGNDatabase:${pgsqlDatabase}}") String database,
+            @Value("${pgsqlGNUser:${pgsqlUser}}") String user,
+            @Value("${pgsqlGNPassword:${pgsqlPassword}}") String password) {
+        String url = String.format("jdbc:postgresql://%s:%d/%s", host, port, database);
+        return DataSourceBuilder.create()
+                .url(url)
+                .username(user)
+                .password(password)
+                .build();
+    }
+
+    public @Bean EmailFactory emailFactory(
+            @Value("${smtpHost:localhost}") String smtpHost,
+            @Value("${smtpPort:25}") int smtpPort,
+            @Value("${emailHtml:false}") boolean emailHtml,
+            @Value("${replyTo:}") String replyTo,
+            @Value("${from:}") String from,
+            @Value("${templateEncoding:UTF-8}") String templateEncoding,
+            @Value("${domainName:localhost}") String domainName,
+            @Value("${publicUrl:}") String publicUrl,
+            @Value("${instanceName:geOrchestra}") String instanceName,
+            @Value("${administratorEmail:georchestra@localhost}") String administratorEmail,
+            @Value("${subject.account.created:}") String accountCreatedSubject,
+            @Value("${subject.account.in.process:}") String accountInProcessSubject,
+            @Value("${subject.requires.moderation:}") String requiresModerationSubject,
+            @Value("${subject.change.password:}") String changePasswordSubject,
+            @Value("${subject.change.password-oauth2:}") String changePasswordOAuth2Subject,
+            @Value("${subject.change.email:}") String changeEmailSubject,
+            @Value("${subject.account.uid.renamed:}") String accountUidRenamedSubject,
+            @Value("${subject.new.account.notification:}") String newAccountNotificationSubject,
+            @Value("${subject.new.oauth2account.notification:}") String newOAuth2AccountNotificationSubject) {
+        EmailFactory factory = new EmailFactory();
+        factory.setSmtpHost(smtpHost);
+        factory.setSmtpPort(smtpPort);
+        factory.setEmailHtml(emailHtml);
+        factory.setReplyTo(replyTo == null || replyTo.isBlank() ? administratorEmail : replyTo);
+        factory.setFrom(from == null || from.isBlank() ? administratorEmail : from);
+        factory.setBodyEncoding("UTF-8");
+        factory.setSubjectEncoding("UTF-8");
+        factory.setTemplateEncoding(templateEncoding);
+        factory.setAccountWasCreatedEmailFile("newaccount-was-created-template.txt");
+        factory.setAccountWasCreatedEmailSubject(
+                fallbackSubject(accountCreatedSubject, "[%s] Your account has been created", instanceName));
+        factory.setAccountCreationInProcessEmailFile("account-creation-in-progress-template.txt");
+        factory.setAccountCreationInProcessEmailSubject(
+                fallbackSubject(accountInProcessSubject, "[%s] Your new account is waiting for validation", instanceName));
+        factory.setNewAccountRequiresModerationEmailFile("newaccount-requires-moderation-template.txt");
+        factory.setNewAccountRequiresModerationEmailSubject(
+                fallbackSubject(requiresModerationSubject, "[%s] New account waiting for validation", instanceName));
+        factory.setChangePasswordEmailFile("changepassword-email-template.txt");
+        factory.setChangePasswordEmailSubject(
+                fallbackSubject(changePasswordSubject, "[%s] Update your password", instanceName));
+        factory.setChangePasswordOAuth2EmailFile("changepasswordoauth2-email-template.txt");
+        factory.setChangePasswordOAuth2EmailSubject(
+                fallbackSubject(changePasswordOAuth2Subject, "[%s] Update your password", instanceName));
+        factory.setChangeEmailAddressEmailFile("changeemail-email-template.txt");
+        factory.setChangeEmailAddressEmailSubject(
+                fallbackSubject(changeEmailSubject, "[%s] Update your e-mail address", instanceName));
+        factory.setAccountUidRenamedEmailFile("account-uid-renamed.txt");
+        factory.setAccountUidRenamedEmailSubject(
+                fallbackSubject(accountUidRenamedSubject, "[%s] New login for your account", instanceName));
+        factory.setNewAccountNotificationEmailFile("newaccount-notification-template.txt");
+        factory.setNewOAuth2AccountNotificationEmailFile("new-oauth2-account-notification-template.txt");
+        factory.setNewAccountNotificationEmailSubject(
+                fallbackSubject(newAccountNotificationSubject, "[%s] New account created", instanceName));
+        factory.setNewOAuth2AccountNotificationEmailSubject(
+                fallbackSubject(newOAuth2AccountNotificationSubject, "[%s] New OAuth2 account created", instanceName));
+        factory.setPublicUrl(publicUrl == null || publicUrl.isBlank() ? "https://" + domainName : publicUrl);
+        factory.setInstanceName(instanceName);
+        factory.setAdministratorEmail(administratorEmail);
+        return factory;
+    }
+
+    private String fallbackSubject(String configuredValue, String defaultPattern, String instanceName) {
+        return configuredValue == null || configuredValue.isBlank()
+                ? defaultPattern.formatted(instanceName)
+                : configuredValue;
     }
 
     public @Bean UserInfoExporter userInfoExporter(AccountDao accountDao, OrgsDao orgsDao) {
@@ -113,17 +209,19 @@ public class ConsoleConfiguration {
         return new AreasService(orgsDao, null, "/console/public/areas.json");
     }
 
-    public @Bean UserRule userRule() {
-        return new UserRule();
+    public @Bean UserRule userRule(
+            @Value("${protectedUsersList:geoserver_privileged_user}") String[] protectedUsersList) {
+        UserRule userRule = new UserRule();
+        userRule.setListOfprotectedUsers(protectedUsersList);
+        return userRule;
     }
 
     public @Bean LogUtils logUtils(AdminLogDao adminLogDao, RoleProtected roleProtected) {
         return new LogUtils(adminLogDao, roleProtected);
     }
 
-    public @Bean Validation validation() {
-        // TODO: rethink configuration with classes to map from the yaml files in resources and/or datadir
-        return new Validation("");
+    public @Bean Validation validation(@Value("${requiredFields:}") String requiredFields) {
+        return new Validation(requiredFields);
     }
 
     public @Bean AdvancedDelegationDao advancedDelegationDao() {
@@ -146,17 +244,22 @@ public class ConsoleConfiguration {
         return new OrgsDaoImpl();
     }
 
-    public @Bean LdapDaoProperties ldapDaoProperties() {
-        // TODO: 1. it's redundant with spring's LdapTemplate / LdapContextSource ?
-        // 2. should be configurable in console.yaml
+    public @Bean LdapDaoProperties ldapDaoProperties(
+            @Value("${ldapBaseDn:dc=georchestra,dc=org}") String baseDn,
+            @Value("${ldapOrgsRdn:ou=orgs}") String orgsRdn,
+            @Value("${orgTypeValues:georchestraOrg}") String orgTypeValues,
+            @Value("${ldapPendingOrgsRdn:ou=pendingorgs}") String pendingOrgsRdn,
+            @Value("${ldapRolesRdn:ou=roles}") String rolesRdn,
+            @Value("${ldapPendingUsersRdn:ou=pendingusers}") String pendingUsersRdn,
+            @Value("${ldapUsersRdn:ou=users}") String usersRdn) {
         return new LdapDaoProperties()
-                .setBasePath("dc=georchestra,dc=org")
-                .setOrgSearchBaseDN("ou=orgs")
-                .setOrgTypeValues("georchestraOrg")
-                .setPendingOrgSearchBaseDN("ou=pendingorgs")
-                .setRoleSearchBaseDN("ou=roles")
-                .setPendingUserSearchBaseDN("ou=pendingusers")
-                .setUserSearchBaseDN("ou=users");
+                .setBasePath(baseDn)
+                .setOrgSearchBaseDN(orgsRdn)
+                .setOrgTypeValues(orgTypeValues)
+                .setPendingOrgSearchBaseDN(pendingOrgsRdn)
+                .setRoleSearchBaseDN(rolesRdn)
+                .setPendingUserSearchBaseDN(pendingUsersRdn)
+                .setUserSearchBaseDN(usersRdn);
     }
 
     public @Bean AccountDaoImpl accountDao(LdapTemplate ldapTemplate, LdapDaoProperties daoProperties) {

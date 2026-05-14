@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>4.0.1</version>
+		<version>4.0.3</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>org.georchestra</groupId>
@@ -14,6 +14,18 @@
 	<name>console</name>
 	<description>Console webapp for geOrchestra (NG)</description>
 	<url/>
+	<distributionManagement>
+		<repository>
+			<id>geOrchestra-artifactory</id>
+			<name>geOrchestra Maven repository</name>
+			<url>https://artifactory.georchestra.org/artifactory/georchestra/</url>
+		</repository>
+		<snapshotRepository>
+			<id>geOrchestra-artifactory</id>
+			<name>geOrchestra Maven repository</name>
+			<url>https://artifactory.georchestra.org/artifactory/georchestra/</url>
+		</snapshotRepository>
+	</distributionManagement>
 	<licenses>
 		<license>
 			<name>GPL</name>
@@ -31,8 +43,8 @@
 		<url/>
 	</scm>
 	<properties>
-		<java.version>17</java.version>
-		<georchestra.version>25.0.1-SNAPSHOT</georchestra.version>
+		<java.version>21</java.version>
+		<georchestra.version>25.0.3-SNAPSHOT</georchestra.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -54,6 +66,11 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-devtools</artifactId>
+			<optional>true</optional>
 		</dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -78,10 +95,6 @@
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-ldap</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>org.springframework.amqp</groupId>
-			<artifactId>spring-rabbit</artifactId>
-		</dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-thymeleaf</artifactId>
@@ -95,12 +108,12 @@
 		<dependency>
 			<groupId>commons-validator</groupId>
 			<artifactId>commons-validator</artifactId>
-			<version>1.9.0</version>
+			<version>1.10.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-csv</artifactId>
-			<version>1.14.0</version>
+			<version>1.14.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.zeroturnaround</groupId>
@@ -110,47 +123,47 @@
 		<dependency>
 			<groupId>com.graphhopper.external</groupId>
 			<artifactId>jackson-datatype-jts</artifactId>
-			<version>2.19.2</version>
+			<version>2.21.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.json</groupId>
 			<artifactId>json</artifactId>
-			<version>20240303</version>
+			<version>20251224</version>
 		</dependency>
 		<dependency>
 			<groupId>com.sun.mail</groupId>
 			<artifactId>jakarta.mail</artifactId>
-			<version>2.0.1</version>
+			<version>2.0.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.geotools</groupId>
 			<artifactId>gt-geojson</artifactId>
-			<version>34.1</version>
+			<version>34.3</version>
 		</dependency>
 		<dependency>
 			<groupId>org.geotools</groupId>
 			<artifactId>gt-geojson-store</artifactId>
-			<version>34.1</version>
+			<version>34.3</version>
 		</dependency>
 		<dependency>
 			<groupId>org.geotools</groupId>
 			<artifactId>gt-api</artifactId>
-			<version>34.1</version>
+			<version>34.3</version>
 		</dependency>
 		<dependency>
 			<groupId>org.geotools</groupId>
 			<artifactId>gt-main</artifactId>
-			<version>34.1</version>
+			<version>34.3</version>
 		</dependency>
 		<dependency>
 			<groupId>org.ldaptive</groupId>
 			<artifactId>ldaptive</artifactId>
-			<version>2.3.0</version>
+			<version>2.5.0</version>
 		</dependency>
 		<dependency>
 			<groupId>com.googlecode.ez-vcard</groupId>
 			<artifactId>ez-vcard</artifactId>
-			<version>0.12.1</version>
+			<version>0.12.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.georchestra</groupId>
@@ -211,9 +224,9 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.testcontainers</groupId>
-			<artifactId>rabbitmq</artifactId>
-			<version>1.21.3</version>
+			<groupId>org.jsoup</groupId>
+			<artifactId>jsoup</artifactId>
+			<version>1.18.3</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
@@ -266,6 +279,34 @@
 				<version>3.5.0</version>
 			</plugin>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <argLine>@{argLine} -javaagent:${settings.localRepository}/org/mockito/mockito-core/${mockito.version}/mockito-core-${mockito.version}.jar</argLine>
+                    <excludes>
+                        <exclude>**/*IT.java</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <configuration>
+                    <argLine>@{argLine} -javaagent:${settings.localRepository}/org/mockito/mockito-core/${mockito.version}/mockito-core-${mockito.version}.jar</argLine>
+                    <includes>
+                        <include>**/*IT.java</include>
+                    </includes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>0.8.14</version>
@@ -286,6 +327,84 @@
             </plugin>
 		</plugins>
 	</build>
+	<profiles>
+		<profile>
+			<id>debianPackage</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-resources-plugin</artifactId>
+						<version>3.3.1</version>
+						<executions>
+							<execution>
+								<id>copy-deb-resources</id>
+								<phase>process-resources</phase>
+								<goals>
+									<goal>copy-resources</goal>
+								</goals>
+								<configuration>
+									<overwrite>true</overwrite>
+									<outputDirectory>${project.build.directory}/deb</outputDirectory>
+									<resources>
+										<resource>
+											<directory>src/deb/resources</directory>
+											<filtering>false</filtering>
+										</resource>
+									</resources>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-antrun-plugin</artifactId>
+						<version>3.1.0</version>
+						<executions>
+							<execution>
+								<id>prepare-deb-layout</id>
+								<phase>package</phase>
+								<goals>
+									<goal>run</goal>
+								</goals>
+								<configuration>
+									<target>
+										<mkdir dir="${project.build.directory}/deb/usr/share/lib/console-georchestra"/>
+										<mkdir dir="${project.build.directory}/deb/srv/apps/georchestra-console"/>
+										<copy file="${project.build.directory}/${project.build.finalName}.jar"
+											  tofile="${project.build.directory}/deb/usr/share/lib/console-georchestra/georchestra-console-${project.version}.jar"/>
+										<symlink link="${project.build.directory}/deb/srv/apps/georchestra-console/georchestra-console.jar"
+												 resource="../../../usr/share/lib/console-georchestra/georchestra-console-${project.version}.jar"
+												 overwrite="true"/>
+										<chmod perm="ugo+x">
+											<fileset dir="${project.build.directory}/deb">
+												<include name="DEBIAN/post*"/>
+												<include name="DEBIAN/pre*"/>
+											</fileset>
+										</chmod>
+									</target>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>net.sf.debian-maven</groupId>
+						<artifactId>debian-maven-plugin</artifactId>
+						<version>1.0.6</version>
+						<configuration>
+							<packageName>georchestra-console</packageName>
+							<packageDescription>geOrchestra Console Spring Boot application</packageDescription>
+							<packageVersion>${project.version}</packageVersion>
+							<projectOrganization>geOrchestra</projectOrganization>
+							<maintainerName>PSC</maintainerName>
+							<maintainerEmail>psc@georchestra.org</maintainerEmail>
+							<excludeAllDependencies>true</excludeAllDependencies>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 	<repositories>
 		<repository>
             <snapshots>

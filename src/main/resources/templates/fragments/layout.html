@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en" th:lang="${#locale.toLanguageTag()}" xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="head(title)">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title th:text="${title}">Console</title>
+  <link rel="stylesheet" th:if="${header != null and !#strings.isEmpty(header.georchestraStylesheet)}"
+        th:href="${header.georchestraStylesheet}">
+  <link rel="stylesheet" th:href="@{/css/console-ui.css}">
+</head>
+<body>
+<th:block th:fragment="appHeader(activeApp)">
+  <a class="skip-link" href="#main-content" th:text="#{common.skipToContent}">Skip to content</a>
+  <div id="go_head" th:if="${param.noheader == null and header != null}">
+    <geor-header th:attr="logo-url=${header.logoUrl},
+                          stylesheet=${header.georchestraStylesheet},
+                          config-file=${header.headerConfigFile},
+                          legacy-header=${header.useLegacyHeader},
+                          legacy-url=${header.headerUrl},
+                          active-app=${activeApp}"
+                 th:style="|height:${header.headerHeight}px;|">
+    </geor-header>
+    <script th:src="${header.headerScript}"></script>
+  </div>
+</th:block>
+</body>
+</html>

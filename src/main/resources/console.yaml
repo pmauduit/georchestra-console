@@ -1,5 +1,118 @@
+# Base geOrchestra paths
+georchestra.datadir: /etc/georchestra
+
+# PostgreSQL used by Console
+pgsqlHost: localhost
+pgsqlPort: 15432
+pgsqlDatabase: georchestra
+pgsqlUser: georchestra
+pgsqlPassword: georchestra
+
+# PostgreSQL used for GeoNetwork/GDPR operations.
+# Defaults in code fall back to pgsql* when these keys are omitted.
+pgsqlGNHost: ${pgsqlHost}
+pgsqlGNPort: ${pgsqlPort}
+pgsqlGNDatabase: ${pgsqlDatabase}
+pgsqlGNUser: ${pgsqlUser}
+pgsqlGNPassword: ${pgsqlPassword}
+
+# LDAP
 ldapScheme: ldap
 ldapHost: localhost
 ldapPort: 3389
+ldapBaseDn: dc=georchestra,dc=org
+ldapAdminDn: cn=admin,dc=georchestra,dc=org
+ldapAdminPassword: secret
+ldapUsersRdn: ou=users
+ldapRolesRdn: ou=roles
+ldapOrgsRdn: ou=orgs
+ldapPendingUsersRdn: ou=pendingusers
+ldapPendingOrgsRdn: ou=pendingorgs
+protectedUsersList: geoserver_privileged_user
+
+# Public instance
 domainName: localhost
+publicUrl: ""
+publicContextPath: /console
+instanceName: geOrchestra
 administratorEmail: psc@georchestra.org
+
+# Header and UI integration
+useLegacyHeader: false
+headerUrl: /header/
+headerHeight: 80
+headerScript: https://cdn.jsdelivr.net/gh/georchestra/header@dist/header.js
+headerConfigFile: ""
+georchestraStylesheet: ""
+logoUrl: https://www.georchestra.org/public/georchestra-logo.svg
+
+# Feature flags
+analyticsEnabled: true
+extractorappEnabled: false
+competenceAreaEnabled: false
+
+# Account creation
+moderatedSignup: true
+readonlyUid: false
+requiredFields: firstName,surname,org,orgType
+orgTypeValues: Association,Company,NGO,Individual,Other
+
+# Password policy
+password.minimumLength: 8
+password.requireLowers: false
+password.requireUppers: false
+password.requireDigits: false
+password.requireSpecials: false
+
+# Agreements displayed on public account creation
+privacy.policy.agreement.activated: false
+privacy.policy.agreement.url: https://${domainName}/policy.html
+data.processing.agreement.activated: false
+data.processing.agreement.url: https://${domainName}/consent.html
+
+# reCAPTCHA
+recaptcha.activated: false
+verificationURL: https://www.google.com/recaptcha/api/siteverify
+privateKey: ""
+publicKey: ""
+
+# SMTP and mail rendering
+smtpHost: localhost
+smtpPort: 25
+emailHtml: false
+replyTo: ""
+from: ""
+templateEncoding: UTF-8
+
+# Mail subjects. Empty values let the application use its built-in defaults.
+subject.account.created: ""
+subject.account.in.process: ""
+subject.requires.moderation: ""
+subject.change.password: ""
+subject.change.password-oauth2: ""
+subject.change.email: ""
+subject.account.uid.renamed: ""
+subject.new.account.notification: ""
+subject.new.oauth2account.notification: ""
+
+# Email proxy
+emailProxyFromAddress: ${administratorEmail}
+emailProxyMaxRecipient: 10
+emailProxyMaxBodySize: 10000
+emailProxyMaxSubjectSize: 200
+emailProxyRecipientWhitelist: ${administratorEmail}
+
+# Competence areas
+AreasUrl: area.geojson
+AreasKey: INSEE_COM
+AreasValue: NOM_COM
+AreasGroup: NOM_DEP
+
+# GDPR
+gdpr.allowAccountDeletion: true
+gdpr.displayMembersList: false
+warnUserIfUidModified: true
+
+# SASL
+saslEnabled: false
+saslServer: ""

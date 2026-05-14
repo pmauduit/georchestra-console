@@ -1,0 +1,15 @@
+Beste beheerder,
+
+Een nieuwe gebruiker heeft zich via OAuth2 geregistreerd op {instanceName}:
+
+Naam: {name}
+E-mail: {email}
+Lokale identificatie: {uid}
+Organisatie: {org}
+Identity provider: {providerName}
+Provider-ID: {providerUid}
+
+Beheer dit account op {publicUrl}/console/manager/users/{uid}/infos.
+
+---
+Dit bericht is automatisch verzonden door {instanceName} ({publicUrl}/), gelieve niet te antwoorden.

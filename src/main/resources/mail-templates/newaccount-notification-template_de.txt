@@ -1,0 +1,13 @@
+Hallo Admin,
+
+Ein neuer {oauth2}-Benutzer hat sich auf {publicUrl}/ registriert!
+
+Benutzername: {name}
+Benutzer-E-Mail: {email}
+{uid_msg}{org_msg}{provider_msg}
+
+Sie können die Kontoparameter von {name} unter {publicUrl}/console/manager/users/{user_id}/infos verwalten!
+
+
+---
+Gesendet von {instanceName} ({publicUrl}/)

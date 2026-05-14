@@ -13,13 +13,25 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - name: Set up JDK 17
+    - name: Set up JDK 21
       uses: actions/setup-java@v4
       with:
-        java-version: '17'
+        java-version: '21'
         distribution: 'temurin'
         cache: maven
+        server-id: geOrchestra-artifactory
+        server-username: ARTIFACTORY_USERNAME_REF
+        server-password: ARTIFACTORY_TOKEN_REF
 
     - name: Build with Maven
       run: mvn -B verify --file pom.xml
 
+    - name: Build Debian package
+      run: mvn -B package deb:package -PdebianPackage --file pom.xml -DskipTests
+
+    - name: Publish jar in Artifactory
+      if: github.repository == 'georchestra/georchestra-console' && github.actor != 'dependabot[bot]' && github.event_name != 'pull_request'
+      run: mvn -B deploy --file pom.xml -DskipTests
+      env:
+        ARTIFACTORY_TOKEN_REF: ${{ secrets.ARTIFACTORY_TOKEN }}
+        ARTIFACTORY_USERNAME_REF: ${{ secrets.ARTIFACTORY_USERNAME }}

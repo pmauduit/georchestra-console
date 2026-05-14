@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en" th:lang="${#locale.toLanguageTag()}" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{manager.usermessages.title})}">
+  <meta charset="UTF-8">
+  <title>User messages</title>
+</head>
+<body>
+<th:block th:replace="~{fragments/layout :: appHeader('console')}"></th:block>
+<main id="main-content" tabindex="-1" class="page">
+  <section class="hero">
+    <div class="hero-inline">
+      <p class="hero-subtitle" th:text="#{manager.usermessages.title}">User messages</p>
+      <p class="hero-text" th:text="#{manager.usermessages.description}">
+        Review the emails sent to this account and compose a new one when needed.
+      </p>
+    </div>
+  </section>
+
+  <nav class="manager-tabs">
+    <a class="manager-tab" th:href="@{/manager/home}" th:text="#{nav.dashboard}">Dashboard</a>
+    <a class="manager-tab active" th:href="@{/manager/browse/all/users}" th:text="#{nav.users}">Users</a>
+    <a class="manager-tab" th:href="@{/manager/orgs/}" th:text="#{nav.orgs}">Orgs</a>
+    <a class="manager-tab" th:href="@{/manager/roles/all}" th:text="#{nav.roles}">Roles</a>
+    <a class="manager-tab" th:if="${isSuperuserView}" th:href="@{/manager/delegations}" th:text="#{nav.delegations}">Delegations</a>
+    <a class="manager-tab" th:href="@{/manager/logs}" th:text="#{manager.logs.title}">Logs</a>
+  </nav>
+
+  <div class="layout">
+    <section class="card">
+      <div class="manager-user-header">
+        <div>
+          <p class="muted">
+            <a th:href="@{/manager/users/{uid}/infos(uid=${managedUser.uid})}" th:text="#{manager.usermessages.back}">
+              Back to user details
+            </a>
+          </p>
+          <h1 th:text="${managedUser.commonName != null and !#strings.isEmpty(managedUser.commonName) ? managedUser.commonName : managedUser.uid}">
+            User name
+          </h1>
+          <p class="muted" th:text="${managedUser.uid}">uid</p>
+        </div>
+        <a class="button button-primary"
+           th:if="${selectedMessage == null and !compose}"
+           th:href="@{/manager/users/{uid}/messages(uid=${managedUser.uid},compose=true)}"
+           th:text="#{manager.usermessages.compose}">
+          Compose
+        </a>
+      </div>
+
+      <div id="manager-user-messages-feedback" class="alert" hidden aria-live="polite"></div>
+
+      <div th:if="${compose}">
+        <form id="manager-user-messages-form" class="manager-user-form">
+          <fieldset class="fieldset">
+            <legend th:text="#{manager.usermessages.compose}">Compose</legend>
+            <div class="form-grid manager-user-form-grid">
+              <div class="field field-span-2" th:if="${!#lists.isEmpty(templates)}">
+                <label for="message-template" th:text="#{manager.usermessages.template}">Template</label>
+                <select id="message-template">
+                  <option value="" th:text="#{manager.usermessages.template.none}">No template</option>
+                  <option th:each="template : ${templates}"
+                          th:value="${template.id()}"
+                          th:text="${template.name()}"
+                          th:attr="data-subject=${template.name()},data-content=${template.content()}">
+                    Template
+                  </option>
+                </select>
+              </div>
+
+              <div class="field field-span-2">
+                <label for="message-subject" th:text="#{manager.usermessages.subject}">Subject</label>
+                <input id="message-subject" name="subject" type="text" maxlength="200">
+              </div>
+
+              <div class="field field-span-2">
+                <label for="message-content" th:text="#{manager.usermessages.content}">Content</label>
+                <textarea id="message-content" name="content" required></textarea>
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset class="fieldset" th:if="${!#lists.isEmpty(attachments)}">
+            <legend th:text="#{manager.usermessages.attachments}">Attachments</legend>
+            <div class="form-grid manager-role-grid">
+              <label class="checkbox manager-role-option" th:each="attachment : ${attachments}">
+                <input type="checkbox" name="attachments" th:value="${attachment.id()}">
+                <span>
+                  <strong th:text="${attachment.name()}">Attachment</strong>
+                  <small class="muted" th:if="${attachment.mimeType() != null}" th:text="${attachment.mimeType()}">mime/type</small>
+                </span>
+              </label>
+            </div>
+          </fieldset>
+
+          <div class="actions">
+            <button type="submit" class="button button-primary" th:text="#{manager.usermessages.send}">Send</button>
+            <a class="button button-link" th:href="@{/manager/users/{uid}/messages(uid=${managedUser.uid})}"
+               th:text="#{manager.userinfo.cancel}">Cancel</a>
+          </div>
+        </form>
+      </div>
+
+      <div th:if="${selectedMessage != null}">
+        <div class="summary-list">
+          <div>
+            <dt th:text="#{manager.usermessages.sender}">Sender</dt>
+            <dd th:text="${selectedMessage.sender()}">sender</dd>
+          </div>
+          <div>
+            <dt th:text="#{manager.usermessages.date}">Date</dt>
+            <dd th:text="${#dates.format(selectedMessage.date(), 'dd/MM/yyyy HH:mm')}">date</dd>
+          </div>
+          <div>
+            <dt th:text="#{manager.usermessages.subject}">Subject</dt>
+            <dd th:text="${#strings.isEmpty(selectedMessage.subject()) ? #messages.msg('manager.usermessages.noSubject') : selectedMessage.subject()}">
+              Subject
+            </dd>
+          </div>
+        </div>
+
+        <hr>
+
+        <article class="manager-message-body" th:utext="${selectedMessage.body()}">
+          Message body
+        </article>
+
+        <section th:if="${!#lists.isEmpty(selectedMessage.attachments())}">
+          <hr>
+          <h2 class="org-title" th:text="#{manager.usermessages.attachments}">Attachments</h2>
+          <ul class="manager-message-attachments">
+            <li th:each="attachment : ${selectedMessage.attachments()}">
+              <span th:text="${attachment.name()}">Attachment</span>
+              <small class="muted" th:if="${attachment.mimeType() != null}" th:text="${attachment.mimeType()}">mime/type</small>
+            </li>
+          </ul>
+        </section>
+
+        <div class="actions">
+          <a class="button button-link" th:href="@{/manager/users/{uid}/messages(uid=${managedUser.uid})}"
+             th:text="#{manager.usermessages.close}">Close</a>
+        </div>
+      </div>
+
+      <div th:if="${selectedMessage == null and !compose}">
+        <p class="muted" th:text="#{manager.usermessages.total(${#lists.size(messages)})}">Messages: 0</p>
+        <div class="table-wrapper">
+          <table class="table">
+            <thead>
+            <tr>
+              <th th:text="#{manager.usermessages.date}">Date</th>
+              <th th:text="#{manager.usermessages.subject}">Subject</th>
+              <th th:text="#{manager.usermessages.sender}">Sender</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="message : ${messages}">
+              <td th:text="${#dates.format(message.date(), 'dd/MM/yyyy')}">01/01/2025</td>
+              <td>
+                <a th:href="@{/manager/users/{uid}/messages(uid=${managedUser.uid},msgid=${message.id()})}"
+                   th:text="${#strings.isEmpty(message.subject()) ? #messages.msg('manager.usermessages.noSubject') : message.subject()}">
+                  Subject
+                </a>
+              </td>
+              <td th:text="${message.sender()}">sender</td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(messages)}">
+              <td colspan="3" class="empty" th:text="#{manager.usermessages.empty}">No message found.</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <aside class="stack">
+      <section class="card">
+        <h2 class="org-title" th:text="#{manager.userinfo.tabs}">Other tabs</h2>
+        <nav class="role-list">
+          <a class="role-link" th:href="@{/manager/users/{uid}/infos(uid=${managedUser.uid})}"
+             th:text="#{manager.userinfo.tab.infos}">Infos</a>
+          <a class="role-link" th:href="@{/manager/users/{uid}/roles(uid=${managedUser.uid})}"
+             th:text="#{manager.userinfo.tab.roles}">Roles</a>
+          <a class="role-link is-active" href="#" th:text="#{manager.userinfo.tab.messages}">Messages</a>
+          <a class="role-link" th:href="@{/manager/users/{uid}/logs(uid=${managedUser.uid})}"
+             th:text="#{manager.userinfo.tab.logs}">Logs</a>
+          <a class="role-link" th:href="@{/manager/users/{uid}/manage(uid=${managedUser.uid})}"
+             th:text="#{manager.userinfo.tab.manage}">Manage</a>
+        </nav>
+      </section>
+
+      <section class="card">
+        <h2 class="org-title" th:text="#{manager.usermessages.summary}">Summary</h2>
+        <dl class="summary-list">
+          <div>
+            <dt th:text="#{email.label}">E-mail</dt>
+            <dd th:text="${managedUser.email}">mail@example.org</dd>
+          </div>
+          <div>
+            <dt th:text="#{manager.userinfo.tab.messages}">Messages</dt>
+            <dd th:text="${#lists.size(messages)}">0</dd>
+          </div>
+          <div th:if="${selectedMessage != null}">
+            <dt th:text="#{manager.usermessages.sender}">Sender</dt>
+            <dd th:text="${selectedMessage.sender()}">sender</dd>
+          </div>
+        </dl>
+      </section>
+    </aside>
+  </div>
+</main>
+
+<script th:inline="javascript">
+  const messageForm = document.getElementById('manager-user-messages-form');
+  const messageFeedback = document.getElementById('manager-user-messages-feedback');
+  const templateSelect = document.getElementById('message-template');
+  const subjectField = document.getElementById('message-subject');
+  const contentField = document.getElementById('message-content');
+  const sendMessageSuccess = /*[[#{manager.usermessages.sendSuccess}]]*/ 'Message sent.';
+  const sendMessageError = /*[[#{manager.usermessages.sendError}]]*/ 'Unable to send the message.';
+  const messageSendUrl = /*[[@{/{uid}/sendEmail(uid=${managedUser.uid})}]]*/ '/user/sendEmail';
+  const messageListUrl = /*[[@{/manager/users/{uid}/messages(uid=${managedUser.uid})}]]*/ '/manager/users/user/messages';
+
+  const showMessageFeedback = (message, type) => {
+    messageFeedback.hidden = false;
+    messageFeedback.className = `alert ${type === 'success' ? 'alert-success' : 'alert-error'}`;
+    messageFeedback.textContent = message;
+  };
+
+  templateSelect?.addEventListener('change', () => {
+    const selected = templateSelect.selectedOptions[0];
+    if (!selected || !selected.value) {
+      return;
+    }
+    subjectField.value = selected.dataset.subject || '';
+    contentField.value = selected.dataset.content || '';
+  });
+
+  messageForm?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const selectedAttachments = Array.from(
+      messageForm.querySelectorAll('input[name="attachments"]:checked')
+    ).map((input) => input.value).join(',');
+
+    const payload = new URLSearchParams();
+    payload.set('subject', subjectField.value);
+    payload.set('content', contentField.value);
+    payload.set('attachments', selectedAttachments);
+
+    try {
+      const response = await fetch(messageSendUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: payload.toString()
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      showMessageFeedback(sendMessageSuccess, 'success');
+      window.location.assign(messageListUrl);
+    } catch (error) {
+      showMessageFeedback(sendMessageError, 'error');
+    }
+  });
+</script>
+</body>
+</html>

@@ -116,7 +116,7 @@ public class ChangeEmailControllerTest {
         prepareLegitRequest(false);
         userIsSpringSecurityAuthenticatedAndExistInLdap("me");
         String ret = ctrlToTest.setupForm(model);
-        assertEquals("changeEmailForm", ret);
+        assertEquals("account/changeEmailForm", ret);
     }
 
     private void prepareLegitRequest() throws Exception {
@@ -143,7 +143,7 @@ public class ChangeEmailControllerTest {
         when(request.getSession()).thenReturn(mock(HttpSession.class));
 
         String ret = ctrlToTest.setupForm(model);
-        assertTrue(ret.equals("changeEmailForm"));
+        assertTrue(ret.equals("account/changeEmailForm"));
     }
 
     @Test
@@ -158,7 +158,7 @@ public class ChangeEmailControllerTest {
         String ret = ctrlToTest.changeEmail(request, formBean, result, status);
 
         assertEquals(false, result.hasErrors());
-        assertEquals("emailWasSentForEmailChange", ret);
+        assertEquals("account/emailWasSentForEmailChange", ret);
 
         ArgumentCaptor<String> tokenUid = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<String> tokenInfo = ArgumentCaptor.forClass(String.class);
@@ -182,7 +182,7 @@ public class ChangeEmailControllerTest {
         String ret = ctrlToTest.changeEmail(request, formBean, result, status);
 
         assertEquals(true, result.hasErrors());
-        assertEquals("changeEmailForm", ret);
+        assertEquals("account/changeEmailForm", ret);
 
         verifyNoMoreInteractions(userTokenDao);
         verify(accountDao, never()).update(any());
@@ -197,7 +197,7 @@ public class ChangeEmailControllerTest {
         String ret = ctrlToTest.changeEmail(request, formBean, result, status);
 
         assertEquals(true, result.hasErrors());
-        assertEquals("changeEmailForm", ret);
+        assertEquals("account/changeEmailForm", ret);
 
         verifyNoMoreInteractions(userTokenDao);
         verifyNoMoreInteractions(accountDao);

@@ -1,0 +1,15 @@
+Hola administrador,
+
+Un nuevo usuario se ha registrado mediante OAuth2 en {instanceName}:
+
+Nombre: {name}
+Correo: {email}
+Identificador local: {uid}
+Organización: {org}
+Proveedor de identidad: {providerName}
+Identificador del proveedor: {providerUid}
+
+Gestione esta cuenta en {publicUrl}/console/manager/users/{uid}/infos.
+
+---
+Este mensaje fue enviado automáticamente por {instanceName} ({publicUrl}/), por favor no responda.

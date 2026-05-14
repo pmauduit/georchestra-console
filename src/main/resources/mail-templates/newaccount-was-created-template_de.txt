@@ -1,0 +1,10 @@
+Hallo {name},
+
+Ihr Konto auf {publicUrl}/ wurde erfolgreich erstellt!
+Besuchen Sie {publicUrl}/console/, um sich mit dem Benutzernamen "{uid}" und Ihrem Passwort anzumelden.
+
+Viel Spaß mit geOrchestra,
+
+Ihr Plattformadministrator
+---
+Gesendet von {instanceName} ({publicUrl}/)

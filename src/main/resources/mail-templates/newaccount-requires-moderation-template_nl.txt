@@ -1,0 +1,12 @@
+Beste admin,
+
+Er is een nieuw account aangemaakt op {publicUrl}/ en dit wacht op validatie.
+
+Gebruikersnaam: {name}
+Gebruikers-ID: {uid}
+Organisatie: {org}
+
+Ga naar {publicUrl}/console/manager/browse/pending/users?login om de wachtende gebruikers te bekijken.
+
+---
+Verzonden door {instanceName} ({publicUrl}/)

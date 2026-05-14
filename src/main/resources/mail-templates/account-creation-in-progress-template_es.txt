@@ -1,0 +1,8 @@
+Hola {name},
+
+Su solicitud de creación de cuenta será procesada muy pronto.
+
+Su usuario es: {uid}
+
+---
+Enviado por {instanceName} ({publicUrl}/)

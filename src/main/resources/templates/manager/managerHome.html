@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en" th:lang="${#locale.toLanguageTag()}" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{manager.home.title})}">
+  <meta charset="UTF-8">
+  <title>Manager dashboard</title>
+</head>
+<body>
+<th:block th:replace="~{fragments/layout :: appHeader('console')}"></th:block>
+<main id="main-content" tabindex="-1" class="page">
+  <section class="hero">
+    <div class="hero-inline">
+      <h1 class="hero-subtitle" th:text="#{manager.home.title}">Manager dashboard</h1>
+      <p class="hero-text" th:text="#{manager.home.description}">
+        Quick overview of the administration area and the items that still need attention.
+      </p>
+    </div>
+  </section>
+
+  <nav class="manager-tabs">
+    <a class="manager-tab active" th:href="@{/manager/home}" th:text="#{nav.dashboard}">Dashboard</a>
+    <a class="manager-tab" th:href="@{/manager/browse/all/users}" th:text="#{nav.users}">Users</a>
+    <a class="manager-tab" th:href="@{/manager/orgs/}" th:text="#{nav.orgs}">Orgs</a>
+    <a class="manager-tab" th:href="@{/manager/roles/all}" th:text="#{nav.roles}">Roles</a>
+    <a class="manager-tab" th:if="${isSuperuserView}" th:href="@{/manager/delegations}" th:text="#{nav.delegations}">Delegations</a>
+    <a class="manager-tab" th:href="@{/manager/logs}" th:text="#{manager.logs.title}">Logs</a>
+  </nav>
+
+  <section class="manager-dashboard-grid">
+    <a class="card dashboard-card" th:href="@{/manager/browse/all/users}">
+      <span class="dashboard-label" th:text="#{nav.users}">Users</span>
+      <strong class="dashboard-value" th:text="${userCount}">0</strong>
+      <span class="muted" th:text="#{manager.home.users.caption}">Active accounts</span>
+    </a>
+
+    <a class="card dashboard-card" th:href="@{/manager/browse/pending/users}">
+      <span class="dashboard-label" th:text="#{manager.home.pendingUsers}">Pending users</span>
+      <strong class="dashboard-value" th:text="${pendingUserCount}">0</strong>
+      <span class="muted" th:text="#{manager.home.pendingUsers.caption}">Waiting for moderation</span>
+    </a>
+
+    <a class="card dashboard-card" th:href="@{/manager/browse/EXPIRED/users}">
+      <span class="dashboard-label" th:text="#{manager.home.expiredUsers}">Expired users</span>
+      <strong class="dashboard-value" th:text="${expiredUserCount}">0</strong>
+      <span class="muted" th:text="#{manager.home.expiredUsers.caption}">Accounts to review</span>
+    </a>
+
+    <a class="card dashboard-card" th:href="@{/manager/orgs/}">
+      <span class="dashboard-label" th:text="#{nav.orgs}">Orgs</span>
+      <strong class="dashboard-value" th:text="${orgCount}">0</strong>
+      <span class="muted" th:text="#{manager.home.orgs.caption}">Validated organizations</span>
+    </a>
+
+    <a class="card dashboard-card" th:href="@{/manager/orgs/pending}">
+      <span class="dashboard-label" th:text="#{manager.home.pendingOrgs}">Pending orgs</span>
+      <strong class="dashboard-value" th:text="${pendingOrgCount}">0</strong>
+      <span class="muted" th:text="#{manager.home.pendingOrgs.caption}">Organizations awaiting approval</span>
+    </a>
+
+    <a class="card dashboard-card" th:href="@{/manager/roles/all}">
+      <span class="dashboard-label" th:text="#{nav.roles}">Roles</span>
+      <strong class="dashboard-value" th:text="${roleCount}">0</strong>
+      <span class="muted" th:text="#{manager.home.roles.caption}">Visible roles</span>
+    </a>
+
+    <a class="card dashboard-card" th:if="${superuser}" th:href="@{/manager/delegations}">
+      <span class="dashboard-label" th:text="#{nav.delegations}">Delegations</span>
+      <strong class="dashboard-value" th:text="${delegationCount}">0</strong>
+      <span class="muted" th:text="#{manager.home.delegations.caption}">Configured delegations</span>
+    </a>
+
+    <a class="card dashboard-card" th:href="@{/manager/logs}">
+      <span class="dashboard-label" th:text="#{manager.logs.title}">Logs</span>
+      <strong class="dashboard-value" th:text="${#lists.size(recentLogs)}">0</strong>
+      <span class="muted" th:text="#{manager.home.logs.caption}">Recent entries loaded</span>
+    </a>
+  </section>
+
+  <section class="card">
+    <div class="manager-panel-header">
+      <div>
+        <h2 th:text="#{manager.home.recentLogs}">Recent logs</h2>
+        <p class="muted" th:text="#{manager.home.recentLogs.description}">
+          Latest administration actions visible to the current administrator.
+        </p>
+      </div>
+      <a class="button button-link" th:href="@{/manager/logs}" th:text="#{manager.home.openLogs}">Open logs</a>
+    </div>
+
+    <div class="table-wrapper">
+      <table class="table">
+        <caption class="visually-hidden" th:text="#{manager.home.recentLogs}">Recent logs</caption>
+        <thead>
+        <tr>
+          <th th:text="#{manager.logs.date}">Date</th>
+          <th th:text="#{manager.logs.sender}">Author</th>
+          <th th:text="#{manager.logs.target}">Target</th>
+          <th th:text="#{manager.logs.type}">Action</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="log : ${recentLogs}">
+          <td th:text="${log.formattedDate}">2025-01-01</td>
+          <td th:text="${log.admin}">admin</td>
+          <td th:text="${log.target}">target</td>
+          <td th:text="${log.type}">ACTION</td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(recentLogs)}">
+          <td colspan="4" class="empty" th:text="#{manager.logs.noresults}">No results</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>
+</body>
+</html>

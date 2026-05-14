@@ -1,0 +1,59 @@
+{
+  "config": {
+    "stylesheet": "http://localhost:8090/stylesheet.css",
+    "logoUrl": "https://www.georchestra.org/public/georchestra-logo.svg",
+    "hideLogin": false,
+    "login": {
+      "url": ":origin/login",
+      "params": [
+        {
+          "service": ":origin/login/"
+        }
+      ]
+    },
+    "logoutUrl": ":origin/logout"
+  },
+  "navigation": {
+    "class": "justify-between",
+    "menus": [
+      [
+        {
+          "label": "Accueil",
+          "url": "/console/",
+          "activeAppUrl": "includes:/console"
+        },
+        {
+          "label": "Mon compte",
+          "url": "/console/account/userdetails",
+          "activeAppUrl": "includes:/console/account",
+          "hasRole": "ROLE_USER"
+        },
+        {
+          "label": "Créer un compte",
+          "url": "/console/account/new",
+          "activeAppUrl": "/console/account/new"
+        },
+        {
+          "type": "dropdown",
+          "label": "Administration",
+          "hasRole": "ROLE_SUPERUSER,ROLE_ORGADMIN",
+          "items": [
+            {
+              "label": "Console manager",
+              "url": "/console/manager/home",
+              "activeAppUrl": "includes:/console/manager",
+              "hasRole": "ROLE_SUPERUSER,ROLE_ORGADMIN"
+            }
+          ]
+        }
+      ],
+      [
+        {
+          "label": "geOrchestra",
+          "url": "https://www.georchestra.org/",
+          "customClass": "custom-btn-home"
+        }
+      ]
+    ]
+  }
+}

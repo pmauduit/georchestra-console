@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en" th:lang="${#locale.toLanguageTag()}" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{manager.delegations.title})}">
+  <meta charset="UTF-8">
+  <title>Delegations</title>
+</head>
+<body>
+<th:block th:replace="~{fragments/layout :: appHeader('console')}"></th:block>
+<main id="main-content" tabindex="-1" class="page">
+  <section class="hero">
+    <div class="hero-inline">
+      <h1 class="hero-subtitle" th:text="#{manager.delegations.title}">Delegations</h1>
+      <p class="hero-text" th:text="#{manager.delegations.description}">
+        Browse management delegations configured for superusers.
+      </p>
+    </div>
+  </section>
+
+  <nav class="manager-tabs">
+    <a class="manager-tab" th:href="@{/manager/home}" th:text="#{nav.dashboard}">Dashboard</a>
+    <a class="manager-tab" th:href="@{/manager/browse/all/users}" th:text="#{nav.users}">Users</a>
+    <a class="manager-tab" th:href="@{/manager/orgs/}" th:text="#{nav.orgs}">Orgs</a>
+    <a class="manager-tab" th:href="@{/manager/roles/all}" th:text="#{nav.roles}">Roles</a>
+    <a class="manager-tab active" th:href="@{/manager/delegations}" th:text="#{nav.delegations}">Delegations</a>
+    <a class="manager-tab" th:href="@{/manager/logs}" th:text="#{manager.logs.title}">Logs</a>
+  </nav>
+
+  <section class="card">
+    <form class="filters" method="get" th:action="@{/manager/delegations}">
+      <div class="form-grid manager-users-filter-grid">
+        <div class="field">
+          <label for="q" th:text="#{manager.delegations.filter}">Filter</label>
+          <input id="q" type="search" name="q" th:value="${query}" th:placeholder="#{manager.delegations.filter}">
+        </div>
+      </div>
+      <div class="actions">
+        <button type="submit" class="button button-primary" th:text="#{manager.logs.filter.apply}">Apply</button>
+        <a class="button button-link" th:href="@{/manager/delegations}" th:text="#{manager.logs.filter.clear}">Clear</a>
+      </div>
+    </form>
+
+    <p class="muted" th:text="#{manager.delegations.total(${totalDelegations})}">
+      Total: 0
+    </p>
+
+    <div class="table-wrapper">
+      <table class="table">
+        <caption class="visually-hidden" th:text="#{manager.delegations.title}">Delegations</caption>
+        <thead>
+        <tr>
+          <th th:text="#{manager.user.label}">User</th>
+          <th th:text="#{nav.orgs}">Orgs</th>
+          <th th:text="#{nav.roles}">Roles</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="delegation : ${delegations}">
+          <td>
+            <a class="break-word" th:href="@{/manager/users/{uid}/infos(uid=${delegation.uid})}" th:text="${delegation.uid}">uid</a>
+          </td>
+          <td>
+            <span th:each="org, stat : ${delegation.orgs}">
+              <a th:href="@{/manager/org/{id}/infos(id=${org.id})}" th:text="${org.name}">Org</a><span th:if="${!stat.last}">, </span>
+            </span>
+          </td>
+          <td>
+            <span th:each="role, stat : ${delegation.roles}">
+              <a th:href="@{/manager/roles/{cn}/infos(cn=${role})}" th:text="${role}">ROLE</a><span th:if="${!stat.last}">, </span>
+            </span>
+          </td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(delegations)}">
+          <td colspan="3" class="empty" th:text="#{manager.delegations.empty}">No delegations found</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <nav class="pagination" th:if="${pageCount > 1}">
+      <a class="button button-link" th:if="${hasPreviousPage}"
+         th:href="@{/manager/delegations(q=${query},page=${page - 1})}"
+         th:text="#{manager.pagination.previous}">Previous</a>
+      <span class="muted" th:text="#{manager.pagination.current(${page + 1}, ${pageCount})}">Page 1 / 1</span>
+      <a class="button button-link" th:if="${hasNextPage}"
+         th:href="@{/manager/delegations(q=${query},page=${page + 1})}"
+         th:text="#{manager.pagination.next}">Next</a>
+    </nav>
+  </section>
+</main>
+</body>
+</html>

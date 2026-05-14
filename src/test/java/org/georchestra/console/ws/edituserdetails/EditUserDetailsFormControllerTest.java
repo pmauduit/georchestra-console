@@ -23,6 +23,7 @@ import static org.georchestra.commons.security.SecurityHeaders.SEC_USERNAME;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
@@ -143,7 +144,7 @@ public class EditUserDetailsFormControllerTest {
         Mockito.when(dao.findByUID(Mockito.anyString())).thenReturn(this.mtesterAccount);
 
         String ret = ctrl.setupForm(request, response, model);
-        assertEquals("editUserDetailsForm", ret);
+        assertEquals("account/editUserDetailsForm", ret);
     }
 
     /**
@@ -163,11 +164,15 @@ public class EditUserDetailsFormControllerTest {
 
         ArgumentCaptor<Boolean> refOrSuCaptor = ArgumentCaptor.forClass(Boolean.class);
         ArgumentCaptor<ObjectNode> orgWithExtCaptor = ArgumentCaptor.forClass(ObjectNode.class);
-        verify(model).addAttribute(Mockito.eq("isReferentOrSuperUser"), refOrSuCaptor.capture());
-        verify(model).addAttribute(Mockito.eq("org"), orgWithExtCaptor.capture());
-        assertEquals("editUserDetailsForm", ret);
+        verify(model, times(2)).addAttribute(Mockito.eq("isReferentOrSuperUser"), refOrSuCaptor.capture());
+        verify(model, times(2)).addAttribute(Mockito.eq("org"), orgWithExtCaptor.capture());
+        assertEquals("account/editUserDetailsForm", ret);
         assertNotNull("expected a isReferentOrSuperUser in the model, null returned", refOrSuCaptor.getValue());
-        ObjectNode node = orgWithExtCaptor.getValue();
+        List<Boolean> refOrSuValues = refOrSuCaptor.getAllValues();
+        assertEquals(2, refOrSuValues.size());
+        assertNotNull("expected a isReferentOrSuperUser in the model, null returned", refOrSuValues.get(0));
+        assertNotNull("expected a isReferentOrSuperUser in the model, null returned", refOrSuValues.get(1));
+        ObjectNode node = orgWithExtCaptor.getAllValues().get(1);
         String desc = node.get("description").asText();
         assertEquals("Description unexpected, missing OrgExt attributes ?", desc, incredibleDesc);
     }
@@ -179,16 +184,17 @@ public class EditUserDetailsFormControllerTest {
 
         String ret = ctrl.setupForm(request, response, model);
 
-        assertEquals("editUserDetailsForm", ret);
+        assertEquals("account/editUserDetailsForm", ret);
     }
 
     @Test
     public void testEditNoOrg() throws Exception {
         request.addHeader(SEC_USERNAME, "mtesterNoOrg");
+        formBean.setUid("mtesterNoOrg");
         Mockito.when(dao.findByUID(Mockito.anyString())).thenReturn(this.mtesterAccountNoOrg);
         String ret = ctrl.edit(request, response, model, formBean, resultErrors, sessionStatus);
 
-        assertEquals("editUserDetailsForm", ret);
+        assertEquals("account/editUserDetailsForm", ret);
     }
 
     /**
@@ -219,6 +225,7 @@ public class EditUserDetailsFormControllerTest {
     public void testEditUserMissingRequiredField() throws IOException {
         request.addHeader(SEC_USERNAME, "mtester");
         EditUserDetailsFormBean formBeanWithMissingField = new EditUserDetailsFormBean();
+        formBeanWithMissingField.setUid("mtester");
         BindingResult resultErrors = new MapBindingResult(new HashMap<>(), "errors");
         ctrl = new EditUserDetailsFormController(dao, orgsDao, roleDao,
                 new Validation("firstName,surname,org,orgType"));
@@ -234,6 +241,7 @@ public class EditUserDetailsFormControllerTest {
     public void specialValidators() throws IOException {
         request.addHeader(SEC_USERNAME, "mtester");
         EditUserDetailsFormBean formBeanWithMissingField = new EditUserDetailsFormBean();
+        formBeanWithMissingField.setUid("mtester");
         BindingResult resultErrors = new MapBindingResult(new HashMap<>(), "errors");
         ctrl = new EditUserDetailsFormController(dao, orgsDao, roleDao,
                 new Validation("phone,facsimile,title,description,postalAddress"));

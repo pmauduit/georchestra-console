@@ -104,7 +104,7 @@ public class ChangePasswordControllerTest {
         request.addHeader(SEC_EXTERNAL_AUTHENTICATION, "false");
 
         String ret = ctrlToTest.setupForm(request, response, model);
-        assertEquals("changePasswordForm", ret);
+        assertEquals("account/changePasswordForm", ret);
     }
 
     @Test
@@ -113,7 +113,7 @@ public class ChangePasswordControllerTest {
         request.addHeader(SEC_EXTERNAL_AUTHENTICATION, "true");
 
         String ret = ctrlToTest.setupForm(request, response, model);
-        assertEquals("userManagedBySASL", ret);
+        assertEquals("account/userManagedBySASL", ret);
     }
 
     @Test
@@ -125,7 +125,7 @@ public class ChangePasswordControllerTest {
 
         String ret = ctrlToTest.changePassword(model, formBean, result);
 
-        assertEquals("changePasswordForm", ret);
+        assertEquals("account/changePasswordForm", ret);
     }
 
     @Test
@@ -141,7 +141,7 @@ public class ChangePasswordControllerTest {
 
         String ret = ctrlToTest.changePassword(model, formBean, result);
 
-        assertEquals("changePasswordForm", ret);
+        assertEquals("account/changePasswordForm", ret);
         assertTrue((Boolean) model.asMap().get("success"));
     }
 

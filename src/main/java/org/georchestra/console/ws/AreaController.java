@@ -25,6 +25,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -33,9 +35,11 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.StringUtils;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.core.io.ClassPathResource;
 
 /**
  * A simple controller to serve an area.json file from your datadir.
@@ -60,12 +64,11 @@ public class AreaController {
     @ResponseBody
     public String serveArea(HttpServletResponse response) throws IOException {
         // if arealUrl in config is an http endpoint, then send it directly.
-        if (isURL(areasUrl)) {
+        if (StringUtils.hasText(areasUrl) && isURL(areasUrl)) {
             response.sendRedirect(areasUrl);
             return "";
         }
-        File areaJsonFile = lookForAreaUrl();
-        try (InputStream stream = new FileInputStream(areaJsonFile)) {
+        try (InputStream stream = openAreaStream()) {
             String jsonString = StreamUtils.copyToString(stream, StandardCharsets.UTF_8);
             return new JSONObject(jsonString).toString();
         } catch (IOException ioe) {
@@ -82,17 +85,32 @@ public class AreaController {
      * try to be a bit permissive in what path we accept for area.json file, could
      * be just `area.json` could be /the/whole/path/to/datadir/
      */
-    private File lookForAreaUrl() {
-        String[] possiblePath = { areasUrl, Paths.get(datadir, areasUrl).toString(),
-                Paths.get(datadir, "/console/", areasUrl).toString(), };
-        File f = null;
-        for (String p : possiblePath) {
-            f = new File(p);
-            if (f.exists()) {
-                return f;
+    private InputStream openAreaStream() throws IOException {
+        for (String resourceLocation : getCandidateLocations()) {
+            if (resourceLocation.startsWith("classpath:")) {
+                String classpathLocation = resourceLocation.substring("classpath:".length());
+                ClassPathResource resource = new ClassPathResource(classpathLocation);
+                if (resource.exists()) {
+                    return resource.getInputStream();
+                }
+                continue;
+            }
+
+            File candidate = new File(resourceLocation);
+            if (candidate.exists()) {
+                return new FileInputStream(candidate);
             }
         }
-        return f;
+        throw new IOException("No area definition file found");
+    }
+
+    private List<String> getCandidateLocations() {
+        List<String> candidates = new ArrayList<>();
+        candidates.add(areasUrl);
+        candidates.add(Paths.get(datadir, areasUrl).toString());
+        candidates.add(Paths.get(datadir, "console", areasUrl).toString());
+        candidates.add("classpath:" + areasUrl);
+        return candidates;
     }
 
     /**

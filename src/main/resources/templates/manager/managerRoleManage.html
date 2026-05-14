@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en" th:lang="${#locale.toLanguageTag()}" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{manager.rolemanage.title})}">
+  <meta charset="UTF-8">
+  <title>Manage role</title>
+</head>
+<body>
+<th:block th:replace="~{fragments/layout :: appHeader('console')}"></th:block>
+<main id="main-content" tabindex="-1" class="page">
+  <section class="hero">
+    <div class="hero-inline">
+      <p class="hero-subtitle" th:text="#{manager.rolemanage.title}">Manage role</p>
+      <p class="hero-text" th:text="#{manager.rolemanage.description}">
+        Delete a role when it is no longer needed.
+      </p>
+    </div>
+  </section>
+
+  <nav class="manager-tabs">
+    <a class="manager-tab" th:href="@{/manager/home}" th:text="#{nav.dashboard}">Dashboard</a>
+    <a class="manager-tab" th:href="@{/manager/browse/all/users}" th:text="#{nav.users}">Users</a>
+    <a class="manager-tab" th:href="@{/manager/orgs/}" th:text="#{nav.orgs}">Orgs</a>
+    <a class="manager-tab active" th:href="@{/manager/roles/all}" th:text="#{nav.roles}">Roles</a>
+    <a class="manager-tab" th:if="${isSuperuserView}" th:href="@{/manager/delegations}" th:text="#{nav.delegations}">Delegations</a>
+    <a class="manager-tab" th:href="@{/manager/logs}" th:text="#{manager.logs.title}">Logs</a>
+  </nav>
+
+  <div class="layout">
+    <section class="card">
+      <div class="manager-user-header">
+        <div>
+          <p class="muted">
+            <a th:href="@{/manager/roles/{cn}/infos(cn=${role.cn})}" th:text="#{manager.rolemanage.back}">Back to role details</a>
+          </p>
+          <h1 th:text="${role.cn}">ROLE</h1>
+        </div>
+      </div>
+
+      <div id="manager-role-manage-feedback" class="alert" hidden aria-live="polite"></div>
+
+      <div class="alert alert-error">
+        <p th:text="#{manager.role.warning}">Warning, this action cannot be undone.</p>
+      </div>
+
+      <div class="actions">
+        <button type="button" id="delete-role-button" class="button button-danger" th:text="#{manager.role.delete}">Delete role</button>
+        <a class="button button-link" th:href="@{/manager/roles/{cn}/infos(cn=${role.cn})}" th:text="#{manager.userinfo.cancel}">Cancel</a>
+      </div>
+    </section>
+
+    <aside class="stack">
+      <section class="card">
+        <h2 class="org-title" th:text="#{manager.userinfo.tabs}">Other tabs</h2>
+        <nav class="role-list">
+          <a class="role-link" th:href="@{/manager/roles/{cn}/infos(cn=${role.cn})}"
+             th:text="#{manager.userinfo.tab.infos}">Infos</a>
+          <a class="role-link" th:href="@{/manager/roles/{cn}/users(cn=${role.cn})}"
+             th:text="#{manager.roleinfo.tab.users}">Users</a>
+          <a class="role-link is-active" href="#" th:text="#{manager.userinfo.tab.manage}">Manage</a>
+        </nav>
+      </section>
+    </aside>
+  </div>
+</main>
+
+<script th:inline="javascript">
+  const deleteRoleButton = document.getElementById('delete-role-button');
+  const roleManageFeedback = document.getElementById('manager-role-manage-feedback');
+  const managedRole = /*[[${role.cn}]]*/ 'ROLE';
+  const deleteRoleError = /*[[#{manager.role.deleteError}]]*/ 'Error deleting role';
+  const rolesBaseUrl = /*[[@{/manager/roles/all}]]*/ '/manager/roles/all';
+  const deleteUrlBase = /*[[@{/private/roles/}]]*/ '/private/roles/';
+
+  const showRoleManageFeedback = (message) => {
+    roleManageFeedback.hidden = false;
+    roleManageFeedback.className = 'alert alert-error';
+    roleManageFeedback.textContent = message;
+  };
+
+  deleteRoleButton?.addEventListener('click', async () => {
+    try {
+      const response = await fetch(`${deleteUrlBase}${encodeURIComponent(managedRole)}`, {
+        method: 'DELETE',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      window.location.assign(rolesBaseUrl);
+    } catch (error) {
+      showRoleManageFeedback(deleteRoleError);
+    }
+  });
+</script>
+</body>
+</html>

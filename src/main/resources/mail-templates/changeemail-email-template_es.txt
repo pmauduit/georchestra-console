@@ -1,0 +1,12 @@
+Hola {name},
+
+Ha solicitado cambiar su dirección de correo electrónico en {publicUrl}/.
+Si usted no solicitó este cambio, ignore este correo.
+
+Para validar su nueva dirección de correo electrónico, abra este enlace: {url}.
+Si aún no ha iniciado sesión, se le pedirá que lo haga.
+
+Atención: este correo es personal, no lo reenvíe.
+
+---
+Enviado por {instanceName} ({publicUrl}/)

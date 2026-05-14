@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en" th:lang="${#locale.toLanguageTag()}" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{manager.logs.title})}">
+  <meta charset="UTF-8">
+  <title>Administration logs</title>
+</head>
+<body>
+<th:block th:replace="~{fragments/layout :: appHeader('console')}"></th:block>
+<main id="main-content" tabindex="-1" class="page">
+  <section class="hero">
+    <div class="hero-inline">
+      <h1 class="hero-subtitle" th:text="#{manager.logs.title}">Administration logs</h1>
+      <p class="hero-text" th:text="#{manager.logs.description}">Audit trail of administration actions.</p>
+    </div>
+  </section>
+
+  <nav class="manager-tabs">
+    <a class="manager-tab" th:href="@{/manager/home}" th:text="#{nav.dashboard}">Dashboard</a>
+    <a class="manager-tab" th:href="@{/manager/browse/all/users}" th:text="#{nav.users}">Users</a>
+    <a class="manager-tab" th:href="@{/manager/orgs/}" th:text="#{nav.orgs}">Orgs</a>
+    <a class="manager-tab" th:href="@{/manager/roles/all}" th:text="#{nav.roles}">Roles</a>
+    <a class="manager-tab" th:if="${isSuperuserView}" th:href="@{/manager/delegations}" th:text="#{nav.delegations}">Delegations</a>
+    <a class="manager-tab active" th:href="@{/manager/logs}" th:text="#{manager.logs.title}">Logs</a>
+  </nav>
+
+  <section class="card">
+    <form class="filters" method="get" th:action="@{/manager/logs}">
+      <div class="form-grid">
+        <div class="field">
+          <label for="admin" th:text="#{manager.logs.sender}">Author</label>
+          <select id="admin" name="admin">
+            <option value="all" th:selected="${adminFilter == 'all'}" th:text="#{manager.logs.allsender}">All</option>
+            <option th:each="a : ${admins}" th:value="${a}" th:text="${a}" th:selected="${adminFilter == a}"></option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="target" th:text="#{manager.logs.target}">Target</label>
+          <select id="target" name="target">
+            <option value="all" th:selected="${targetFilter == 'all'}" th:text="#{manager.logs.alltarget}">All</option>
+            <option th:each="t : ${targets}" th:value="${t}" th:text="${t}" th:selected="${targetFilter == t}"></option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="type" th:text="#{manager.logs.type}">Action</label>
+          <select id="type" name="type">
+            <option value="all" th:selected="${typeFilter == 'all'}" th:text="#{manager.logs.alltype}">All</option>
+            <option th:each="t : ${allTypes}"
+                    th:value="${t.name()}"
+                    th:text="${t.name()}"
+                    th:selected="${typeFilter == t.name()}">
+            </option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="from" th:text="#{manager.logs.filter.from}">From</label>
+          <input id="from" type="date" name="from" th:value="${fromFilter}">
+        </div>
+
+        <div class="field">
+          <label for="to" th:text="#{manager.logs.filter.to}">To</label>
+          <input id="to" type="date" name="to" th:value="${toFilter}">
+        </div>
+      </div>
+
+      <div class="actions">
+        <button type="submit" class="button button-primary" th:text="#{manager.logs.filter.apply}">Apply</button>
+        <a class="button button-link" th:href="@{/manager/logs}" th:text="#{manager.logs.filter.clear}">Clear</a>
+      </div>
+    </form>
+
+    <p class="muted" th:text="#{manager.logs.total(${#lists.size(logs)})}">
+      Total: 0
+    </p>
+
+    <div class="table-wrapper">
+      <table class="table">
+        <caption class="visually-hidden" th:text="#{manager.logs.title}">Administration logs</caption>
+        <thead>
+        <tr>
+          <th th:text="#{manager.logs.date}">Date</th>
+          <th th:text="#{manager.logs.sender}">Author</th>
+          <th th:text="#{manager.logs.target}">Target</th>
+          <th th:text="#{manager.logs.type}">Action</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="log : ${logs}">
+          <td th:text="${log.formattedDate}">2025-01-01</td>
+          <td th:text="${log.admin}">admin</td>
+          <td th:text="${log.target}">target</td>
+          <td th:text="${log.type}">TYPE</td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(logs)}">
+          <td colspan="4" class="empty" th:text="#{manager.logs.noresults}">No results</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>
+</body>
+</html>

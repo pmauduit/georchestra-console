@@ -27,6 +27,13 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import org.georchestra.console.bs.ExpiredTokenCleanTask;
 import org.georchestra.console.bs.ExpiredTokenManagement;
+import org.georchestra.console.dao.AdminLogDao;
+import org.georchestra.console.dao.AdvancedDelegationDao;
+import org.georchestra.console.dao.DelegationDao;
+import org.georchestra.ds.orgs.OrgsDao;
+import org.georchestra.ds.roles.RoleDao;
+import org.georchestra.ds.users.AccountDao;
+import org.georchestra.ds.users.UserRule;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -42,11 +49,19 @@ public class HomeControllerTest {
     private HomeController ctrl;
     private ExpiredTokenCleanTask tokenTask = Mockito.mock(ExpiredTokenCleanTask.class);
     private ExpiredTokenManagement expiredTokenMgmt = new ExpiredTokenManagement(tokenTask);
+    private AccountDao accountDao = Mockito.mock(AccountDao.class);
+    private OrgsDao orgDao = Mockito.mock(OrgsDao.class);
+    private RoleDao roleDao = Mockito.mock(RoleDao.class);
+    private DelegationDao delegationDao = Mockito.mock(DelegationDao.class);
+    private AdvancedDelegationDao advancedDelegationDao = Mockito.mock(AdvancedDelegationDao.class);
+    private AdminLogDao adminLogDao = Mockito.mock(AdminLogDao.class);
+    private UserRule userRule = Mockito.mock(UserRule.class);
 
     @Before
     public void setUp() {
         expiredTokenMgmt.setDelayInDays(1);
-        ctrl = new HomeController(expiredTokenMgmt, Mockito.mock(ServletContext.class));
+        ctrl = new HomeController(expiredTokenMgmt, accountDao, orgDao, roleDao, delegationDao,
+                advancedDelegationDao, adminLogDao, userRule, Mockito.mock(ServletContext.class));
         ctrl.setPublicContextPath("/console");
     }
 
@@ -60,7 +75,7 @@ public class HomeControllerTest {
         assertTrue("expected 302, got " + response.getStatus(),
                 response.getStatus() == HttpServletResponse.SC_MOVED_TEMPORARILY);
         assertTrue("bad redirectUrl, got " + response.getRedirectedUrl(),
-                response.getRedirectedUrl().contains("/account/userdetails?login"));
+                response.getRedirectedUrl().contains("/account/userdetails"));
     }
 
     @Test
@@ -73,7 +88,7 @@ public class HomeControllerTest {
         assertTrue("expected 302, got " + response.getStatus(),
                 response.getStatus() == HttpServletResponse.SC_MOVED_TEMPORARILY);
         assertTrue("bad redirectUrl, got " + response.getRedirectedUrl(),
-                response.getRedirectedUrl().contains("/account/userdetails?login"));
+                response.getRedirectedUrl().contains("/account/userdetails"));
     }
 
     @Test
@@ -96,7 +111,7 @@ public class HomeControllerTest {
         request.addHeader(SEC_ROLES, "ROLE_SUPERUSER");
         ctrl.root(request, response);
 
-        assertTrue(response.getRedirectedUrl().endsWith("/manager/"));
+        assertTrue(response.getRedirectedUrl().endsWith("/manager"));
 
     }
 

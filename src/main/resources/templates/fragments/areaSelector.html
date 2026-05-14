@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+<th:block th:fragment="areaSelector(inputId, inputName, inputValue, title, description)">
+  <section class="area-selector"
+           th:attr="data-config-url=@{/public/orgs/areaConfig.json},
+                    data-geojson-url=@{/public/area.geojson},
+                    data-add-label=#{area.add},
+                    data-remove-label=#{area.remove},
+                    data-load-error=#{area.loadError},
+                    data-missing-areas-message=#{area.missingConfiguration},
+                    data-live-added-one=#{area.live.addedOne},
+                    data-live-added-all=#{area.live.addedAll},
+                    data-live-removed-one=#{area.live.removedOne},
+                    data-live-cleared=#{area.live.cleared},
+                    data-live-selected-count=#{area.live.selectedCount},
+                    data-live-available-count=#{area.live.availableCount},
+                    data-map-title=#{area.map.title},
+                    data-map-help=#{area.map.help},
+                    data-map-empty=#{area.map.empty},
+                    data-tooltip-separator=#{area.map.tooltipSeparator},
+                    data-list-separator=#{area.list.separator},
+                    data-empty-available=#{area.noneAvailable},
+                    data-empty-selected=#{area.noneSelected}">
+    <input type="hidden" th:id="${inputId}" th:name="${inputName}" th:value="${inputValue}">
+
+    <div class="area-selector-header">
+      <div>
+        <h3 class="org-title" th:if="${title != null and !#strings.isEmpty(title)}" th:text="${title}">Area of competence</h3>
+        <p class="muted" th:if="${description != null and !#strings.isEmpty(description)}" th:text="${description}">
+          Search and select the administrative areas attached to this organization.
+        </p>
+      </div>
+      <div class="area-selector-actions">
+        <button type="button" class="button button-link js-area-import" th:text="#{area.import}">CSV Import</button>
+        <button type="button" class="button button-link js-area-export" th:text="#{area.export}">CSV Export</button>
+      </div>
+    </div>
+
+    <div class="form-grid area-selector-controls">
+      <div class="field">
+        <label th:attr="for=${inputId + '-search'}" th:text="#{area.search}">Search</label>
+        <input type="search" class="js-area-search" th:id="${inputId + '-search'}"
+               th:attr="placeholder=#{area.search.placeholder}">
+      </div>
+      <div class="field">
+        <label th:attr="for=${inputId + '-group'}" th:text="#{area.group}">Group</label>
+        <select class="js-area-group" th:id="${inputId + '-group'}">
+          <option value="" th:text="#{area.group.all}">All groups</option>
+        </select>
+      </div>
+      <div class="field">
+        <label th:attr="for=${inputId + '-sort'}" th:text="#{area.sort}">Sort</label>
+        <select class="js-area-sort" th:id="${inputId + '-sort'}">
+          <option value="label" th:text="#{area.sort.label}">By name</option>
+          <option value="id" th:text="#{area.sort.key}">By code</option>
+          <option value="group" th:text="#{area.sort.group}">By group</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="alert alert-error js-area-error" hidden aria-live="polite"></div>
+    <p class="visually-hidden js-area-live" aria-live="polite" aria-atomic="true"></p>
+
+    <section class="card area-selector-map-panel">
+      <div class="area-selector-panel-header">
+        <div>
+          <h4 th:text="#{area.map.title}">Map</h4>
+          <p class="muted" th:text="#{area.map.help}">
+            Use the map to add or remove areas. The lists remain available for keyboard and precise selection.
+          </p>
+        </div>
+      </div>
+      <div class="area-selector-map-shell">
+        <div class="area-selector-map js-area-map"
+             role="img"
+             th:attr="aria-label=#{area.map.title}"></div>
+        <div class="area-map-tooltip js-area-map-tooltip" hidden></div>
+        <p class="area-selector-empty js-area-map-empty" hidden th:text="#{area.map.empty}">
+          No map geometry available for the current area file.
+        </p>
+      </div>
+    </section>
+
+    <div class="area-selector-body">
+      <section class="card area-selector-panel">
+        <div class="area-selector-panel-header">
+          <div class="area-selector-panel-title">
+            <h4 th:text="#{area.available}">Available areas</h4>
+            <p class="muted js-area-available-count"
+               th:attr="aria-label=#{area.availableCountLabel(0)}">0</p>
+          </div>
+          <button type="button" class="button button-link js-area-add-all" th:text="#{area.addAll}">
+            Add all
+          </button>
+        </div>
+        <ul class="area-selector-list js-area-available-list"></ul>
+      </section>
+
+      <section class="card area-selector-panel">
+        <div class="area-selector-panel-header">
+          <div class="area-selector-panel-title">
+            <h4 th:text="#{area.selected}">Selected areas</h4>
+            <p class="muted js-area-selected-count"
+               th:attr="aria-label=#{area.selectedCountLabel(0)}">0</p>
+          </div>
+          <button type="button" class="button button-link js-area-clear" th:text="#{area.clearSelection}">
+            Clear selection
+          </button>
+        </div>
+        <ul class="area-selector-list js-area-selected-list"></ul>
+      </section>
+    </div>
+  </section>
+</th:block>
+</body>
+</html>

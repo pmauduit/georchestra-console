@@ -1,0 +1,8 @@
+Beste {name},
+
+Uw aanvraag voor een nieuw account wordt binnenkort verwerkt.
+
+Uw login is: {uid}
+
+---
+Verzonden door {instanceName} ({publicUrl}/)

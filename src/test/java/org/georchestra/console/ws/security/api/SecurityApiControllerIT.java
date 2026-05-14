@@ -1,6 +1,7 @@
 package org.georchestra.console.ws.security.api;
 
 import org.georchestra.console.boot.ConsoleApplicationTests;
+import org.json.JSONObject;
 import org.georchestra.security.model.GeorchestraUser;
 import org.georchestra.security.model.Organization;
 import org.junit.jupiter.api.Test;
@@ -125,6 +126,25 @@ public class SecurityApiControllerIT extends ConsoleApplicationTests {
                             "No roles being returned from a default geOrchestra LDAP, " +
                                     "expecting ~ 11");
                 });
+    }
+
+    @Test
+    public void testAccountCreatedEventEndpoint() throws Exception {
+        JSONObject payload = new JSONObject();
+        payload.put("uid", "ignored");
+        payload.put("subject", "OAUTH2-ACCOUNT-CREATION");
+        payload.put("fullName", "OAuth Test User");
+        payload.put("localUid", "oauth-test-user");
+        payload.put("email", "oauth-test-user@example.org");
+        payload.put("organization", "PSC");
+        payload.put("providerName", "test-provider");
+        payload.put("providerUid", "provider-user-id");
+
+        restTestClient.post().uri("/internal/events/accountcreated")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(payload.toString())
+                .exchange()
+                .expectStatus().isOk();
     }
 
 }

@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en" th:lang="${#locale.toLanguageTag()}" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{manager.usercreate.title})}">
+  <meta charset="UTF-8">
+  <title>Create user</title>
+</head>
+<body>
+<th:block th:replace="~{fragments/layout :: appHeader('console')}"></th:block>
+<main id="main-content" tabindex="-1" class="page">
+  <section class="hero">
+    <div class="hero-inline">
+      <h1 class="hero-subtitle" th:text="#{manager.usercreate.title}">Create user</h1>
+      <p class="hero-text" th:text="#{manager.usercreate.description}">
+        Create a new account directly from the manager without going through the legacy Angular form.
+      </p>
+    </div>
+  </section>
+
+  <nav class="manager-tabs">
+    <a class="manager-tab" th:href="@{/manager/home}" th:text="#{nav.dashboard}">Dashboard</a>
+    <a class="manager-tab active" th:href="@{/manager/browse/all/users}" th:text="#{nav.users}">Users</a>
+    <a class="manager-tab" th:href="@{/manager/orgs/}" th:text="#{nav.orgs}">Orgs</a>
+    <a class="manager-tab" th:href="@{/manager/roles/all}" th:text="#{nav.roles}">Roles</a>
+    <a class="manager-tab" th:if="${isSuperuserView}" th:href="@{/manager/delegations}" th:text="#{nav.delegations}">Delegations</a>
+    <a class="manager-tab" th:href="@{/manager/logs}" th:text="#{manager.logs.title}">Logs</a>
+  </nav>
+
+  <section class="card">
+    <p class="muted">
+      <a th:href="@{/manager/browse/all/users}" th:text="#{manager.usercreate.back}">Back to users</a>
+    </p>
+
+    <div id="manager-user-create-feedback" class="alert" hidden aria-live="polite"></div>
+
+    <form id="manager-user-create-form" class="manager-user-form">
+      <fieldset class="fieldset">
+        <legend th:text="#{manager.userinfo.fieldset.identity}">Identity</legend>
+        <div class="form-grid manager-user-form-grid">
+          <div class="field">
+            <label for="uid" th:text="#{uid.label}">User ID</label>
+            <input id="uid" name="uid" type="text" pattern="^[a-zA-Z][a-zA-Z0-9_.-]*$">
+            <p class="help-text" th:text="#{manager.usercreate.uidHelp}">Leave blank to generate it automatically.</p>
+          </div>
+
+          <div class="field">
+            <label for="sn">
+              <span th:text="#{surname.label}">Surname</span>
+              <span class="required-marker">*</span>
+            </label>
+            <input id="sn" name="sn" type="text" required>
+          </div>
+
+          <div class="field">
+            <label for="givenName">
+              <span th:text="#{firstName.label}">First name</span>
+              <span class="required-marker">*</span>
+            </label>
+            <input id="givenName" name="givenName" type="text" required>
+          </div>
+
+          <div class="field">
+            <label for="mail">
+              <span th:text="#{email.label}">E-mail</span>
+              <span class="required-marker">*</span>
+            </label>
+            <input id="mail" name="mail" type="email" required>
+          </div>
+
+          <div class="field">
+            <label for="org">
+              <span th:text="#{org.label}">Organization</span>
+              <span class="required-marker">*</span>
+            </label>
+            <select id="org" name="org" required>
+              <option value="" th:text="#{account.create.org.placeholder}">Organization</option>
+              <option th:each="org : ${organizations}" th:value="${org.id()}" th:text="${org.label()}">Organization</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="manager" th:text="#{manager.userinfo.manager}">Manager</label>
+            <input id="manager" name="manager" type="text">
+          </div>
+
+          <div class="field">
+            <label for="title" th:text="#{title.label}">Job title</label>
+            <input id="title" name="title" type="text">
+          </div>
+
+          <div class="field">
+            <label for="telephoneNumber" th:text="#{phone.label}">Phone</label>
+            <input id="telephoneNumber" name="telephoneNumber" type="tel">
+          </div>
+
+          <div class="field">
+            <label for="facsimileTelephoneNumber" th:text="#{facsimile.label}">Fax</label>
+            <input id="facsimileTelephoneNumber" name="facsimileTelephoneNumber" type="tel">
+          </div>
+
+          <div class="field">
+            <label for="shadowExpire" th:text="#{manager.userinfo.expire}">Expiration date</label>
+            <input id="shadowExpire" name="shadowExpire" type="date">
+          </div>
+
+          <div class="field field-span-2">
+            <label for="description" th:text="#{description.label}">Description</label>
+            <textarea id="description" name="description"></textarea>
+          </div>
+
+          <div class="field field-span-2">
+            <label for="postalAddress" th:text="#{postalAddress.label}">Postal address</label>
+            <textarea id="postalAddress" name="postalAddress"></textarea>
+          </div>
+
+          <div class="field field-span-2">
+            <label for="knowledgeInformation" th:text="#{manager.userinfo.note}">Note</label>
+            <textarea id="knowledgeInformation" name="knowledgeInformation"></textarea>
+          </div>
+        </div>
+      </fieldset>
+
+      <div class="actions">
+        <button type="submit" class="button button-primary" th:text="#{manager.usercreate.create}">Create user</button>
+        <a class="button button-link" th:href="@{/manager/browse/all/users}" th:text="#{manager.userinfo.cancel}">Cancel</a>
+      </div>
+    </form>
+  </section>
+</main>
+
+<script th:inline="javascript">
+  const userCreateForm = document.getElementById('manager-user-create-form');
+  const userCreateFeedback = document.getElementById('manager-user-create-feedback');
+  const createUserSuccess = /*[[#{manager.usercreate.createSuccess}]]*/ 'User created successfully.';
+  const createUserError = /*[[#{manager.usercreate.createError}]]*/ 'Unable to create the user.';
+  const createUserUrl = /*[[@{/private/users}]]*/ '/private/users';
+  const userInfosBaseUrl = /*[[@{/manager/users/}]]*/ '/manager/users/';
+
+  const showUserCreateFeedback = (message, type) => {
+    userCreateFeedback.hidden = false;
+    userCreateFeedback.className = `alert ${type === 'success' ? 'alert-success' : 'alert-error'}`;
+    userCreateFeedback.textContent = message;
+  };
+
+  userCreateForm?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const formData = new FormData(userCreateForm);
+    const payload = Object.fromEntries(formData.entries());
+    Object.keys(payload).forEach((key) => {
+      if (payload[key] === '') {
+        delete payload[key];
+      }
+    });
+
+    try {
+      const response = await fetch(createUserUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify(payload)
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      const createdUser = await response.json();
+      showUserCreateFeedback(createUserSuccess, 'success');
+      window.location.assign(`${userInfosBaseUrl}${encodeURIComponent(createdUser.uid)}/infos`);
+    } catch (error) {
+      showUserCreateFeedback(createUserError, 'error');
+    }
+  });
+</script>
+</body>
+</html>

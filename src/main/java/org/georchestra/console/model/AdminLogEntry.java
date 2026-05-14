@@ -28,8 +28,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.NamedQueries;
-import jakarta.persistence.NamedQuery;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 
@@ -41,9 +39,6 @@ import org.hibernate.type.SqlTypes;
 
 @Entity
 @Table(schema = "console", name = "admin_log")
-@NamedQueries({
-        @NamedQuery(name = "AdminLogEntry.findByTargetPageable", query = "SELECT l FROM AdminLogEntry l WHERE l.target = :target ORDER BY l.date DESC"),
-        @NamedQuery(name = "AdminLogEntry.myFindByTargets", query = "SELECT l FROM AdminLogEntry l WHERE l.target IN :targets ORDER BY l.date DESC") })
 public class AdminLogEntry {
 
     @Id

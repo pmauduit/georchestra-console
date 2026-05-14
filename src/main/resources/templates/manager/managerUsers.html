@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en" th:lang="${#locale.toLanguageTag()}" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{manager.users.title})}">
+  <meta charset="UTF-8">
+  <title>Users</title>
+</head>
+<body>
+<th:block th:replace="~{fragments/layout :: appHeader('console')}"></th:block>
+<main id="main-content" tabindex="-1" class="page">
+  <section class="hero">
+    <div class="hero-inline">
+      <h1 class="hero-subtitle" th:text="#{manager.users.title}">Users</h1>
+      <p class="hero-text" th:text="#{manager.users.description}">
+        Browse and filter the accounts available to the current administrator.
+      </p>
+    </div>
+  </section>
+
+  <nav class="manager-tabs">
+    <a class="manager-tab" th:href="@{/manager/home}" th:text="#{nav.dashboard}">Dashboard</a>
+    <a class="manager-tab active" th:href="@{/manager/browse/all/users}" th:text="#{nav.users}">Users</a>
+    <a class="manager-tab" th:href="@{/manager/orgs/}" th:text="#{nav.orgs}">Orgs</a>
+    <a class="manager-tab" th:href="@{/manager/roles/all}" th:text="#{nav.roles}">Roles</a>
+    <a class="manager-tab" th:if="${isSuperuserView}" th:href="@{/manager/delegations}" th:text="#{nav.delegations}">Delegations</a>
+    <a class="manager-tab" th:href="@{/manager/logs}" th:text="#{manager.logs.title}">Logs</a>
+  </nav>
+
+  <section class="manager-grid">
+    <aside class="card manager-aside">
+      <div class="manager-aside-header">
+        <h2 th:text="#{manager.users.browse.title}">Browse</h2>
+        <a class="button button-link"
+           th:href="@{/manager/users/add}"
+           th:text="#{manager.role.newUser}">New user</a>
+      </div>
+
+      <nav class="role-list">
+        <a th:each="browseRole : ${browseRoles}"
+           class="role-link"
+           th:classappend="${scope == browseRole.cn()} ? ' is-active' : ''"
+           th:href="@{/manager/browse/{scope}/users(scope=${browseRole.cn()})}"
+           th:title="${browseRole.description()}">
+          <span th:text="${browseRole.label()}">Role</span>
+          <span class="role-count" th:text="${browseRole.count()}">0</span>
+        </a>
+      </nav>
+    </aside>
+
+    <section class="card">
+      <div class="manager-panel-header">
+        <div>
+          <h2 th:if="${activeRole != null}" th:text="${activeRole.label()}">All users</h2>
+          <p class="muted"
+             th:if="${activeRole != null and activeRole.description() != null and !#strings.isEmpty(activeRole.description())}"
+             th:text="${activeRole.description()}">Description</p>
+        </div>
+        <p class="muted" th:text="#{manager.users.total(${totalUsers})}">Total: 0</p>
+      </div>
+
+      <form class="filters" method="get" th:action="@{/manager/browse/{scope}/users(scope=${scope})}">
+        <div class="form-grid manager-users-filter-grid">
+          <div class="field">
+            <label for="q" th:text="#{manager.role.filterUsers}">Filter</label>
+            <input id="q" type="search" name="q" th:value="${query}" th:placeholder="#{manager.role.filterUsers}">
+            <input type="hidden" name="sort" th:value="${sort}">
+            <input type="hidden" name="dir" th:value="${dir}">
+          </div>
+        </div>
+        <div class="actions">
+          <button type="submit" class="button button-primary" th:text="#{manager.logs.filter.apply}">Apply</button>
+          <a class="button button-link" th:href="@{/manager/browse/{scope}/users(scope=${scope})}" th:text="#{manager.logs.filter.clear}">Clear</a>
+        </div>
+      </form>
+
+      <div class="table-wrapper">
+        <table class="table">
+          <caption class="visually-hidden" th:text="#{manager.users.title}">Users</caption>
+          <thead>
+          <tr>
+            <th th:attr="aria-sort=${sort == 'user' ? (dir == 'asc' ? 'ascending' : 'descending') : 'none'}">
+              <a class="table-sort"
+                 th:href="@{/manager/browse/{scope}/users(scope=${scope},q=${query},sort='user',dir=${sort == 'user' ? nextSortDir : 'asc'})}">
+                <span th:text="#{manager.users.user}">User</span>
+                <span class="sort-indicator" th:if="${sort == 'user'}" th:text="${dir == 'asc' ? '↑' : '↓'}">↑</span>
+              </a>
+            </th>
+            <th th:attr="aria-sort=${sort == 'login' ? (dir == 'asc' ? 'ascending' : 'descending') : 'none'}">
+              <a class="table-sort"
+                 th:href="@{/manager/browse/{scope}/users(scope=${scope},q=${query},sort='login',dir=${sort == 'login' ? nextSortDir : 'asc'})}">
+                <span th:text="#{manager.users.login}">Login</span>
+                <span class="sort-indicator" th:if="${sort == 'login'}" th:text="${dir == 'asc' ? '↑' : '↓'}">↑</span>
+              </a>
+            </th>
+            <th th:attr="aria-sort=${sort == 'organization' ? (dir == 'asc' ? 'ascending' : 'descending') : 'none'}">
+              <a class="table-sort"
+                 th:href="@{/manager/browse/{scope}/users(scope=${scope},q=${query},sort='organization',dir=${sort == 'organization' ? nextSortDir : 'asc'})}">
+                <span th:text="#{manager.users.organization}">Organization</span>
+                <span class="sort-indicator" th:if="${sort == 'organization'}" th:text="${dir == 'asc' ? '↑' : '↓'}">↑</span>
+              </a>
+            </th>
+            <th th:attr="aria-sort=${sort == 'email' ? (dir == 'asc' ? 'ascending' : 'descending') : 'none'}">
+              <a class="table-sort"
+                 th:href="@{/manager/browse/{scope}/users(scope=${scope},q=${query},sort='email',dir=${sort == 'email' ? nextSortDir : 'asc'})}">
+                <span th:text="#{manager.users.email}">Mail</span>
+                <span class="sort-indicator" th:if="${sort == 'email'}" th:text="${dir == 'asc' ? '↑' : '↓'}">↑</span>
+              </a>
+            </th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr th:each="user : ${users}">
+            <td>
+              <a th:href="@{/manager/users/{uid}/infos(uid=${user.uid})}"
+                 th:text="${((user.surname ?: '') + ' ' + (user.givenName ?: '')).trim()}">
+                User name
+              </a>
+            </td>
+            <td th:text="${user.uid}">uid</td>
+            <td>
+              <a th:if="${user.orgId != null}"
+                 th:href="@{/manager/org/{id}/infos(id=${user.orgId})}"
+                 th:text="${user.orgName}">
+                Organization
+              </a>
+              <span th:if="${user.orgId == null}" th:text="${user.orgName}">Organization</span>
+            </td>
+            <td th:text="${user.email}">mail@example.org</td>
+          </tr>
+          <tr th:if="${#lists.isEmpty(users)}">
+            <td colspan="4" class="empty" th:text="#{manager.users.noresults}">No users found</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </section>
+</main>
+</body>
+</html>

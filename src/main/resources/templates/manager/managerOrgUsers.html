@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en" th:lang="${#locale.toLanguageTag()}" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{manager.orgusers.title})}">
+  <meta charset="UTF-8">
+  <title>Organization users</title>
+</head>
+<body>
+<th:block th:replace="~{fragments/layout :: appHeader('console')}"></th:block>
+<main id="main-content" tabindex="-1" class="page">
+  <section class="hero">
+    <div class="hero-inline">
+      <p class="hero-subtitle" th:text="#{manager.orgusers.title}">Organization users</p>
+      <p class="hero-text" th:text="#{manager.orgusers.description}">
+        Review visible users assigned to the selected organization and update memberships.
+      </p>
+    </div>
+  </section>
+
+  <nav class="manager-tabs">
+    <a class="manager-tab" th:href="@{/manager/home}" th:text="#{nav.dashboard}">Dashboard</a>
+    <a class="manager-tab" th:href="@{/manager/browse/all/users}" th:text="#{nav.users}">Users</a>
+    <a class="manager-tab active" th:href="@{/manager/orgs/}" th:text="#{nav.orgs}">Orgs</a>
+    <a class="manager-tab" th:href="@{/manager/roles/all}" th:text="#{nav.roles}">Roles</a>
+    <a class="manager-tab" th:if="${isSuperuserView}" th:href="@{/manager/delegations}" th:text="#{nav.delegations}">Delegations</a>
+    <a class="manager-tab" th:href="@{/manager/logs}" th:text="#{manager.logs.title}">Logs</a>
+  </nav>
+
+  <div class="layout">
+    <section class="card">
+      <div class="manager-user-header">
+        <div>
+          <p class="muted">
+            <a th:href="@{/manager/org/{id}/infos(id=${managedOrg.id})}" th:text="#{manager.orgusers.back}">
+              Back to organization details
+            </a>
+          </p>
+          <h1 th:text="${managedOrg.name}">Organization</h1>
+          <p class="muted" th:text="#{manager.orgusers.count(${totalUsers})}">0 users</p>
+        </div>
+      </div>
+
+      <div id="manager-org-users-feedback" class="alert" hidden aria-live="polite"></div>
+
+      <form class="filters" method="get" th:action="@{/manager/org/{id}/users(id=${managedOrg.id})}">
+        <div class="form-grid manager-users-filter-grid">
+          <div class="field">
+            <label for="q" th:text="#{manager.role.filterUsers}">Filter</label>
+            <input id="q" type="search" name="q" th:value="${query}" th:placeholder="#{manager.role.filterUsers}">
+          </div>
+        </div>
+        <div class="actions">
+          <button type="submit" class="button button-primary" th:text="#{manager.logs.filter.apply}">Apply</button>
+          <a class="button button-link" th:href="@{/manager/org/{id}/users(id=${managedOrg.id})}"
+             th:text="#{manager.logs.filter.clear}">Clear</a>
+        </div>
+      </form>
+
+      <form id="manager-org-associate-form" class="manager-user-form">
+        <fieldset class="fieldset">
+          <legend th:text="#{manager.org.userLabel}">Add</legend>
+          <div class="form-grid manager-users-filter-grid">
+            <div class="field">
+              <label for="newOrgUserUid" th:text="#{manager.org.userLabel}">Add</label>
+              <select id="newOrgUserUid" name="uid">
+                <option value="" th:text="#{manager.orgusers.selectUser}">Select a user</option>
+                <option th:each="user : ${availableUsers}" th:value="${user.uid()}" th:text="${user.displayName()}"></option>
+              </select>
+            </div>
+          </div>
+          <div class="actions">
+            <button type="submit" class="button button-primary" th:text="#{manager.org.userLabel}">Add</button>
+          </div>
+        </fieldset>
+      </form>
+
+      <div class="table-wrapper">
+        <table class="table">
+          <thead>
+          <tr>
+            <th th:text="#{manager.users.user}">User</th>
+            <th th:text="#{manager.user.action}">Action</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr th:each="user : ${managedUsers}">
+            <td>
+              <a th:href="@{/manager/users/{uid}/infos(uid=${user.uid()})}" th:text="${user.displayName()}">User name</a>
+              <span class="muted" th:text="${user.uid()}">uid</span>
+            </td>
+            <td>
+              <button type="button" class="button button-link text-danger org-user-remove"
+                      th:attr="data-uid=${user.uid()}" th:text="#{manager.user.remove}">Remove</button>
+            </td>
+          </tr>
+          <tr th:if="${#lists.isEmpty(managedUsers)}">
+            <td colspan="2" class="empty" th:text="#{manager.orgusers.empty}">No user found</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <nav class="pagination" th:if="${pageCount > 1}">
+        <a class="button button-link" th:if="${hasPreviousPage}"
+           th:href="@{/manager/org/{id}/users(id=${managedOrg.id},q=${query},page=${page - 1})}"
+           th:text="#{manager.pagination.previous}">Previous</a>
+        <span class="muted" th:text="#{manager.pagination.current(${page + 1}, ${pageCount})}">Page 1 / 1</span>
+        <a class="button button-link" th:if="${hasNextPage}"
+           th:href="@{/manager/org/{id}/users(id=${managedOrg.id},q=${query},page=${page + 1})}"
+           th:text="#{manager.pagination.next}">Next</a>
+      </nav>
+    </section>
+
+    <aside class="stack">
+      <section class="card">
+        <h2 class="org-title" th:text="#{manager.userinfo.tabs}">Other tabs</h2>
+        <nav class="role-list">
+          <a class="role-link" th:href="@{/manager/org/{id}/infos(id=${managedOrg.id})}"
+             th:text="#{manager.userinfo.tab.infos}">Infos</a>
+          <a class="role-link is-active" href="#" th:text="#{manager.orginfo.tab.users}">Users</a>
+          <a class="role-link" th:href="@{/manager/org/{id}/manage(id=${managedOrg.id})}"
+             th:text="#{manager.userinfo.tab.manage}">Manage</a>
+        </nav>
+      </section>
+    </aside>
+  </div>
+</main>
+
+<script th:inline="javascript">
+  const orgUsersFeedback = document.getElementById('manager-org-users-feedback');
+  const managedOrgId = /*[[${managedOrg.id}]]*/ 'org';
+  const orgUserAdded = /*[[#{manager.org.userAdded}]]*/ 'User has been added to organization.';
+  const orgUserRemoved = /*[[#{manager.org.userRemoved}]]*/ 'User has been removed from organization.';
+  const orgUsersError = /*[[#{manager.orgusers.updateError}]]*/ 'Unable to update organization users.';
+  const userUpdateBaseUrl = /*[[@{/private/users/}]]*/ '/private/users/';
+
+  const showOrgUsersFeedback = (message, type) => {
+    orgUsersFeedback.hidden = false;
+    orgUsersFeedback.className = `alert ${type === 'success' ? 'alert-success' : 'alert-error'}`;
+    orgUsersFeedback.textContent = message;
+  };
+
+  const updateOrgMembership = async (uid, orgId) => {
+    const response = await fetch(`${userUpdateBaseUrl}${encodeURIComponent(uid)}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      body: JSON.stringify({
+        uid,
+        originalID: uid,
+        org: orgId
+      })
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+  };
+
+  document.getElementById('manager-org-associate-form')?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const uid = document.getElementById('newOrgUserUid').value;
+    if (!uid) {
+      return;
+    }
+    try {
+      await updateOrgMembership(uid, managedOrgId);
+      window.location.reload();
+    } catch (error) {
+      showOrgUsersFeedback(orgUsersError, 'error');
+    }
+  });
+
+  document.querySelectorAll('.org-user-remove').forEach((button) => {
+    button.addEventListener('click', async () => {
+      try {
+        await updateOrgMembership(button.dataset.uid, '');
+        window.location.reload();
+      } catch (error) {
+        showOrgUsersFeedback(orgUsersError, 'error');
+      }
+    });
+  });
+</script>
+</body>
+</html>

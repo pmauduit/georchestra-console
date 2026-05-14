@@ -41,6 +41,7 @@ import javax.sql.DataSource;
 import org.georchestra.ds.DataServiceException;
 import org.georchestra.ds.users.Account;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import com.google.common.annotations.VisibleForTesting;
 
@@ -78,6 +79,7 @@ public class AccountGDPRDaoImpl implements AccountGDPRDao {
     private DataSource dataSource;
 
     @Autowired
+    @Qualifier("dataSourceGeonetwork")
     private DataSource dataSourceGeonetwork;
 
     public void setDataSource(DataSource dataSource) {

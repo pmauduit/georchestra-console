@@ -115,7 +115,7 @@ public class OrgsControllerTest {
     public void updateOrgUpateDelegation() throws IOException, SQLException {
         OrgsController toTest = createToTest();
         when(mockOrg.getId()).thenReturn("c2c42");
-        when(mockOrgsDao.reGenerateId("c2c", "csc")).thenReturn("c2c42");
+        when(mockOrgsDao.reGenerateId("C2C", "csc")).thenReturn("c2c42");
         when(mockEntry1.getOrgs()).thenReturn(new String[] { "momorg" });
         when(mockEntry2.getOrgs()).thenReturn(new String[] {});
         JSONObject reqUsr = new JSONObject().put("shortName", "c2c");
@@ -145,9 +145,13 @@ public class OrgsControllerTest {
         Validation mockValidation = mock(Validation.class);
         when(mockValidation.validateOrgField(anyString(), any(JSONObject.class))).thenReturn(true);
         when(mockValidation.validateUrl(anyString())).thenReturn(true);
+        when(mockValidation.normalizeOrgShortName(anyString()))
+                .thenAnswer(invocation -> ((String) invocation.getArgument(0)).toUpperCase().replaceAll("[^A-Z0-9]", ""));
         JSONObject mockChanges = new JSONObject();
         when(mockValidation.validateOrgUnicity(mockOrgsDao, mockChanges)).thenReturn(true);
         when(mockValidation.validateOrgUnicity(eq(mockOrgsDao), any(JSONObject.class))).thenReturn(true);
+        when(mockValidation.validateOrgShortNameFormat(anyString())).thenReturn(true);
+        when(mockValidation.validateOrgUnicityByShortName(eq(mockOrgsDao), anyString(), anyString())).thenReturn(true);
         OrgsController toTest = new OrgsController(mockOrgsDao);
         toTest.delegationDao = delegationDaoMock;
         toTest.advancedDelegationDao = advancedDelegationDaoMock;

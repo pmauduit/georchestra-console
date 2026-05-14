@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en" th:lang="${#locale.toLanguageTag()}" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${title})}">
+  <meta charset="UTF-8">
+  <title>Error</title>
+</head>
+<body>
+<th:block th:replace="~{fragments/layout :: appHeader('console')}"></th:block>
+<main id="main-content" tabindex="-1" class="page">
+  <section class="hero">
+    <div class="hero-inline">
+      <h1 class="hero-subtitle" th:text="${title}">Error</h1>
+      <p class="hero-text" th:text="|HTTP ${status}|">HTTP 500</p>
+    </div>
+  </section>
+
+  <section class="card">
+    <p th:text="${message}">An unexpected error occurred.</p>
+  </section>
+</main>
+</body>
+</html>

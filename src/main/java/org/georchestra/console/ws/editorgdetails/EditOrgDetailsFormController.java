@@ -96,7 +96,7 @@ public class EditOrgDetailsFormController {
                 session.setAttribute(f + "Required", "true");
             }
         }
-        return "editOrgDetailsForm";
+        return "account/editOrgDetailsForm";
     }
 
     @PostMapping("/account/orgdetails")
@@ -110,7 +110,7 @@ public class EditOrgDetailsFormController {
         // TODO validate mail address for the organization ?
 
         if (resultErrors.hasErrors()) {
-            return "editOrgDetailsForm";
+            return "account/editOrgDetailsForm";
         }
 
         Org orgOrigin = orgsDao.findByCommonName(formBean.getId());

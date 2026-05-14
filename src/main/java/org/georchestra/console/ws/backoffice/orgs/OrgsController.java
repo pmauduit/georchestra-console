@@ -65,12 +65,16 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 
 import com.google.common.collect.Sets;
 
@@ -102,22 +106,12 @@ public class OrgsController {
     protected LogUtils logUtils;
 
     /**
-     * Areas map configuration
+     * Areas selector configuration.
      *
-     * This map appears on the /console/account/new page, when the user checks the
-     * "my org does not exist" checkbox. Currently the map is configured with the
-     * EPSG:4326 SRS.
+     * The frontend reads the GeoJSON separately from /public/area.geojson and only
+     * needs metadata describing how to extract identifiers, labels and groups from
+     * feature properties.
      */
-
-    /* Center of map */
-    @Value("${AreaMapCenter:1.77, 47.3}")
-    private String areaMapCenter;
-
-    /* Zoom of map */
-    @Value("${AreaMapZoom:6}")
-    private String areaMapZoom;
-
-    /* The following properties are used to configure the map widget behavior */
 
     /* Key stored in the org LDAP record to uniquely identify a feature. */
     @Value("${AreasKey:INSEE_COM}")
@@ -214,11 +208,27 @@ public class OrgsController {
 
         this.checkOrgAuthorization(commonName);
 
+        Org currentOrg = this.orgDao.findByCommonName(commonName);
+
         // Parse Json
         JSONObject json = this.parseRequest(request);
 
         if (!this.validation.validateOrgUnicity(orgDao, json)) {
             throw new IOException("Organization : already exists");
+        }
+
+        json.put(Org.JSON_SHORT_NAME, this.validation.normalizeOrgShortName(json.optString(Org.JSON_SHORT_NAME)));
+
+        if (!this.validation.validateOrgField("shortName", json)) {
+            throw new IOException("required field : shortName");
+        }
+
+        if (!this.validation.validateOrgShortNameFormat(json.optString(Org.JSON_SHORT_NAME))) {
+            throw new IOException("Short name must contain only uppercase ASCII letters and digits.");
+        }
+
+        if (!this.validation.validateOrgUnicityByShortName(orgDao, json.optString(Org.JSON_SHORT_NAME), commonName)) {
+            throw new IOException("An organization with this short name already exists.");
         }
 
         // Validate request against required fields for admin part
@@ -231,7 +241,7 @@ public class OrgsController {
         }
 
         // Retrieve current orgs state from ldap
-        Org org = this.orgDao.findByCommonName(commonName);
+        Org org = currentOrg;
         final Org initialOrg = org.clone();
 
         // get default pending status
@@ -287,9 +297,22 @@ public class OrgsController {
             throw new IOException("An organization with this identification number already exists.");
         }
 
-        // Validate request against required fields for admin part
+        json.put(Org.JSON_SHORT_NAME, this.validation.normalizeOrgShortName(json.optString(Org.JSON_SHORT_NAME)));
+
         if (!this.validation.validateOrgField("shortName", json)) {
-            throw new IOException("required field : shortName");
+            String generatedShortName = this.validation.generateUniqueOrgShortName(orgDao, json.optString("name"), null);
+            if (!StringUtils.hasLength(generatedShortName)) {
+                throw new IOException("required field : shortName");
+            }
+            json.put(Org.JSON_SHORT_NAME, generatedShortName);
+        }
+
+        if (!this.validation.validateOrgShortNameFormat(json.optString(Org.JSON_SHORT_NAME))) {
+            throw new IOException("Short name must contain only uppercase ASCII letters and digits.");
+        }
+
+        if (!this.validation.validateOrgUnicityByShortName(orgDao, json.optString(Org.JSON_SHORT_NAME), null)) {
+            throw new IOException("An organization with this short name already exists.");
         }
 
         if (!this.validation.validateUrl(json.optString(Org.JSON_URL))) {
@@ -344,6 +367,12 @@ public class OrgsController {
         return validation.getRequiredOrgFields();
     }
 
+    @ExceptionHandler(IOException.class)
+    @ResponseBody
+    public ResponseEntity<String> handleIOException(IOException exception) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exception.getMessage());
+    }
+
     @GetMapping(value=PUBLIC_REQUEST_MAPPING + "/orgTypeValues", produces="application/json; charset=utf-8")
     @ResponseBody
     public List<String> getOrganisationTypePossibleValues() {
@@ -351,36 +380,16 @@ public class OrgsController {
     }
 
     /**
-     * Return configuration areas UI as json object. Configuration includes
-     * following values :
+     * Return area selector metadata as json.
      *
-     * - inital map center - initial map zoom - ows service to retrieve area
-     * geometry 'url' - attribute to use as label 'value' - attribute to use to
-     * group area 'group' - attribute to use as identifier 'key'
-     *
-     * Ex : { "map" : { "center": [49.5468, 5.123486], "zoom": 8}, "areas" : {
-     * "url": "http://sdi.georchestra.org/geoserver/....;", "key": "insee_code",
-     * "value": "commune_name", "group": "department_name"} }
+     * The frontend computes the map extent directly from the loaded features, so it
+     * only needs the feature property names used for ids, labels and grouping.
      */
 
     @GetMapping(value=PUBLIC_REQUEST_MAPPING + "/areaConfig.json", produces="application/json; charset=utf-8")
     @ResponseBody
     public Map<String, Object> getAreaConfig() {
         Map<String, Object> res = new HashMap<>();
-        Map<String, Object> map = new HashMap<>();
-
-        // Parse center
-        try {
-            String[] rawCenter = areaMapCenter.split("\\s*,\\s*");
-            List<Double> center = new ArrayList<>();
-            center.add(Double.parseDouble(rawCenter[0]));
-            center.add(Double.parseDouble(rawCenter[1]));
-            map.put("center", center);
-            map.put("zoom", areaMapZoom);
-            res.put("map", map);
-        } catch (Exception e) {
-            LOG.info("Could not parse value", e);
-        }
         Map<String, Object> areas = new HashMap<>();
         areas.put("key", areasKey);
         areas.put("value", areasValue);

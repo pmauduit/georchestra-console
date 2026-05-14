@@ -21,12 +21,15 @@ package org.georchestra.console.ws.utils;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.Normalizer;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.lang.reflect.Method;
 
 import org.georchestra.ds.orgs.Org;
 import org.georchestra.ds.orgs.OrgsDao;
@@ -49,6 +52,8 @@ import org.springframework.validation.Errors;
  *
  */
 public class Validation {
+
+    private static final Pattern ORG_SHORT_NAME_PATTERN = Pattern.compile("^[A-Z0-9]+$");
 
     private Set<String> requiredUserFields;
     private Set<String> requiredOrgFields;
@@ -177,6 +182,63 @@ public class Validation {
         return !this.isOrgFieldRequired(field) || StringUtils.hasLength(value);
     }
 
+    public String normalizeOrgShortName(String value) {
+        if (!StringUtils.hasLength(value)) {
+            return "";
+        }
+        String ascii = Normalizer.normalize(value, Normalizer.Form.NFD)
+                .replaceAll("\\p{M}+", "");
+        return ascii.toUpperCase().replaceAll("[^A-Z0-9]", "");
+    }
+
+    public String buildOrgShortNameCandidate(String source) {
+        if (!StringUtils.hasLength(source)) {
+            return "";
+        }
+
+        String ascii = Normalizer.normalize(source, Normalizer.Form.NFD)
+                .replaceAll("\\p{M}+", "")
+                .toUpperCase();
+
+        String[] words = Arrays.stream(ascii.split("[^A-Z0-9]+"))
+                .filter(StringUtils::hasLength)
+                .toArray(String[]::new);
+
+        if (words.length == 0) {
+            return "";
+        }
+        if (words.length == 1) {
+            return words[0].substring(0, Math.min(4, words[0].length()));
+        }
+
+        StringBuilder shortName = new StringBuilder();
+        for (String word : words) {
+            shortName.append(word, 0, Math.min(2, word.length()));
+        }
+        return shortName.toString();
+    }
+
+    public boolean validateOrgShortNameFormat(String shortName) {
+        return !StringUtils.hasLength(shortName) || ORG_SHORT_NAME_PATTERN.matcher(shortName).matches();
+    }
+
+    public String generateUniqueOrgShortName(OrgsDao orgDao, String source, String currentOrgId) {
+        String base = buildOrgShortNameCandidate(source);
+        if (!StringUtils.hasLength(base)) {
+            return "";
+        }
+        if (validateOrgUnicityByShortName(orgDao, base, currentOrgId)) {
+            return base;
+        }
+        for (int i = 1; i < 250; i++) {
+            String candidate = base + i;
+            if (validateOrgUnicityByShortName(orgDao, candidate, currentOrgId)) {
+                return candidate;
+            }
+        }
+        return "";
+    }
+
     public boolean validateUrl(String value) {
         if (value == null || value.length() == 0) {
             return true;
@@ -253,5 +315,43 @@ public class Validation {
             isValid = false;
         }
         return isValid;
+    }
+
+    public boolean validateOrgUnicityByShortName(OrgsDao orgDao, String shortName, String currentOrgId) {
+        if (!StringUtils.hasLength(shortName)) {
+            return true;
+        }
+        Org existing = lookupOrgByShortName(orgDao, shortName);
+        if (existing == null) {
+            return true;
+        }
+        return StringUtils.hasLength(currentOrgId) && currentOrgId.equals(existing.getId());
+    }
+
+    private Org lookupOrgByShortName(OrgsDao orgDao, String shortName) {
+        try {
+            Method method = orgDao.getClass().getMethod("findByShortName", String.class);
+            Object result = method.invoke(orgDao, shortName);
+            if (result instanceof Org org) {
+                return org;
+            }
+        } catch (ReflectiveOperationException ignored) {
+            // Older ldap-account-management versions do not expose a direct short-name
+            // lookup yet. Keep a compatibility fallback for these deployments.
+        }
+        return orgDao.findAll().stream()
+                .filter(org -> StringUtils.hasLength(org.getShortName()))
+                .filter(org -> shortName.equalsIgnoreCase(org.getShortName()))
+                .findFirst()
+                .orElse(null);
+    }
+
+    public boolean validateOrgShortNameField(OrgsDao orgDao, String shortName, String currentOrgId, Errors errors,
+            String fieldName) {
+        if (!validateOrgUnicityByShortName(orgDao, shortName, currentOrgId)) {
+            errors.rejectValue(fieldName, "error.orgShortNameExists", "orgShortNameExists");
+            return false;
+        }
+        return true;
     }
 }

@@ -1,0 +1,9 @@
+Bonjour {name},
+
+Ce message a pour but de vous informer que votre identifiant sur la plateforme
+{instanceName} a été modifié.
+
+Votre nouvel identifiant est : {uid}
+
+---
+Envoyé par {instanceName} ({publicUrl}/)

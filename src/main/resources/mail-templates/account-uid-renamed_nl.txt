@@ -1,0 +1,9 @@
+Beste {name},
+
+Dit bericht is bedoeld om u te informeren dat uw identificatie op het
+{instanceName}-platform is gewijzigd.
+
+Uw nieuwe login is nu: {uid}
+
+---
+Verzonden door {instanceName} ({publicUrl}/)

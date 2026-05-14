@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en" th:lang="${#locale.toLanguageTag()}" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{manager.userroles.title})}">
+  <meta charset="UTF-8">
+  <title>User roles</title>
+</head>
+<body>
+<th:block th:replace="~{fragments/layout :: appHeader('console')}"></th:block>
+<main id="main-content" tabindex="-1" class="page">
+  <section class="hero">
+    <div class="hero-inline">
+      <p class="hero-subtitle" th:text="#{manager.userroles.title}">User roles</p>
+      <p class="hero-text" th:text="#{manager.userroles.description}">
+        Review and update the role assignments exposed by the legacy manager roles tab.
+      </p>
+    </div>
+  </section>
+
+  <nav class="manager-tabs">
+    <a class="manager-tab" th:href="@{/manager/home}" th:text="#{nav.dashboard}">Dashboard</a>
+    <a class="manager-tab active" th:href="@{/manager/browse/all/users}" th:text="#{nav.users}">Users</a>
+    <a class="manager-tab" th:href="@{/manager/orgs/}" th:text="#{nav.orgs}">Orgs</a>
+    <a class="manager-tab" th:href="@{/manager/roles/all}" th:text="#{nav.roles}">Roles</a>
+    <a class="manager-tab" th:if="${isSuperuserView}" th:href="@{/manager/delegations}" th:text="#{nav.delegations}">Delegations</a>
+    <a class="manager-tab" th:href="@{/manager/logs}" th:text="#{manager.logs.title}">Logs</a>
+  </nav>
+
+  <div class="layout">
+    <section class="card">
+      <div class="manager-user-header">
+        <div>
+          <p class="muted">
+            <a th:href="@{/manager/users/{uid}/infos(uid=${managedUser.uid})}" th:text="#{manager.userroles.back}">
+              Back to user details
+            </a>
+          </p>
+          <h1 th:text="${managedUser.commonName != null and !#strings.isEmpty(managedUser.commonName) ? managedUser.commonName : managedUser.uid}">
+            User name
+          </h1>
+          <p class="muted" th:text="${managedUser.uid}">uid</p>
+        </div>
+      </div>
+
+      <div id="manager-user-roles-feedback" class="alert" hidden aria-live="polite"></div>
+
+      <form id="manager-user-roles-form" class="manager-user-form">
+        <fieldset class="fieldset">
+          <legend th:text="#{manager.userroles.system}">System roles</legend>
+          <div class="form-grid manager-role-grid">
+            <label class="checkbox manager-role-option" th:each="roleOption : ${adminRoles}" th:title="${roleOption.description()}">
+              <input type="checkbox" name="systemRoles" th:value="${roleOption.cn()}" th:checked="${roleOption.assigned()}">
+              <span>
+                <strong th:text="${roleOption.label()}">Role</strong>
+                <small class="muted" th:if="${roleOption.description() != null and !#strings.isEmpty(roleOption.description())}"
+                       th:text="${roleOption.description()}">Description</small>
+              </span>
+            </label>
+            <p class="muted" th:if="${#lists.isEmpty(adminRoles)}" th:text="#{manager.userroles.none}">
+              No editable system role is available for this user.
+            </p>
+          </div>
+        </fieldset>
+
+        <fieldset class="fieldset">
+          <legend th:text="#{manager.userroles.app}">Application roles</legend>
+          <div class="form-grid manager-role-grid">
+            <label class="checkbox manager-role-option" th:each="roleOption : ${appRoles}" th:title="${roleOption.description()}">
+              <input type="checkbox" name="appRoles" th:value="${roleOption.cn()}" th:checked="${roleOption.assigned()}">
+              <span>
+                <strong th:text="${roleOption.label()}">Role</strong>
+                <small class="muted" th:if="${roleOption.description() != null and !#strings.isEmpty(roleOption.description())}"
+                       th:text="${roleOption.description()}">Description</small>
+              </span>
+            </label>
+            <p class="muted" th:if="${#lists.isEmpty(appRoles)}" th:text="#{manager.userroles.none}">
+              No editable application role is available for this user.
+            </p>
+          </div>
+        </fieldset>
+
+        <div class="actions">
+          <button type="submit" class="button button-primary" th:text="#{manager.userroles.save}">Save roles</button>
+          <a class="button button-link" th:href="@{/manager/users/{uid}/infos(uid=${managedUser.uid})}"
+             th:text="#{manager.userinfo.cancel}">Cancel</a>
+        </div>
+      </form>
+    </section>
+
+    <aside class="stack">
+      <section class="card">
+        <h2 class="org-title" th:text="#{manager.userinfo.tabs}">Other tabs</h2>
+        <nav class="role-list">
+          <a class="role-link" th:href="@{/manager/users/{uid}/infos(uid=${managedUser.uid})}"
+             th:text="#{manager.userinfo.tab.infos}">Infos</a>
+          <a class="role-link is-active" href="#" th:text="#{manager.userinfo.tab.roles}">Roles</a>
+          <a class="role-link" th:href="@{/manager/users/{uid}/messages(uid=${managedUser.uid})}"
+             th:text="#{manager.userinfo.tab.messages}">Messages</a>
+          <a class="role-link" th:href="@{/manager/users/{uid}/logs(uid=${managedUser.uid})}"
+             th:text="#{manager.userinfo.tab.logs}">Logs</a>
+          <a class="role-link" th:href="@{/manager/users/{uid}/manage(uid=${managedUser.uid})}"
+             th:text="#{manager.userinfo.tab.manage}">Manage</a>
+        </nav>
+      </section>
+
+      <section class="card">
+        <h2 class="org-title" th:text="#{manager.userroles.summary}">Assigned roles</h2>
+        <p class="muted" th:if="${#strings.isEmpty(roleSummary)}" th:text="#{manager.userroles.noneAssigned}">
+          No visible role is currently assigned.
+        </p>
+        <p th:unless="${#strings.isEmpty(roleSummary)}" th:text="${roleSummary}">ROLE_A, ROLE_B</p>
+      </section>
+    </aside>
+  </div>
+</main>
+
+<script th:inline="javascript">
+  const rolesForm = document.getElementById('manager-user-roles-form');
+  const rolesFeedback = document.getElementById('manager-user-roles-feedback');
+  const roleSaveSuccess = /*[[#{manager.userroles.saveSuccess}]]*/ 'Roles saved successfully.';
+  const roleSaveError = /*[[#{manager.userroles.saveError}]]*/ 'Unable to save user roles.';
+  const rolesUpdateUrl = /*[[@{/private/roles_users}]]*/ '/private/roles_users';
+  const managedUid = /*[[${managedUser.uid}]]*/ 'user';
+  const initialRoles = new Set(/*[[${selectedRoles}]]*/ []);
+
+  const showRolesFeedback = (message, type) => {
+    rolesFeedback.hidden = false;
+    rolesFeedback.className = `alert ${type === 'success' ? 'alert-success' : 'alert-error'}`;
+    rolesFeedback.textContent = message;
+  };
+
+  const selectedRoles = () => Array.from(
+    rolesForm.querySelectorAll('input[type="checkbox"]:checked')
+  ).map((input) => input.value);
+
+  rolesForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const selected = selectedRoles();
+    const selectedSet = new Set(selected);
+    const toPut = selected.filter((role) => !initialRoles.has(role));
+    const toDelete = Array.from(initialRoles).filter((role) => !selectedSet.has(role));
+
+    if (toPut.length === 0 && toDelete.length === 0) {
+      showRolesFeedback(roleSaveSuccess, 'success');
+      return;
+    }
+
+    try {
+      const response = await fetch(rolesUpdateUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({
+          users: [managedUid],
+          PUT: toPut,
+          DELETE: toDelete
+        })
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      window.location.reload();
+    } catch (error) {
+      showRolesFeedback(roleSaveError, 'error');
+    }
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en" th:lang="${#locale.toLanguageTag()}" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{manager.roleusers.title})}">
+  <meta charset="UTF-8">
+  <title>Role users</title>
+</head>
+<body>
+<th:block th:replace="~{fragments/layout :: appHeader('console')}"></th:block>
+<main id="main-content" tabindex="-1" class="page">
+  <section class="hero">
+    <div class="hero-inline">
+      <p class="hero-subtitle" th:text="#{manager.roleusers.title}">Role members</p>
+      <p class="hero-text" th:text="#{manager.roleusers.description}">
+        Review visible users assigned to the selected role and update memberships.
+      </p>
+    </div>
+  </section>
+
+  <nav class="manager-tabs">
+    <a class="manager-tab" th:href="@{/manager/home}" th:text="#{nav.dashboard}">Dashboard</a>
+    <a class="manager-tab" th:href="@{/manager/browse/all/users}" th:text="#{nav.users}">Users</a>
+    <a class="manager-tab" th:href="@{/manager/orgs/}" th:text="#{nav.orgs}">Orgs</a>
+    <a class="manager-tab active" th:href="@{/manager/roles/all}" th:text="#{nav.roles}">Roles</a>
+    <a class="manager-tab" th:if="${isSuperuserView}" th:href="@{/manager/delegations}" th:text="#{nav.delegations}">Delegations</a>
+    <a class="manager-tab" th:href="@{/manager/logs}" th:text="#{manager.logs.title}">Logs</a>
+  </nav>
+
+  <div class="layout">
+    <section class="card">
+      <div class="manager-user-header">
+        <div>
+          <p class="muted">
+            <a th:href="@{/manager/roles/{cn}/infos(cn=${role.cn})}" th:text="#{manager.roleusers.back}">
+              Back to role details
+            </a>
+          </p>
+          <h1 th:text="${role.cn}">ROLE</h1>
+          <p class="muted" th:text="#{manager.roleusers.count(${totalUsers})}">0 users</p>
+        </div>
+      </div>
+
+      <div id="manager-role-users-feedback" class="alert" hidden aria-live="polite"></div>
+
+      <form class="filters" method="get" th:action="@{/manager/roles/{cn}/users(cn=${role.cn})}">
+        <div class="form-grid manager-users-filter-grid">
+          <div class="field">
+            <label for="q" th:text="#{manager.role.filterUsers}">Filter</label>
+            <input id="q" type="search" name="q" th:value="${query}" th:placeholder="#{manager.role.filterUsers}">
+          </div>
+        </div>
+        <div class="actions">
+          <button type="submit" class="button button-primary" th:text="#{manager.logs.filter.apply}">Apply</button>
+          <a class="button button-link" th:href="@{/manager/roles/{cn}/users(cn=${role.cn})}"
+             th:text="#{manager.logs.filter.clear}">Clear</a>
+        </div>
+      </form>
+
+      <form id="manager-role-associate-form" class="manager-user-form" th:if="${!readonly}">
+        <fieldset class="fieldset">
+          <legend th:text="#{manager.role.userLabel}">Add</legend>
+          <div class="form-grid manager-users-filter-grid">
+            <div class="field">
+              <label for="newUserUid" th:text="#{manager.role.userLabel}">Add</label>
+              <select id="newUserUid" name="uid">
+                <option value="" th:text="#{manager.roleusers.selectUser}">Select a user</option>
+                <option th:each="user : ${availableUsers}" th:value="${user.uid()}" th:text="${user.displayName()}"></option>
+              </select>
+            </div>
+          </div>
+          <div class="actions">
+            <button type="submit" class="button button-primary" th:text="#{manager.role.userLabel}">Add</button>
+          </div>
+        </fieldset>
+      </form>
+
+      <div class="table-wrapper">
+        <table class="table">
+          <thead>
+          <tr>
+            <th th:text="#{manager.users.user}">User</th>
+            <th th:text="#{manager.user.action}">Action</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr th:each="user : ${managedUsers}">
+            <td>
+              <a th:href="@{/manager/users/{uid}/infos(uid=${user.uid()})}" th:text="${user.displayName()}">User name</a>
+              <span class="muted" th:text="${user.uid()}">uid</span>
+            </td>
+            <td>
+              <button type="button" class="button button-link text-danger role-user-remove"
+                      th:if="${!readonly}" th:attr="data-uid=${user.uid()}" th:text="#{manager.user.remove}">Remove</button>
+            </td>
+          </tr>
+          <tr th:if="${#lists.isEmpty(managedUsers)}">
+            <td colspan="2" class="empty" th:text="#{manager.roleusers.empty}">No user found</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <nav class="pagination" th:if="${pageCount > 1}">
+        <a class="button button-link" th:if="${hasPreviousPage}"
+           th:href="@{/manager/roles/{cn}/users(cn=${role.cn},q=${query},page=${page - 1})}"
+           th:text="#{manager.pagination.previous}">Previous</a>
+        <span class="muted" th:text="#{manager.pagination.current(${page + 1}, ${pageCount})}">Page 1 / 1</span>
+        <a class="button button-link" th:if="${hasNextPage}"
+           th:href="@{/manager/roles/{cn}/users(cn=${role.cn},q=${query},page=${page + 1})}"
+           th:text="#{manager.pagination.next}">Next</a>
+      </nav>
+    </section>
+
+    <aside class="stack">
+      <section class="card">
+        <h2 class="org-title" th:text="#{manager.userinfo.tabs}">Other tabs</h2>
+        <nav class="role-list">
+          <a class="role-link" th:href="@{/manager/roles/{cn}/infos(cn=${role.cn})}"
+             th:text="#{manager.userinfo.tab.infos}">Infos</a>
+          <a class="role-link is-active" href="#" th:text="#{manager.roleinfo.tab.users}">Users</a>
+          <a class="role-link" th:if="${!readonly}" th:href="@{/manager/roles/{cn}/manage(cn=${role.cn})}"
+             th:text="#{manager.userinfo.tab.manage}">Manage</a>
+        </nav>
+      </section>
+    </aside>
+  </div>
+</main>
+
+<script th:inline="javascript">
+  const roleUsersFeedback = document.getElementById('manager-role-users-feedback');
+  const roleUsersUpdateUrl = /*[[@{/private/roles_users}]]*/ '/private/roles_users';
+  const managedRoleCn = /*[[${role.cn}]]*/ 'ROLE';
+  const roleUserAdded = /*[[#{manager.role.userAdded}]]*/ 'User has been added to role.';
+  const roleUserRemoved = /*[[#{manager.role.userRemoved}]]*/ 'User has been removed from role.';
+  const roleUsersError = /*[[#{manager.roleusers.updateError}]]*/ 'Unable to update role users.';
+
+  const showRoleUsersFeedback = (message, type) => {
+    roleUsersFeedback.hidden = false;
+    roleUsersFeedback.className = `alert ${type === 'success' ? 'alert-success' : 'alert-error'}`;
+    roleUsersFeedback.textContent = message;
+  };
+
+  const updateRoleUsers = async (uid, remove = false) => {
+    const response = await fetch(roleUsersUpdateUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      body: JSON.stringify({
+        users: [uid],
+        PUT: remove ? [] : [managedRoleCn],
+        DELETE: remove ? [managedRoleCn] : []
+      })
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+  };
+
+  document.getElementById('manager-role-associate-form')?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const uid = document.getElementById('newUserUid').value;
+    if (!uid) {
+      return;
+    }
+    try {
+      await updateRoleUsers(uid, false);
+      window.location.reload();
+    } catch (error) {
+      showRoleUsersFeedback(roleUsersError, 'error');
+    }
+  });
+
+  document.querySelectorAll('.role-user-remove').forEach((button) => {
+    button.addEventListener('click', async () => {
+      try {
+        await updateRoleUsers(button.dataset.uid, true);
+        window.location.reload();
+      } catch (error) {
+        showRoleUsersFeedback(roleUsersError, 'error');
+      }
+    });
+  });
+</script>
+</body>
+</html>

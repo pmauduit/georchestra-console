@@ -20,12 +20,14 @@
 package org.georchestra.console.ws.newaccount;
 
 import java.io.IOException;
+import java.text.Normalizer;
 import java.sql.SQLException;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -39,9 +41,9 @@ import jakarta.mail.MessagingException;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.google.common.annotations.VisibleForTesting;
-import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -68,6 +70,7 @@ import org.georchestra.ds.users.DuplicatedUidException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.StringUtils;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
@@ -109,23 +112,30 @@ public final class NewAccountFormController {
     @Autowired
     protected PasswordUtils passwordUtils;
 
+    @Value("${moderatedSignup:true}")
     private boolean moderatedSignup = true;
 
-    // TODO
+    @Value("${readonlyUid:false}")
+    private boolean readonlyUid = false;
+
+    @Value("${recaptcha.activated:false}")
     protected boolean reCaptchaActivated = false;
     private ReCaptchaParameters reCaptchaParameters;
 
-    // TODO
+    @Value("${privacy.policy.agreement.activated:false}")
     protected boolean privacyPolicyAgreementActivated = false;
 
-    // TODO
+    @Value("${privacy.policy.agreement.url:https://${domainName}/policy.html}")
     protected String privacyPolicyAgreementUrl;
 
-    // TODO
+    @Value("${data.processing.agreement.activated:false}")
     protected boolean consentAgreementActivated = false;
 
-    // TODO
+    @Value("${data.processing.agreement.url:https://${domainName}/consent.html}")
     protected String consentAgreementUrl;
+
+    @Value("${competenceAreaEnabled:false}")
+    private boolean competenceAreaEnabled;
 
     @Autowired
     protected LogUtils logUtils;
@@ -189,15 +199,7 @@ public final class NewAccountFormController {
         HttpSession session = request.getSession();
 
         populateOrgsAndOrgTypes(model);
-
-        model.addAttribute("privacyPolicyAgreementActivated", this.privacyPolicyAgreementActivated);
-        model.addAttribute("privacyPolicyAgreementUrl", this.privacyPolicyAgreementUrl);
-
-        model.addAttribute("consentAgreementActivated", this.consentAgreementActivated);
-        model.addAttribute("consentAgreementUrl", this.consentAgreementUrl);
-
-        model.addAttribute("recaptchaActivated", this.reCaptchaActivated);
-        model.addAttribute("pwdUtils", passwordUtils);
+        populateCommonModelAttributes(model);
 
         session.setAttribute("reCaptchaPublicKey", reCaptchaParameters.getPublicKey());
         for (String f : validation.getRequiredUserFields()) {
@@ -209,7 +211,7 @@ public final class NewAccountFormController {
                     "true");
         }
 
-        return "createAccountForm";
+        return "account/createAccountForm";
     }
 
     /**
@@ -229,34 +231,47 @@ public final class NewAccountFormController {
      */
     @PostMapping("/account/new")
     public String create(HttpServletRequest request, @ModelAttribute AccountFormBean formBean,
-            @RequestParam(required = false, defaultValue = "") String orgCities, BindingResult result,
+            @RequestParam(required = false, defaultValue = "") String orgCities,
+            @RequestParam(required = false) MultipartFile orgLogoFile, BindingResult result,
             SessionStatus sessionStatus, Model model) throws IOException, SQLException {
 
         populateOrgsAndOrgTypes(model);
+        populateCommonModelAttributes(model);
         model.addAttribute("moderatedSignup", this.moderatedSignup);
-        model.addAttribute("pwdUtils", passwordUtils);
+        applyReadonlyUid(formBean);
         validateFields(formBean, result);
 
         if (result.hasErrors()) {
-            return "createAccountForm";
+            return "account/createAccountForm";
         }
 
         if (formBean.getCreateOrg()) {
             try {
                 Org org = new Org();
+                String orgShortName = validation.normalizeOrgShortName(formBean.getOrgShortName());
+                if (!StringUtils.hasLength(orgShortName)) {
+                    orgShortName = validation.generateUniqueOrgShortName(orgDao, formBean.getOrgName(), null);
+                    formBean.setOrgShortName(orgShortName);
+                } else {
+                    formBean.setOrgShortName(orgShortName);
+                }
 
                 // Generate textual identifier based on name
-                String orgId = orgDao.generateId(formBean.getOrgShortName());
+                String orgId = orgDao.generateId(orgShortName);
                 org.setId(orgId);
 
                 // Store name, short name, orgType and address
                 org.setName(formBean.getOrgName());
-                org.setShortName(formBean.getOrgShortName());
+                org.setShortName(orgShortName);
                 org.setAddress(formBean.getOrgAddress());
                 org.setOrgType(formBean.getOrgType());
                 org.setDescription(formBean.getOrgDescription());
                 org.setUrl(formBean.getOrgUrl());
-                org.setLogo(formBean.getOrgLogo());
+                if (orgLogoFile != null && !orgLogoFile.isEmpty()) {
+                    org.setLogo(transformLogoFileToBase64(orgLogoFile));
+                } else {
+                    org.setLogo(formBean.getOrgLogo());
+                }
                 org.setMail(formBean.getOrgMail());
                 org.setOrgUniqueId(formBean.getOrgUniqueId());
                 // Parse and store cities
@@ -338,20 +353,20 @@ public final class NewAccountFormController {
                 logUtils.createLog(account.getUid(), AdminLogType.PENDING_USER_CREATED, null);
             }
 
-            return "welcomeNewUser";
+            return "account/welcomeNewUser";
 
         } catch (DuplicatedEmailException e) {
 
             result.rejectValue("email", "email.error.exist",
                     new String[] { String.format("%s%s", publicContextPath, "/account/passwordRecovery") },
                     "there is a user with this e-mail");
-            return "createAccountForm";
+            return "account/createAccountForm";
 
         } catch (DuplicatedUidException e) {
 
             formBean.setUid(accountDao.generateUid(formBean.getUid()));
             result.rejectValue("uid", "uid.error.exist", "the uid exist");
-            return "createAccountForm";
+            return "account/createAccountForm";
 
         } catch (DataServiceException | MessagingException e) {
 
@@ -360,7 +375,7 @@ public final class NewAccountFormController {
     }
 
     public @VisibleForTesting List<String> getSuperUserEmailAddresses() throws DataServiceException {
-        return accountDao.findByRole("SUPERUSER").stream().map(Account::getEmail).filter(StringUtils::isNotEmpty)
+        return accountDao.findByRole("SUPERUSER").stream().map(Account::getEmail).filter(StringUtils::hasLength)
                 .collect(Collectors.toCollection(LinkedList::new));
     }
 
@@ -412,7 +427,11 @@ public final class NewAccountFormController {
 
         if (formBean.getCreateOrg() && !result.hasErrors()) {
             validation.validateOrgField("name", formBean.getOrgName(), result);
-            validation.validateOrgField("shortName", formBean.getOrgShortName(), result);
+            formBean.setOrgShortName(validation.normalizeOrgShortName(formBean.getOrgShortName()));
+            if (StringUtils.hasLength(formBean.getOrgShortName())
+                    && !validation.validateOrgShortNameFormat(formBean.getOrgShortName())) {
+                result.rejectValue("orgShortName", "account.create.org.shortNameFormat", "badFormat");
+            }
             validation.validateOrgField("address", formBean.getOrgAddress(), result);
             validation.validateOrgField("type", formBean.getOrgType(), result);
             validation.validateOrgField("url", formBean.getOrgUrl(), result);
@@ -420,6 +439,10 @@ public final class NewAccountFormController {
             validation.validateOrgField("logo", formBean.getOrgLogo(), result);
             validation.validateOrgField("orgUniqueId", formBean.getOrgUniqueId(), result);
             validation.validateUrlFieldWithSpecificMsg("orgUrl", formBean.getOrgUrl(), result);
+            if (StringUtils.hasLength(formBean.getOrgShortName())) {
+                validation.validateOrgShortNameField(this.orgDao, formBean.getOrgShortName(), null, result,
+                        "orgShortName");
+            }
 
             JSONObject orgToValidate = new JSONObject().put("orgUniqueId", formBean.getOrgUniqueId());
             validation.validateOrgUniqueIdField(this.orgDao, orgToValidate, result);
@@ -431,6 +454,40 @@ public final class NewAccountFormController {
     private void populateOrgsAndOrgTypes(Model model) {
         model.addAttribute("orgs", getOrgs());
         model.addAttribute("orgTypes", getOrgTypes());
+    }
+
+    private String transformLogoFileToBase64(MultipartFile logo) throws IOException {
+        byte[] base64Encoded = Base64.getMimeEncoder().encode(logo.getBytes());
+        return new String(base64Encoded);
+    }
+
+    private void populateCommonModelAttributes(Model model) {
+        model.addAttribute("privacyPolicyAgreementActivated", this.privacyPolicyAgreementActivated);
+        model.addAttribute("privacyPolicyAgreementUrl", this.privacyPolicyAgreementUrl);
+        model.addAttribute("consentAgreementActivated", this.consentAgreementActivated);
+        model.addAttribute("consentAgreementUrl", this.consentAgreementUrl);
+        model.addAttribute("recaptchaActivated", this.reCaptchaActivated);
+        model.addAttribute("pwdUtils", passwordUtils);
+        model.addAttribute("competenceAreaEnabled", this.competenceAreaEnabled);
+        model.addAttribute("readonlyUid", this.readonlyUid);
+    }
+
+    private void applyReadonlyUid(AccountFormBean formBean) {
+        if (!readonlyUid) {
+            return;
+        }
+        String firstName = formBean.getFirstName() == null ? "" : formBean.getFirstName().trim();
+        String surname = formBean.getSurname() == null ? "" : formBean.getSurname().trim();
+        if (firstName.isEmpty() || surname.isEmpty()) {
+            formBean.setUid("");
+            return;
+        }
+        String seed = firstName.substring(0, 1) + surname;
+        String normalized = Normalizer.normalize(seed, Normalizer.Form.NFD)
+                .replaceAll("\\p{M}", "")
+                .toLowerCase()
+                .replaceAll("[^a-z0-9_.-]+", "");
+        formBean.setUid(accountDao.generateUid(normalized));
     }
 
     /**

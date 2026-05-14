@@ -49,6 +49,8 @@ import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
 /**
@@ -78,7 +80,7 @@ public class ChangeEmailFormController {
     @Value("${publicContextPath:/console}")
     private String publicContextPath;
 
-    @Value("https://${domainName}")
+    @Value("${publicUrl:https://${domainName}}")
     private String publicUrl;
 
     public ChangeEmailFormController(AccountDao accountDao, EmailFactory emailFactory, UserTokenDao userTokenDao,
@@ -109,7 +111,7 @@ public class ChangeEmailFormController {
     public String setupForm(Model model) throws DataServiceException {
         ChangeEmailFormBean formBean = new ChangeEmailFormBean();
         model.addAttribute(formBean);
-        return "changeEmailForm";
+        return "account/changeEmailForm";
     }
 
     /**
@@ -129,7 +131,7 @@ public class ChangeEmailFormController {
         if (validation.validateUserFieldWithSpecificMsg("newEmail", formBean.getNewEmail(), result)
                 && !EmailValidator.getInstance().isValid(formBean.getNewEmail())) {
             result.rejectValue("newEmail", "email.error.invalidFormat", "Invalid Format");
-            return "changeEmailForm";
+            return "account/changeEmailForm";
         }
 
         String newEmail = formBean.getNewEmail();
@@ -139,7 +141,7 @@ public class ChangeEmailFormController {
             result.rejectValue("newEmail", "email.error.exist",
                     new String[] { String.format("%s%s", publicContextPath, "/account/changeEmail") },
                     "there is a user with this e-mail");
-            return "changeEmailForm";
+            return "account/changeEmailForm";
         } catch (NameNotFoundException e) {}
 
         Account account = getAccount();
@@ -166,7 +168,7 @@ public class ChangeEmailFormController {
 
         LOG.debug(AdminLogType.EMAIL_CHANGE_EMAIL_SENT + " from " + account.getUid() + " to " + newEmail);
 
-        return "emailWasSentForEmailChange";
+        return "account/emailWasSentForEmailChange";
     }
 
     /**
@@ -217,8 +219,14 @@ public class ChangeEmailFormController {
      * @return a new URL to change email address
      */
     protected String makeChangeEmailURL(final String publicUrl, final String contextPath, final String token) {
-        String url = UriComponentsBuilder.fromUriString(publicUrl).path(contextPath).path("/account/validateEmail")
-                .query("token={token}").buildAndExpand(token).toUriString();
+        String baseUrl = publicUrl.endsWith("/") ? publicUrl.substring(0, publicUrl.length() - 1) : publicUrl;
+        String resolvedContextPath = contextPath == null || contextPath.isBlank() ? "" : contextPath;
+        if (!resolvedContextPath.isEmpty() && !resolvedContextPath.startsWith("/")) {
+            resolvedContextPath = "/" + resolvedContextPath;
+        }
+
+        String url = baseUrl + resolvedContextPath + "/account/validateEmail?token="
+                + URLEncoder.encode(token, StandardCharsets.UTF_8);
 
         if (LOG.isDebugEnabled()) {
             LOG.debug("generated url:" + url);

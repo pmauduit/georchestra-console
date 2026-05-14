@@ -120,7 +120,7 @@ public class UsersController {
     @Autowired
     private @Setter GDPRAccountWorker gdprInfoWorker;
 
-    // TODO: configuration
+    @Value("${warnUserIfUidModified:true}")
     private Boolean warnUserIfUidModified = false;
 
     private UserRule userRule;

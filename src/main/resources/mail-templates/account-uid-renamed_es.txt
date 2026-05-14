@@ -1,0 +1,9 @@
+Hola {name},
+
+Este mensaje es para informarle que su identificador en la plataforma
+{instanceName} ha sido modificado.
+
+Su nuevo usuario es: {uid}
+
+---
+Enviado por {instanceName} ({publicUrl}/)
