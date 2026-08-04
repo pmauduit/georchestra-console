@@ -268,6 +268,27 @@ textarea:focus-visible,
   grid-template-columns: minmax(0, 1fr);
 }
 
+.manager-logs-filter-grid {
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  align-items: end;
+}
+
+.manager-logs-filter-grid > .field {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
+  align-items: start;
+}
+
+.form-grid.manager-logs-filter-grid > .field > :is(label, input, select) {
+  grid-column: auto;
+  margin: 0;
+}
+
+.manager-logs-filter-grid > .field > label {
+  cursor: pointer;
+}
+
 .table-wrapper {
   overflow-x: auto;
   margin-top: 16px;
@@ -441,7 +462,7 @@ textarea:focus-visible,
   gap: 16px;
 }
 
-.filters .form-grid {
+.filters .form-grid:not(.manager-logs-filter-grid) {
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
 }
 
@@ -486,8 +507,8 @@ textarea:focus-visible,
   gap: 16px;
 }
 
-.form-grid:not(.area-selector-controls):not(.manager-user-form-grid) > .field,
-.form-grid:not(.area-selector-controls):not(.manager-user-form-grid) > .static-field {
+.form-grid:not(.area-selector-controls):not(.manager-user-form-grid):not(.manager-logs-filter-grid) > .field,
+.form-grid:not(.area-selector-controls):not(.manager-user-form-grid):not(.manager-logs-filter-grid) > .static-field {
   display: grid;
   grid-template-columns: minmax(180px, 220px) minmax(0, 1fr);
   gap: 8px 16px;
@@ -501,22 +522,17 @@ textarea:focus-visible,
   font-weight: 600;
 }
 
-.form-grid:not(.area-selector-controls):not(.manager-user-form-grid) > .field > label,
-.form-grid:not(.area-selector-controls):not(.manager-user-form-grid) > .static-field > .label {
+.form-grid:not(.area-selector-controls):not(.manager-user-form-grid):not(.manager-logs-filter-grid) > .field > label,
+.form-grid:not(.area-selector-controls):not(.manager-user-form-grid):not(.manager-logs-filter-grid) > .static-field > .label {
   margin: 0;
 }
 
-.form-grid:not(.area-selector-controls):not(.manager-user-form-grid) > .field > input,
-.form-grid:not(.area-selector-controls):not(.manager-user-form-grid) > .field > textarea,
-.form-grid:not(.area-selector-controls):not(.manager-user-form-grid) > .field > select,
-.form-grid:not(.area-selector-controls):not(.manager-user-form-grid) > .field > .field-error,
-.form-grid:not(.area-selector-controls):not(.manager-user-form-grid) > .field > .help-text,
-.form-grid:not(.area-selector-controls):not(.manager-user-form-grid) > .field > .pwd-quality,
-.form-grid:not(.area-selector-controls):not(.manager-user-form-grid) > .static-field > .static-value {
+.form-grid:not(.area-selector-controls):not(.manager-user-form-grid):not(.manager-logs-filter-grid) > .field > :is(input, textarea, select, .field-error, .help-text, .pwd-quality),
+.form-grid:not(.area-selector-controls):not(.manager-user-form-grid):not(.manager-logs-filter-grid) > .static-field > .static-value {
   grid-column: 2;
 }
 
-.form-grid:not(.area-selector-controls):not(.manager-user-form-grid) > .field > textarea {
+.form-grid:not(.area-selector-controls):not(.manager-user-form-grid):not(.manager-logs-filter-grid) > .field > textarea {
   align-self: start;
 }
 
@@ -969,20 +985,15 @@ input.is-invalid {
     grid-column: auto;
   }
 
-  .form-grid:not(.area-selector-controls):not(.manager-user-form-grid) > .field,
-  .form-grid:not(.area-selector-controls):not(.manager-user-form-grid) > .static-field {
+  .form-grid:not(.area-selector-controls):not(.manager-user-form-grid):not(.manager-logs-filter-grid) > .field,
+  .form-grid:not(.area-selector-controls):not(.manager-user-form-grid):not(.manager-logs-filter-grid) > .static-field {
     grid-template-columns: 1fr;
     align-items: stretch;
   }
 
-  .form-grid:not(.area-selector-controls):not(.manager-user-form-grid) > .field > input,
-  .form-grid:not(.area-selector-controls):not(.manager-user-form-grid) > .field > textarea,
-  .form-grid:not(.area-selector-controls):not(.manager-user-form-grid) > .field > select,
-  .form-grid:not(.area-selector-controls):not(.manager-user-form-grid) > .field > .field-error,
-  .form-grid:not(.area-selector-controls):not(.manager-user-form-grid) > .field > .help-text,
-  .form-grid:not(.area-selector-controls):not(.manager-user-form-grid) > .field > .pwd-quality,
-  .form-grid:not(.area-selector-controls):not(.manager-user-form-grid) > .static-field > .static-value {
-    grid-column: auto;
+  .form-grid:not(.area-selector-controls):not(.manager-user-form-grid):not(.manager-logs-filter-grid) > .field > :is(input, textarea, select, .field-error, .help-text, .pwd-quality),
+  .form-grid:not(.area-selector-controls):not(.manager-user-form-grid):not(.manager-logs-filter-grid) > .static-field > .static-value {
+    grid-column: 1;
   }
 
   .manager-user-header {

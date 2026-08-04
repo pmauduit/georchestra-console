@@ -25,9 +25,9 @@
 
   <section class="card">
     <form class="filters" method="get" th:action="@{/manager/logs}">
-      <div class="form-grid">
+      <div class="form-grid manager-logs-filter-grid">
         <div class="field">
-          <label for="admin" th:text="#{manager.logs.sender}">Author</label>
+          <label for="admin" data-open-control="admin" th:text="#{manager.logs.sender}">Author</label>
           <select id="admin" name="admin">
             <option value="all" th:selected="${adminFilter == 'all'}" th:text="#{manager.logs.allsender}">All</option>
             <option th:each="a : ${admins}" th:value="${a}" th:text="${a}" th:selected="${adminFilter == a}"></option>
@@ -35,7 +35,7 @@
         </div>
 
         <div class="field">
-          <label for="target" th:text="#{manager.logs.target}">Target</label>
+          <label for="target" data-open-control="target" th:text="#{manager.logs.target}">Target</label>
           <select id="target" name="target">
             <option value="all" th:selected="${targetFilter == 'all'}" th:text="#{manager.logs.alltarget}">All</option>
             <option th:each="t : ${targets}" th:value="${t}" th:text="${t}" th:selected="${targetFilter == t}"></option>
@@ -43,7 +43,7 @@
         </div>
 
         <div class="field">
-          <label for="type" th:text="#{manager.logs.type}">Action</label>
+          <label for="type" data-open-control="type" th:text="#{manager.logs.type}">Action</label>
           <select id="type" name="type">
             <option value="all" th:selected="${typeFilter == 'all'}" th:text="#{manager.logs.alltype}">All</option>
             <option th:each="t : ${allTypes}"
@@ -55,15 +55,17 @@
         </div>
 
         <div class="field">
-          <label for="from" th:text="#{manager.logs.filter.from}">From</label>
+          <label for="from" data-open-control="from" th:text="#{manager.logs.filter.from}">From</label>
           <input id="from" type="date" name="from" th:value="${fromFilter}">
         </div>
 
         <div class="field">
-          <label for="to" th:text="#{manager.logs.filter.to}">To</label>
+          <label for="to" data-open-control="to" th:text="#{manager.logs.filter.to}">To</label>
           <input id="to" type="date" name="to" th:value="${toFilter}">
         </div>
       </div>
+      <input type="hidden" name="sort" th:value="${sort}">
+      <input type="hidden" name="dir" th:value="${dir}">
 
       <div class="actions">
         <button type="submit" class="button button-primary" th:text="#{manager.logs.filter.apply}">Apply</button>
@@ -80,10 +82,34 @@
         <caption class="visually-hidden" th:text="#{manager.logs.title}">Administration logs</caption>
         <thead>
         <tr>
-          <th th:text="#{manager.logs.date}">Date</th>
-          <th th:text="#{manager.logs.sender}">Author</th>
-          <th th:text="#{manager.logs.target}">Target</th>
-          <th th:text="#{manager.logs.type}">Action</th>
+          <th th:attr="aria-sort=${sort == 'date' ? (dir == 'asc' ? 'ascending' : 'descending') : 'none'}">
+            <a class="table-sort"
+               th:href="@{/manager/logs(admin=${adminFilter},target=${targetFilter},type=${typeFilter},from=${fromFilter},to=${toFilter},sort='date',dir=${sort == 'date' ? nextSortDir : 'desc'})}">
+              <span th:text="#{manager.logs.date}">Date</span>
+              <span class="sort-indicator" th:if="${sort == 'date'}" th:text="${dir == 'asc' ? '↑' : '↓'}">↓</span>
+            </a>
+          </th>
+          <th th:attr="aria-sort=${sort == 'author' ? (dir == 'asc' ? 'ascending' : 'descending') : 'none'}">
+            <a class="table-sort"
+               th:href="@{/manager/logs(admin=${adminFilter},target=${targetFilter},type=${typeFilter},from=${fromFilter},to=${toFilter},sort='author',dir=${sort == 'author' ? nextSortDir : 'asc'})}">
+              <span th:text="#{manager.logs.sender}">Author</span>
+              <span class="sort-indicator" th:if="${sort == 'author'}" th:text="${dir == 'asc' ? '↑' : '↓'}">↑</span>
+            </a>
+          </th>
+          <th th:attr="aria-sort=${sort == 'target' ? (dir == 'asc' ? 'ascending' : 'descending') : 'none'}">
+            <a class="table-sort"
+               th:href="@{/manager/logs(admin=${adminFilter},target=${targetFilter},type=${typeFilter},from=${fromFilter},to=${toFilter},sort='target',dir=${sort == 'target' ? nextSortDir : 'asc'})}">
+              <span th:text="#{manager.logs.target}">Target</span>
+              <span class="sort-indicator" th:if="${sort == 'target'}" th:text="${dir == 'asc' ? '↑' : '↓'}">↑</span>
+            </a>
+          </th>
+          <th th:attr="aria-sort=${sort == 'action' ? (dir == 'asc' ? 'ascending' : 'descending') : 'none'}">
+            <a class="table-sort"
+               th:href="@{/manager/logs(admin=${adminFilter},target=${targetFilter},type=${typeFilter},from=${fromFilter},to=${toFilter},sort='action',dir=${sort == 'action' ? nextSortDir : 'asc'})}">
+              <span th:text="#{manager.logs.type}">Action</span>
+              <span class="sort-indicator" th:if="${sort == 'action'}" th:text="${dir == 'asc' ? '↑' : '↓'}">↑</span>
+            </a>
+          </th>
         </tr>
         </thead>
         <tbody>
@@ -101,5 +127,24 @@
     </div>
   </section>
 </main>
+<script>
+  document.querySelectorAll("[data-open-control]").forEach((label) => {
+    label.addEventListener("click", (event) => {
+      const control = document.getElementById(label.dataset.openControl);
+      if (!control) {
+        return;
+      }
+      event.preventDefault();
+      control.focus();
+      if (typeof control.showPicker === "function") {
+        control.showPicker();
+        return;
+      }
+      if (typeof control.click === "function") {
+        control.click();
+      }
+    });
+  });
+</script>
 </body>
 </html>
