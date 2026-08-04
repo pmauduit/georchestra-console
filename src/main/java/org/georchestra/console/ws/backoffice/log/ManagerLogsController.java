@@ -21,10 +21,12 @@ package org.georchestra.console.ws.backoffice.log;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -37,7 +39,6 @@ import org.georchestra.console.model.AdminLogType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -73,21 +74,32 @@ public class ManagerLogsController {
                        @RequestParam(defaultValue = "0") int page,
                        @RequestParam(required = false) String admin,
                        @RequestParam(required = false) String target,
-                       @RequestParam(required = false) AdminLogType type,
-                       @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
-                       @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
+                       @RequestParam(required = false) String type,
+                       @RequestParam(required = false) String from,
+                       @RequestParam(required = false) String to,
+                       @RequestParam(defaultValue = "date") String sort,
+                       @RequestParam(defaultValue = "desc") String dir) {
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         List<AdminLogEntry> logs = fetchLogsForUser(auth, limit, page);
+        AdminLogType typeFilter = parseType(type);
+        LocalDate fromFilter = parseDate(from);
+        LocalDate toFilter = parseDate(to);
+        String sortField = normalizeSort(sort);
+        String sortDirection = normalizeDirection(dir);
 
-        logs = applyFilters(logs, admin, target, type, from, to);
+        logs = applyFilters(logs, admin, target, typeFilter, fromFilter, toFilter);
+        logs = applySort(logs, sortField, sortDirection);
 
         model.addAttribute("logs", logs);
         model.addAttribute("adminFilter", admin == null ? "all" : admin);
         model.addAttribute("targetFilter", target == null ? "all" : target);
-        model.addAttribute("typeFilter", type == null ? "all" : type.name());
-        model.addAttribute("fromFilter", from);
-        model.addAttribute("toFilter", to);
+        model.addAttribute("typeFilter", typeFilter == null ? "all" : typeFilter.name());
+        model.addAttribute("fromFilter", fromFilter);
+        model.addAttribute("toFilter", toFilter);
+        model.addAttribute("sort", sortField);
+        model.addAttribute("dir", sortDirection);
+        model.addAttribute("nextSortDir", "asc".equals(sortDirection) ? "desc" : "asc");
 
         model.addAttribute("admins", extractDistinct(logs, AdminLogEntry::getAdmin));
         model.addAttribute("targets", extractDistinct(logs, AdminLogEntry::getTarget));
@@ -95,6 +107,38 @@ public class ManagerLogsController {
         model.addAttribute("allTypes", AdminLogType.values());
 
         return "manager/managerLogs";
+    }
+
+    private AdminLogType parseType(String type) {
+        if (type == null || type.isBlank() || "all".equalsIgnoreCase(type)) {
+            return null;
+        }
+        return AdminLogType.valueOf(type);
+    }
+
+    private LocalDate parseDate(String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        try {
+            return LocalDate.parse(value);
+        } catch (DateTimeParseException e) {
+            throw new IllegalArgumentException("Invalid date: " + value, e);
+        }
+    }
+
+    private String normalizeSort(String sort) {
+        if (sort == null) {
+            return "date";
+        }
+        return switch (sort) {
+            case "author", "target", "action", "date" -> sort;
+            default -> "date";
+        };
+    }
+
+    private String normalizeDirection(String dir) {
+        return "asc".equalsIgnoreCase(dir) ? "asc" : "desc";
     }
 
     private List<AdminLogEntry> fetchLogsForUser(Authentication auth, int limit, int page) {
@@ -119,8 +163,23 @@ public class ManagerLogsController {
                 .filter(log -> type == null || log.getType() == type)
                 .filter(log -> fromInstant == null || (log.getDate() != null && !log.getDate().toInstant().isBefore(fromInstant)))
                 .filter(log -> toInstant == null || (log.getDate() != null && log.getDate().toInstant().isBefore(toInstant)))
-                .sorted(Comparator.comparing(AdminLogEntry::getDate, Comparator.nullsLast(Comparator.naturalOrder())).reversed())
                 .collect(Collectors.toList());
+    }
+
+    private List<AdminLogEntry> applySort(List<AdminLogEntry> logs, String sort, String dir) {
+        Comparator<String> textComparator = Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER);
+        Comparator<AdminLogEntry> comparator = switch (sort) {
+            case "author" -> Comparator.comparing(AdminLogEntry::getAdmin, textComparator);
+            case "target" -> Comparator.comparing(AdminLogEntry::getTarget, textComparator);
+            case "action" -> Comparator.comparing(
+                    log -> log.getType() == null ? null : log.getType().name().toLowerCase(Locale.ROOT),
+                    Comparator.nullsLast(Comparator.naturalOrder()));
+            default -> Comparator.comparing(AdminLogEntry::getDate, Comparator.nullsLast(Comparator.naturalOrder()));
+        };
+        if ("desc".equals(dir)) {
+            comparator = comparator.reversed();
+        }
+        return logs.stream().sorted(comparator).collect(Collectors.toList());
     }
 
     private List<String> extractDistinct(List<AdminLogEntry> logs, java.util.function.Function<AdminLogEntry, String> extractor) {
