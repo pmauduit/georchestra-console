@@ -45,6 +45,7 @@
 	<properties>
 		<java.version>21</java.version>
 		<georchestra.version>25.0.3-SNAPSHOT</georchestra.version>
+		<geotools.version>34.4</geotools.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -138,22 +139,22 @@
 		<dependency>
 			<groupId>org.geotools</groupId>
 			<artifactId>gt-geojson</artifactId>
-			<version>34.3</version>
+			<version>${geotools.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.geotools</groupId>
 			<artifactId>gt-geojson-store</artifactId>
-			<version>34.3</version>
+			<version>${geotools.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.geotools</groupId>
 			<artifactId>gt-api</artifactId>
-			<version>34.3</version>
+			<version>${geotools.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.geotools</groupId>
 			<artifactId>gt-main</artifactId>
-			<version>34.3</version>
+			<version>${geotools.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.ldaptive</groupId>
@@ -226,7 +227,7 @@
 		<dependency>
 			<groupId>org.jsoup</groupId>
 			<artifactId>jsoup</artifactId>
-			<version>1.18.3</version>
+			<version>1.22.2</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
@@ -266,7 +267,7 @@
 			<plugin>
 				<groupId>com.diffplug.spotless</groupId>
 				<artifactId>spotless-maven-plugin</artifactId>
-				<version>2.44.3</version>
+				<version>3.6.0</version>
 			</plugin>
 			<plugin>
 				<groupId>com.github.ekryd.sortpom</groupId>
@@ -276,7 +277,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-enforcer-plugin</artifactId>
-				<version>3.5.0</version>
+				<version>3.6.3</version>
 			</plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -359,7 +360,7 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-antrun-plugin</artifactId>
-						<version>3.1.0</version>
+						<version>3.2.0</version>
 						<executions>
 							<execution>
 								<id>prepare-deb-layout</id>
