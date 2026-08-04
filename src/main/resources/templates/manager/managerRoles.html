@@ -105,7 +105,14 @@
               <span class="muted" th:if="${roleItem.favorite}">★</span>
             </td>
             <td th:text="${roleItem.description}">Description</td>
-            <td th:text="${roleItem.usersCount}">0</td>
+            <td>
+              <a th:if="${roleItem.usersCount > 0}"
+                 th:href="@{/manager/roles/{cn}/users(cn=${roleItem.cn})}"
+                 th:text="${roleItem.usersCount}">
+                0
+              </a>
+              <span th:if="${roleItem.usersCount == 0}" th:text="${roleItem.usersCount}">0</span>
+            </td>
           </tr>
           <tr th:if="${#lists.isEmpty(roles)}">
             <td colspan="3" class="empty" th:text="#{manager.roles.empty}">No roles found</td>
