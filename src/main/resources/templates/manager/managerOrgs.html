@@ -111,7 +111,14 @@
               <span class="muted" th:if="${organization.orgUniqueId != null and !#strings.isEmpty(organization.orgUniqueId)}"
                     th:text="${organization.orgUniqueId}">id</span>
             </td>
-            <td th:text="${organization.membersCount}">0</td>
+            <td>
+              <a th:if="${organization.membersCount > 0}"
+                 th:href="@{/manager/org/{id}/users(id=${organization.id})}"
+                 th:text="${organization.membersCount}">
+                0
+              </a>
+              <span th:if="${organization.membersCount == 0}" th:text="${organization.membersCount}">0</span>
+            </td>
           </tr>
           <tr th:if="${#lists.isEmpty(organizations)}">
             <td colspan="3" class="empty" th:text="#{manager.orgs.empty}">No organization found</td>

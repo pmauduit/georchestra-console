@@ -536,7 +536,22 @@ public class ManagerUsersController {
     }
 
     private String roleLabelKey(String roleCn) {
-        return "users." + roleCn;
+        return switch (roleCn) {
+            case "SUPERUSER" -> "manager.users.superuser";
+            case "ADMINISTRATOR" -> "manager.users.administrator";
+            case "GN_ADMIN" -> "manager.users.geonetworkAdmin";
+            case "GN_EDITOR" -> "manager.users.geonetworkEditor";
+            case "GN_REVIEWER" -> "manager.users.geonetworkReviewer";
+            case "ORGADMIN" -> "manager.users.orgAdmin";
+            case "MAPSTORE_ADMIN" -> "manager.users.mapstoreAdmin";
+            case "USER" -> "manager.users.standard";
+            case "PENDING" -> "manager.users.pending";
+            case "EXPIRED" -> "manager.users.expired";
+            case "REFERENT" -> "manager.users.referent";
+            case "TEMPORARY" -> "manager.users.temporary";
+            case "IMPORT" -> "manager.users.import";
+            default -> roleCn;
+        };
     }
 
     private String resolve(String key) {
