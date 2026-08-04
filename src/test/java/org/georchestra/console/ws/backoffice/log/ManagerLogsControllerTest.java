@@ -41,6 +41,7 @@ import org.springframework.data.domain.Pageable;
 import org.mockito.Mockito;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
@@ -64,7 +65,7 @@ public class ManagerLogsControllerTest {
         when(logDao.findAll(any(Pageable.class))).thenReturn(new PageImpl<>(logs));
 
         Authentication auth = new PreAuthenticatedAuthenticationToken("testadmin", null,
-                List.of(() -> "ROLE_SUPERUSER"));
+                List.of(new SimpleGrantedAuthority("ROLE_SUPERUSER")));
         SecurityContext securityContext = Mockito.mock(SecurityContext.class);
         Mockito.when(securityContext.getAuthentication()).thenReturn(auth);
         SecurityContextHolder.setContext(securityContext);
