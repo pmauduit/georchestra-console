@@ -7,7 +7,22 @@ Wants=network-online.target
 User=georchestra
 Group=georchestra
 WorkingDirectory=/srv/apps/georchestra-console
-ExecStart=/usr/bin/java -Dgeorchestra.datadir=/etc/georchestra -jar /srv/apps/georchestra-console/georchestra-console.jar
+Environment=GEORCHESTRA_DATADIR=/etc/georchestra
+ExecStart=/bin/sh -c ' \
+  LOGGING_CONFIG=""; \
+  for candidate in \
+    "$GEORCHESTRA_DATADIR/console/logback-spring.xml" \
+    "$GEORCHESTRA_DATADIR/console/logback.xml"; \
+  do \
+    if [ -f "$candidate" ]; then \
+      LOGGING_CONFIG="$candidate"; \
+      break; \
+    fi; \
+  done; \
+  if [ -n "$LOGGING_CONFIG" ]; then \
+    exec /usr/bin/java -Dgeorchestra.datadir="$GEORCHESTRA_DATADIR" -Dlogging.config="file:$LOGGING_CONFIG" -jar /srv/apps/georchestra-console/georchestra-console.jar; \
+  fi; \
+  exec /usr/bin/java -Dgeorchestra.datadir="$GEORCHESTRA_DATADIR" -jar /srv/apps/georchestra-console/georchestra-console.jar'
 SuccessExitStatus=143
 Restart=on-failure
 RestartSec=10
