@@ -29,8 +29,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.georchestra.console.dao.DelegationDao;
 import org.georchestra.console.model.DelegationEntry;
 import org.georchestra.console.ws.backoffice.utils.ResponseUtil;
@@ -52,12 +50,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Controller
 @Tag(name = "Private API", description = "Private JSON endpoints used by backoffice features or legacy clients.")
 public class DelegationController {
 
-    private static final Log LOG = LogFactory.getLog(DelegationController.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(DelegationController.class);
 
     private static final String BASE_MAPPING = "/private";
     private static final String REQUEST_MAPPING = BASE_MAPPING + "/delegation";
@@ -73,7 +73,7 @@ public class DelegationController {
     @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
     @ResponseBody
     public String handleException(Exception e, HttpServletResponse response) throws IOException {
-        LOG.error(e.getMessage());
+        LOG.error("Delegation controller error", e);
         ResponseUtil.buildResponse(response, ResponseUtil.buildResponseMessage(false, e.getMessage()),
                 HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         throw new IOException(e);

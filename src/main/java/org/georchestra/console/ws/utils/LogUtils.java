@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009-2025 by the geOrchestra PSC
+ * Copyright (C) 2009-2026 by the geOrchestra PSC
  *
  * This file is part of geOrchestra.
  *
@@ -26,8 +26,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.georchestra.console.dao.AdminLogDao;
 import org.georchestra.console.model.AdminLogEntry;
 import org.georchestra.console.model.AdminLogType;
@@ -41,6 +39,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RequiredArgsConstructor
 public class LogUtils {
@@ -49,7 +49,7 @@ public class LogUtils {
 
     private final RoleProtected roles;
 
-    private static final Log LOG = LogFactory.getLog(LogUtils.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(LogUtils.class);
 
     /**
      * Create log to save and display.
@@ -76,7 +76,7 @@ public class LogUtils {
                     logDao.save(log);
                 } catch (DataIntegrityViolationException divex) {
                     // Value could be to large for field size
-                    LOG.error("Could not save changed values for admin log, reset value : " + values, divex);
+                    LOG.error("Could not save changed values for admin log, reset value: {}", values, divex);
                     JSONObject errorsjson = new JSONObject();
                     errorsjson.put("error",
                             "Error while inserting admin log in database, see admin log file for more information");
@@ -106,7 +106,7 @@ public class LogUtils {
                 logDao.save(log);
             } catch (DataIntegrityViolationException divex) {
                 // Value could be to large for field size
-                LOG.error("Could not save changed values for admin log, reset value : " + values, divex);
+                LOG.error("Could not save changed values for admin log, reset value: {}", values, divex);
                 JSONObject errorsjson = new JSONObject();
                 errorsjson.put("error",
                         "Error while inserting admin log in database, see admin log file for more information");

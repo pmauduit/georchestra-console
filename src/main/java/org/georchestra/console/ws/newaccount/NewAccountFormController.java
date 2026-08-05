@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009-2025 by the geOrchestra PSC
+ * Copyright (C) 2009-2026 by the geOrchestra PSC
  *
  * This file is part of geOrchestra.
  *
@@ -45,8 +45,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.google.common.annotations.VisibleForTesting;
 import org.json.JSONObject;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.georchestra.console.bs.ReCaptchaParameters;
 import org.georchestra.console.dao.AdvancedDelegationDao;
@@ -81,6 +79,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.support.SessionStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Manages the UI Account Form.
@@ -92,7 +92,7 @@ import org.springframework.web.bind.support.SessionStatus;
 @SessionAttributes(types = { AccountFormBean.class })
 public final class NewAccountFormController {
 
-    private static final Log LOG = LogFactory.getLog(NewAccountFormController.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(NewAccountFormController.class);
 
     @Autowired
     private AccountDao accountDao;
@@ -291,7 +291,7 @@ public final class NewAccountFormController {
                     logUtils.createLog(orgId, AdminLogType.PENDING_ORG_CREATED, null);
                 }
             } catch (Exception e) {
-                LOG.error(e.getMessage());
+                LOG.error("Failed to create organization during signup", e);
                 throw new IOException(e);
             }
         }

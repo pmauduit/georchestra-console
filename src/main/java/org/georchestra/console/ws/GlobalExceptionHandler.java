@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009-2025 by the geOrchestra PSC
+ * Copyright (C) 2009-2026 by the geOrchestra PSC
  *
  * This file is part of geOrchestra.
  *
@@ -20,8 +20,6 @@
 package org.georchestra.console.ws;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.georchestra.console.ws.backoffice.utils.Response;
 import org.georchestra.console.ws.backoffice.utils.ResponseUtil;
 import org.springframework.http.HttpStatus;
@@ -31,27 +29,29 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.ModelAndView;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    private static final Log LOG = LogFactory.getLog(GlobalExceptionHandler.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(NameNotFoundException.class)
     public Object handleNameNotFoundException(NameNotFoundException e, HttpServletRequest request) {
-        LOG.info(e.getMessage());
+        LOG.info("Resource not found: {}", e.getMessage());
         return respond(request, HttpStatus.NOT_FOUND, "Resource not found", e.getMessage());
     }
 
     @ExceptionHandler(AccessDeniedException.class)
     public Object handleAccessDeniedException(AccessDeniedException e, HttpServletRequest request) {
-        LOG.debug(e.getMessage());
+        LOG.debug("Access denied: {}", e.getMessage());
         return respond(request, HttpStatus.FORBIDDEN, "Forbidden", e.getMessage());
     }
 
     @ExceptionHandler(Exception.class)
     public Object handleException(Exception e, HttpServletRequest request) {
-        LOG.error(e.getMessage(), e);
+        LOG.error("Unhandled exception", e);
         return respond(request, HttpStatus.INTERNAL_SERVER_ERROR, "Internal error", e.getMessage());
     }
 

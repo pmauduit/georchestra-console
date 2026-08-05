@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009-2025 by the geOrchestra PSC
+ * Copyright (C) 2009-2026 by the geOrchestra PSC
  *
  * This file is part of geOrchestra.
  *
@@ -19,8 +19,6 @@
 
 package org.georchestra.console.ws.changeemail;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.georchestra.console.ds.UserTokenDao;
 import org.georchestra.console.mailservice.EmailFactory;
@@ -43,6 +41,8 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.util.UriComponentsBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.mail.MessagingException;
 import jakarta.servlet.ServletContext;
@@ -67,7 +67,7 @@ import java.util.UUID;
 @SessionAttributes(types = ChangeEmailFormBean.class)
 public class ChangeEmailFormController {
 
-    protected static final Log LOG = LogFactory.getLog(ChangeEmailFormController.class.getName());
+    protected static final Logger LOG = LoggerFactory.getLogger(ChangeEmailFormController.class);
 
     private final AccountDao accountDao;
     private EmailFactory emailFactory;
@@ -166,7 +166,7 @@ public class ChangeEmailFormController {
             throw new IOException(e);
         }
 
-        LOG.debug(AdminLogType.EMAIL_CHANGE_EMAIL_SENT + " from " + account.getUid() + " to " + newEmail);
+        LOG.debug("{} from {} to {}", AdminLogType.EMAIL_CHANGE_EMAIL_SENT, account.getUid(), newEmail);
 
         return "account/emailWasSentForEmailChange";
     }
@@ -229,7 +229,7 @@ public class ChangeEmailFormController {
                 + URLEncoder.encode(token, StandardCharsets.UTF_8);
 
         if (LOG.isDebugEnabled()) {
-            LOG.debug("generated url:" + url);
+            LOG.debug("generated url: {}", url);
         }
 
         return url;

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009-2025 by the geOrchestra PSC
+ * Copyright (C) 2009-2026 by the geOrchestra PSC
  *
  * This file is part of geOrchestra.
  *
@@ -36,8 +36,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.georchestra.commons.security.SecurityHeaders;
 import org.georchestra.console.bs.ExpiredTokenManagement;
 import org.georchestra.console.dao.AdminLogDao;
@@ -65,6 +63,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Displays the home page, also intercepts some assets.
@@ -77,7 +77,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequiredArgsConstructor
 public class HomeController {
 
-    private static final Log LOG = LogFactory.getLog(HomeController.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(HomeController.class);
     private static final SimpleGrantedAuthority ROLE_SUPERUSER = new SimpleGrantedAuthority("ROLE_SUPERUSER");
     private final ExpiredTokenManagement tokenManagement;
     private final AccountDao accountDao;
@@ -108,7 +108,7 @@ public class HomeController {
                 redirectUrl = "/account/userdetails";
             }
             if (LOG.isDebugEnabled()) {
-                LOG.debug("root page request -> redirection to " + publicContextPath + redirectUrl);
+                LOG.debug("root page request -> redirection to {}{}", publicContextPath, redirectUrl);
             }
             response.sendRedirect(publicContextPath + redirectUrl);
         } else {

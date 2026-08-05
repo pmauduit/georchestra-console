@@ -39,8 +39,6 @@ import jakarta.servlet.ServletInputStream;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.georchestra.console.dao.AdvancedDelegationDao;
 import org.georchestra.console.dao.DelegationDao;
 import org.georchestra.console.dto.SimpleAccount;
@@ -83,6 +81,8 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import lombok.Setter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Web Services to maintain the User information.
@@ -100,7 +100,7 @@ import lombok.Setter;
 @Tag(name = "Account API", description = "Endpoints related to the current authenticated account.")
 public class UsersController {
 
-    private static final Log LOG = LogFactory.getLog(UsersController.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(UsersController.class);
 
     private static final String BASE_MAPPING = "/private";
     private static final String REQUEST_MAPPING = BASE_MAPPING + "/users";
@@ -627,7 +627,7 @@ public class UsersController {
         if (this.userRule.isProtected(account.getUid()))
             throw new AccessDeniedException("The user is protected, it cannot be deleted: " + account.getUid());
 
-        LOG.info(String.format("GDPR: user %s requested to delete his records", accountId));
+        LOG.info("GDPR: user {} requested to delete his records", accountId);
 
         deleteAccount(account);
 
@@ -670,7 +670,7 @@ public class UsersController {
             fields.put(UserSchema.GIVEN_NAME_KEY);
             ResponseUtil.buildResponse(response, fields.toString(4), HttpServletResponse.SC_OK);
         } catch (Exception e) {
-            LOG.error(e.getMessage());
+            LOG.error("Failed to return required user fields", e);
             ResponseUtil.buildResponse(response, ResponseUtil.buildResponseMessage(false, e.getMessage()),
                     HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             throw new IOException(e);
@@ -799,7 +799,7 @@ public class UsersController {
                 try {
                     account.setPrivacyPolicyAgreementDate(LocalDate.parse(privacyPolicyAgreementDate));
                 } catch (DateTimeParseException e) {
-                    LOG.error(e.getMessage());
+                    LOG.error("Invalid privacyPolicyAgreementDate '{}'", privacyPolicyAgreementDate, e);
                     throw new IllegalArgumentException(e);
                 }
         }
@@ -821,7 +821,7 @@ public class UsersController {
         try {
             json = new JSONObject(FileUtils.asString(is));
         } catch (JSONException e) {
-            LOG.error(e.getMessage());
+            LOG.error("Failed to parse account JSON payload", e);
             throw new IOException(e);
         }
 
@@ -864,7 +864,7 @@ public class UsersController {
             try {
                 uid = createUid(givenName, surname);
             } catch (DataServiceException e) {
-                LOG.error(e.getMessage());
+                LOG.error("Failed to generate uid for '{} {}'", givenName, surname, e);
                 throw new IOException(e);
             }
 
@@ -885,7 +885,7 @@ public class UsersController {
             try {
                 a.setShadowExpire((new SimpleDateFormat("yyyy-MM-dd")).parse(shadowExpire));
             } catch (ParseException e) {
-                LOG.error(e.getMessage());
+                LOG.error("Invalid shadowExpire '{}'", shadowExpire, e);
                 throw new IllegalArgumentException(e);
             }
         }
@@ -896,7 +896,7 @@ public class UsersController {
             try {
                 a.setPrivacyPolicyAgreementDate(LocalDate.parse(privacyPolicyAgreementDate));
             } catch (DateTimeParseException e) {
-                LOG.error(e.getMessage());
+                LOG.error("Invalid privacyPolicyAgreementDate '{}'", privacyPolicyAgreementDate, e);
                 throw new IllegalArgumentException(e);
             }
         }

@@ -41,8 +41,6 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.georchestra.console.dao.AdvancedDelegationDao;
 import org.georchestra.console.dao.DelegationDao;
 import org.georchestra.console.model.AdminLogType;
@@ -78,6 +76,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Web Services to maintain the Roles information.
@@ -90,7 +90,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Private API", description = "Private JSON endpoints used by backoffice features or legacy clients.")
 public class RolesController {
 
-    private static final Log LOG = LogFactory.getLog(RolesController.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(RolesController.class);
 
     public static final GrantedAuthority ROLE_SUPERUSER = new SimpleGrantedAuthority("ROLE_SUPERUSER");
 
@@ -288,7 +288,7 @@ public class RolesController {
             ResponseUtil.buildResponse(response, jsonResponse, HttpServletResponse.SC_CONFLICT);
 
         } catch (DataServiceException dsex) {
-            LOG.error(dsex.getMessage());
+            LOG.error("Failed to create role", dsex);
             ResponseUtil.buildResponse(response, buildErrorResponse(dsex.getMessage()),
                     HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             throw new IOException(dsex);
@@ -336,14 +336,14 @@ public class RolesController {
             ResponseUtil.writeSuccess(response);
 
         } catch (NameNotFoundException e) {
-            LOG.error(e.getMessage());
+            LOG.error("Role not found during deletion", e);
             ResponseUtil.buildResponse(response, buildErrorResponse(e.getMessage()), HttpServletResponse.SC_NOT_FOUND);
         } catch (DataServiceException e) {
-            LOG.error(e.getMessage());
+            LOG.error("Failed to delete role", e);
             ResponseUtil.buildResponse(response, buildErrorResponse(e.getMessage()),
                     HttpServletResponse.SC_BAD_REQUEST);
         } catch (Exception e) {
-            LOG.error(e.getMessage());
+            LOG.error("Unexpected error while deleting role", e);
             ResponseUtil.buildResponse(response, buildErrorResponse(e.getMessage()),
                     HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             throw new IOException(e);
@@ -442,7 +442,7 @@ public class RolesController {
             return;
 
         } catch (DataServiceException e) {
-            LOG.error(e.getMessage());
+            LOG.error("Failed to update role", e);
             ResponseUtil.buildResponse(response, buildErrorResponse(e.getMessage()),
                     HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             throw new IOException(e);
@@ -476,7 +476,7 @@ public class RolesController {
             try {
                 return accountDao.findByUID(userUuid);
             } catch (DataServiceException e) {
-                LOG.debug(e.getMessage());
+                LOG.debug("Failed to load account {}", userUuid, e);
                 return null;
             }
         }).filter(account -> null != account).collect(Collectors.toList());
@@ -562,7 +562,7 @@ public class RolesController {
                     .mapToObj(jsonArray::getString) //
                     .collect(Collectors.toList());
         } catch (Exception e) {
-            LOG.error(e.getMessage());
+            LOG.error("Failed to parse JSON array '{}'", arrayKey, e);
             throw new IOException(e);
         }
     }
@@ -582,7 +582,7 @@ public class RolesController {
         try {
             json = new JSONObject(strRole);
         } catch (JSONException e) {
-            LOG.error(e.getMessage());
+            LOG.error("Failed to parse role JSON payload", e);
             throw new IOException(e);
         }
 
@@ -630,7 +630,7 @@ public class RolesController {
         } catch (IllegalArgumentException e) {
             throw e;
         } catch (Exception e) {
-            LOG.error(e.getMessage());
+            LOG.error("Failed to create role from request body", e);
             throw new IOException(e);
         }
     }

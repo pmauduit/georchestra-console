@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009-2025 by the geOrchestra PSC
+ * Copyright (C) 2009-2026 by the geOrchestra PSC
  *
  * This file is part of geOrchestra.
  *
@@ -24,10 +24,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.georchestra.console.ds.UserTokenDao;
 import org.georchestra.ds.DataServiceException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This task searches and removes the expired tokens generated when for the
@@ -38,7 +38,7 @@ import org.georchestra.ds.DataServiceException;
  */
 public class ExpiredTokenCleanTask implements Runnable {
 
-    private static final Log LOG = LogFactory.getLog(ExpiredTokenCleanTask.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(ExpiredTokenCleanTask.class);
 
     private UserTokenDao userTokenDao;
 
@@ -73,11 +73,11 @@ public class ExpiredTokenCleanTask implements Runnable {
                 try {
                     userTokenDao.delete((String) userToken.get("uid"));
                 } catch (Exception e) {
-                    LOG.error(e.getMessage());
+                    LOG.error("Failed to delete expired token for uid {}", userToken.get("uid"), e);
                 }
             }
         } catch (DataServiceException e1) {
-            LOG.error(e1);
+            LOG.error("Failed to remove expired tokens", e1);
         }
     }
 }

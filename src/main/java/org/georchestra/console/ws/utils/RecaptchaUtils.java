@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009-2025 by the geOrchestra PSC
+ * Copyright (C) 2009-2026 by the geOrchestra PSC
  *
  * This file is part of geOrchestra.
  *
@@ -21,10 +21,10 @@ package org.georchestra.console.ws.utils;
 
 import java.io.IOException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.georchestra.console.ReCaptchaV2;
 import org.georchestra.console.bs.ReCaptchaParameters;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.validation.Errors;
 
 /**
@@ -35,7 +35,7 @@ import org.springframework.validation.Errors;
  */
 public class RecaptchaUtils {
 
-    private static final Log LOG = LogFactory.getLog(RecaptchaUtils.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(RecaptchaUtils.class);
 
     private RecaptchaUtils() {
 

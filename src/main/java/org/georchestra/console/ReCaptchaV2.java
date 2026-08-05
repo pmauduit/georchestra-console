@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009-2025 by the geOrchestra PSC
+ * Copyright (C) 2009-2026 by the geOrchestra PSC
  *
  * This file is part of geOrchestra.
  *
@@ -27,10 +27,10 @@ import java.net.URL;
 
 import javax.net.ssl.HttpsURLConnection;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Class used to verify CaptchaV2 response
@@ -40,7 +40,7 @@ import org.json.JSONObject;
  */
 public class ReCaptchaV2 {
 
-    private static final Log LOG = LogFactory.getLog(ReCaptchaV2.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(ReCaptchaV2.class);
 
     /**
      *
@@ -71,9 +71,9 @@ public class ReCaptchaV2 {
 
             if (LOG.isDebugEnabled()) {
                 int responseCode = con.getResponseCode();
-                LOG.debug("\nSending 'POST' request to URL : " + url);
-                LOG.debug("Post parameters : " + postParams);
-                LOG.debug("Response Code : " + responseCode);
+                LOG.debug("Sending POST request to URL: {}", url);
+                LOG.debug("Post parameters: {}", postParams);
+                LOG.debug("Response code: {}", responseCode);
             }
 
             // getResponse
@@ -97,9 +97,9 @@ public class ReCaptchaV2 {
                     isValid = true;
                 } else {
                     // Error in response
-                    LOG.info("The user response to recaptcha is not valid. The error message is '"
-                            + captchaResponse.getString("error-codes")
-                            + "' - see Error Code Reference at https://developers.google.com/recaptcha/docs/verify.");
+                    LOG.info(
+                            "The user response to recaptcha is not valid. The error message is '{}' - see Error Code Reference at https://developers.google.com/recaptcha/docs/verify.",
+                            captchaResponse.getString("error-codes"));
                 }
             } catch (JSONException e) {
                 // Error in response

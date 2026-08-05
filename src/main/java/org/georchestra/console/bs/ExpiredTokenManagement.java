@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009-2025 by the geOrchestra PSC
+ * Copyright (C) 2009-2026 by the geOrchestra PSC
  *
  * This file is part of geOrchestra.
  *
@@ -24,9 +24,9 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -45,7 +45,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public final class ExpiredTokenManagement {
 
-    private static final Log LOG = LogFactory.getLog(ExpiredTokenManagement.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(ExpiredTokenManagement.class);
 
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
@@ -78,7 +78,7 @@ public final class ExpiredTokenManagement {
         this.scheduler.scheduleWithFixedDelay(expiredTokenCleanTask, 0, delay, TimeUnit.MILLISECONDS);
 
         if (LOG.isDebugEnabled()) {
-            LOG.debug("was scheduled - delay (days):" + delayInDays);
+            LOG.debug("was scheduled - delay (days): {}", delayInDays);
         }
     }
 

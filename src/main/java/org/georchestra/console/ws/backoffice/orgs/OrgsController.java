@@ -45,8 +45,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.georchestra.commons.security.SecurityHeaders;
 import org.georchestra.console.dao.AdvancedDelegationDao;
 import org.georchestra.console.dao.DelegationDao;
@@ -82,6 +80,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Sets;
 
@@ -89,7 +89,7 @@ import com.google.common.collect.Sets;
 @Tag(name = "Public API", description = "Public endpoints used by forms and widgets.")
 public class OrgsController {
 
-    private static final Log LOG = LogFactory.getLog(OrgsController.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(OrgsController.class);
 
     private static final String BASE_MAPPING = "/private";
     private static final String BASE_RESOURCE = "orgs";

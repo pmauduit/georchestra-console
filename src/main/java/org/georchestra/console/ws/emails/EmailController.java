@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009-2025 by the geOrchestra PSC
+ * Copyright (C) 2009-2026 by the geOrchestra PSC
  *
  * This file is part of geOrchestra.
  *
@@ -54,8 +54,6 @@ import jakarta.mail.util.ByteArrayDataSource;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.georchestra.commons.security.SecurityHeaders;
 import org.georchestra.console.dao.AdvancedDelegationDao;
 import org.georchestra.console.dao.AttachmentDao;
@@ -81,6 +79,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Controller
 public class EmailController {
@@ -106,7 +106,7 @@ public class EmailController {
     @Autowired
     private AdvancedDelegationDao advancedDelegationDao;
 
-    private static final Log LOG = LogFactory.getLog(EmailController.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(EmailController.class);
     private Collection<String> recipientWhiteList;
 
     /**
@@ -297,11 +297,10 @@ public class EmailController {
         final String secLastName = SecurityHeaders.decode(request.getHeader(SEC_LASTNAME));
         final String secEmail = SecurityHeaders.decode(request.getHeader(SEC_EMAIL));
 
-        LOG.info("EMail request : user=" + secUsername + " to=" + this.extractAddress("to", payload) + " cc="
-                + this.extractAddress("cc", payload) + " bcc=" + this.extractAddress("bcc", payload) + " roles="
-                + secRoles);
+        LOG.info("EMail request: user={} to={} cc={} bcc={} roles={}", secUsername, this.extractAddress("to", payload),
+                this.extractAddress("cc", payload), this.extractAddress("bcc", payload), secRoles);
 
-        LOG.debug("EMail request : " + payload.toString());
+        LOG.debug("EMail request: {}", payload);
 
         // Instanciate MimeMessage
         MimeMessage message = this.emailFactory.createEmptyMessage();

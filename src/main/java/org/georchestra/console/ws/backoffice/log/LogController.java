@@ -28,8 +28,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.georchestra.console.dao.AdminLogDao;
 import org.georchestra.console.dao.AdvancedDelegationDao;
 import org.georchestra.console.dao.DelegationDao;
@@ -48,12 +46,14 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Controller
 @Tag(name = "Private API", description = "Private JSON endpoints used by backoffice features or legacy clients.")
 public class LogController {
 
-    private static final Log LOG = LogFactory.getLog(LogController.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(LogController.class);
 
     private static final String BASE_MAPPING = "/private";
     private static final String REQUEST_MAPPING = BASE_MAPPING + "/admin_logs";

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009-2025 by the geOrchestra PSC
+ * Copyright (C) 2009-2026 by the geOrchestra PSC
  *
  * This file is part of geOrchestra.
  *
@@ -27,14 +27,14 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.georchestra.commons.security.SecurityHeaders;
 import org.georchestra.console.model.AdminLogType;
 import org.georchestra.console.ws.utils.LogUtils;
 import org.georchestra.console.ws.utils.Validation;
 import org.georchestra.ds.orgs.Org;
 import org.georchestra.ds.orgs.OrgsDao;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
@@ -52,7 +52,7 @@ public class EditOrgDetailsFormController {
     private static final String[] FIELDS = { "id", "url", "description", "logo", "name", "address", "mail",
             "orgUniqueId" };
 
-    private static final Log LOG = LogFactory.getLog(EditOrgDetailsFormController.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(EditOrgDetailsFormController.class);
 
     @Autowired
     protected LogUtils logUtils;
