@@ -55,6 +55,10 @@ public class SimpleAccount {
     @JsonSerialize(using = ToStringSerializer.class)
     private LocalDate privacyPolicyAgreementDate;
 
+    @JsonProperty("lastLogin")
+    @JsonSerialize(using = ToStringSerializer.class)
+    private LocalDate lastLogin;
+
     public SimpleAccount(Account account) {
         this.uid = account.getUid();
         this.givenName = account.getGivenName();
@@ -63,6 +67,7 @@ public class SimpleAccount {
         this.email = account.getEmail();
         this.pending = account.isPending();
         this.privacyPolicyAgreementDate = account.getPrivacyPolicyAgreementDate();
+        this.lastLogin = account.getLastLogin();
     }
 
     public String getUid() {
@@ -127,5 +132,13 @@ public class SimpleAccount {
 
     public void setPrivacyPolicyAgreementDate(LocalDate privacyPolicyAgreementDate) {
         this.privacyPolicyAgreementDate = privacyPolicyAgreementDate;
+    }
+
+    public LocalDate getLastLogin() {
+        return lastLogin;
+    }
+
+    public void setLastLogin(LocalDate lastLogin) {
+        this.lastLogin = lastLogin;
     }
 }

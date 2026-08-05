@@ -1,0 +1,421 @@
+<!--
+  Copyright (C) 2026 by the geOrchestra PSC
+
+  This file is part of geOrchestra.
+
+  geOrchestra is free software: you can redistribute it and/or modify it under
+  the terms of the GNU General Public License as published by the Free
+  Software Foundation, either version 3 of the License, or (at your option)
+  any later version.
+
+  geOrchestra is distributed in the hope that it will be useful, but WITHOUT
+  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+  more details.
+
+  You should have received a copy of the GNU General Public License along with
+  geOrchestra. If not, see <http://www.gnu.org/licenses/>.
+-->
+<!DOCTYPE html>
+<html lang="en" th:lang="${#locale.toLanguageTag()}" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${creating} ? #{manager.delegationcreate.title} : #{manager.delegationinfo.title})}">
+  <meta charset="UTF-8">
+  <title>Delegation</title>
+</head>
+<body>
+<th:block th:replace="~{fragments/layout :: appHeader('console')}"></th:block>
+<main id="main-content" tabindex="-1" class="page" th:classappend="${creating} ? ' page-wide'">
+  <section class="hero">
+    <div class="hero-inline">
+      <p class="hero-subtitle" th:text="${creating} ? #{manager.delegationcreate.title} : #{manager.delegationinfo.title}">Delegation</p>
+      <p class="hero-text" th:text="${creating} ? #{manager.delegationcreate.description} : #{manager.delegationinfo.description}">
+        Configure the delegated organizations and roles for an administrator.
+      </p>
+    </div>
+  </section>
+
+  <nav class="manager-tabs">
+    <a class="manager-tab" th:href="@{/manager/home}" th:text="#{nav.dashboard}">Dashboard</a>
+    <a class="manager-tab" th:classappend="${userScoped} ? ' active' : ''" th:href="@{/manager/browse/all/users}" th:text="#{nav.users}">Users</a>
+    <a class="manager-tab" th:href="@{/manager/orgs/}" th:text="#{nav.orgs}">Orgs</a>
+    <a class="manager-tab" th:href="@{/manager/roles/all}" th:text="#{nav.roles}">Roles</a>
+    <a class="manager-tab" th:classappend="${!userScoped} ? ' active' : ''" th:href="@{/manager/delegations}" th:text="#{nav.delegations}">Delegations</a>
+    <a class="manager-tab" th:href="@{/manager/logs}" th:text="#{manager.logs.title}">Logs</a>
+  </nav>
+
+  <div class="layout">
+    <section class="card">
+      <div class="manager-user-header">
+        <div>
+          <p class="muted">
+            <a th:href="${returnUrl}"
+               th:text="${userScoped} ? #{manager.userinfo.back} : #{manager.delegationinfo.back}">Back</a>
+          </p>
+          <h1 th:text="${userScoped and managedUser != null and managedUser.commonName != null and !#strings.isEmpty(managedUser.commonName)} ? ${managedUser.commonName} : (${creating} ? #{manager.delegations.new} : ${delegation.uid})">Delegation</h1>
+          <p class="muted" th:if="${!creating}" th:text="${delegation.uid}">uid</p>
+        </div>
+      </div>
+
+      <div id="manager-delegation-feedback" class="alert" hidden aria-live="polite"></div>
+
+      <div class="alert" th:text="#{manager.delegationinfo.orgadminHint}">
+        Saving a delegation automatically grants ORGADMIN to the delegated user.
+      </div>
+
+      <form id="manager-delegation-form" class="manager-user-form">
+        <fieldset class="fieldset">
+          <legend th:text="#{manager.delegationinfo.fieldset}">Delegation definition</legend>
+          <div class="form-grid manager-user-form-grid">
+            <div class="field">
+              <label for="uid">
+                <span th:text="#{manager.user.label}">User</span>
+                <span class="required-marker">*</span>
+              </label>
+              <select id="uid" name="uid" required th:disabled="${!creating or userScoped}">
+                <option value=""></option>
+                <option th:each="user : ${users}"
+                        th:value="${user.uid}"
+                        th:text="${user.label}"
+                        th:selected="${user.uid == delegation.uid}">
+                  user
+                </option>
+              </select>
+              <input th:if="${!creating or userScoped}" type="hidden" id="uidValue" th:value="${delegation.uid}">
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="fieldset">
+          <legend th:text="#{manager.delegationinfo.orgs}">Organizations</legend>
+          <div class="delegation-picker"
+               data-picker="orgs"
+               th:attr="data-selected-label=#{manager.delegationinfo.selected},
+                        data-none-selected=#{manager.delegationinfo.noneSelected},
+                        data-show-picker=#{manager.delegationinfo.showPicker},
+                        data-hide-picker=#{manager.delegationinfo.hidePicker},
+                        data-clear-search=#{manager.delegationinfo.clearSearch},
+                        data-select-visible=#{manager.delegationinfo.selectVisible},
+                        data-clear-visible=#{manager.delegationinfo.clearVisible},
+                        data-no-results=#{manager.delegationinfo.noResults},
+                        data-remove-selection=#{manager.delegationinfo.removeSelection}">
+            <div class="delegation-picker-header">
+              <div class="delegation-picker-meta">
+                <p class="muted delegation-picker-count">0</p>
+                <div class="delegation-picker-summary empty"></div>
+              </div>
+              <button type="button" class="button button-secondary delegation-picker-toggle"
+                      th:text="#{manager.delegationinfo.showPicker}">Browse list</button>
+            </div>
+            <div class="delegation-picker-panel" hidden>
+              <div class="delegation-picker-toolbar">
+                <input type="search"
+                       class="delegation-picker-search"
+                       th:attr="placeholder=#{manager.delegationinfo.searchOrganizations},
+                                aria-label=#{manager.delegationinfo.searchOrganizations}">
+                <button type="button" class="button button-link delegation-picker-clear-search"
+                        th:text="#{manager.delegationinfo.clearSearch}">Clear search</button>
+              </div>
+              <div class="delegation-picker-actions">
+                <button type="button" class="button button-link delegation-picker-select-visible"
+                        th:text="#{manager.delegationinfo.selectVisible}">Select visible</button>
+                <button type="button" class="button button-link delegation-picker-clear-visible"
+                        th:text="#{manager.delegationinfo.clearVisible}">Clear visible</button>
+              </div>
+              <p class="muted delegation-picker-empty" hidden
+                 th:text="#{manager.delegationinfo.noResults}">No results</p>
+              <div class="selection-list selection-list--picker">
+                <label class="checkbox selection-item" th:each="org : ${organizations}"
+                       th:attr="data-label=${org.name}">
+                  <input type="checkbox" name="orgs" th:value="${org.id}" th:checked="${#lists.contains(delegation.orgs, org.id)}">
+                  <span th:text="${org.name}">Organization</span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="fieldset">
+          <legend th:text="#{manager.delegationinfo.roles}">Roles</legend>
+          <div class="delegation-picker"
+               data-picker="roles"
+               th:attr="data-selected-label=#{manager.delegationinfo.selected},
+                        data-none-selected=#{manager.delegationinfo.noneSelected},
+                        data-show-picker=#{manager.delegationinfo.showPicker},
+                        data-hide-picker=#{manager.delegationinfo.hidePicker},
+                        data-clear-search=#{manager.delegationinfo.clearSearch},
+                        data-select-visible=#{manager.delegationinfo.selectVisible},
+                        data-clear-visible=#{manager.delegationinfo.clearVisible},
+                        data-no-results=#{manager.delegationinfo.noResults},
+                        data-remove-selection=#{manager.delegationinfo.removeSelection}">
+            <div class="delegation-picker-header">
+              <div class="delegation-picker-meta">
+                <p class="muted delegation-picker-count">0</p>
+                <div class="delegation-picker-summary empty"></div>
+              </div>
+              <button type="button" class="button button-secondary delegation-picker-toggle"
+                      th:text="#{manager.delegationinfo.showPicker}">Browse list</button>
+            </div>
+            <div class="delegation-picker-panel" hidden>
+              <div class="delegation-picker-toolbar">
+                <input type="search"
+                       class="delegation-picker-search"
+                       th:attr="placeholder=#{manager.delegationinfo.searchRoles},
+                                aria-label=#{manager.delegationinfo.searchRoles}">
+                <button type="button" class="button button-link delegation-picker-clear-search"
+                        th:text="#{manager.delegationinfo.clearSearch}">Clear search</button>
+              </div>
+              <div class="delegation-picker-actions">
+                <button type="button" class="button button-link delegation-picker-select-visible"
+                        th:text="#{manager.delegationinfo.selectVisible}">Select visible</button>
+                <button type="button" class="button button-link delegation-picker-clear-visible"
+                        th:text="#{manager.delegationinfo.clearVisible}">Clear visible</button>
+              </div>
+              <p class="muted delegation-picker-empty" hidden
+                 th:text="#{manager.delegationinfo.noResults}">No results</p>
+              <div class="selection-list selection-list--picker">
+                <label class="checkbox selection-item" th:each="role : ${roles}"
+                       th:attr="data-label=${role.label}">
+                  <input type="checkbox" name="roles" th:value="${role.name}" th:checked="${#lists.contains(delegation.roles, role.name)}">
+                  <span th:text="${role.label}">ROLE</span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </fieldset>
+
+        <div class="actions">
+          <button type="submit" class="button button-primary"
+                  th:text="${creating} ? #{manager.delegationcreate.submit} : #{manager.delegationinfo.save}">Save</button>
+          <button type="button" class="button button-danger" id="delete-delegation-button"
+                  th:disabled="${creating or !hasDelegation}"
+                  th:classappend="${creating or !hasDelegation} ? ' is-disabled' : ''"
+                  th:text="#{manager.delegationinfo.delete}">Delete</button>
+          <a class="button button-link" th:href="${returnUrl}" th:text="#{manager.userinfo.cancel}">Cancel</a>
+        </div>
+      </form>
+    </section>
+
+    <aside class="stack" th:if="${userScoped and managedUser != null}">
+      <section class="card">
+        <h2 class="org-title" th:text="#{manager.userinfo.tabs}">Other tabs</h2>
+        <nav class="role-list">
+          <a class="role-link" th:href="@{/manager/users/{uid}/infos(uid=${managedUser.uid})}"
+             th:text="#{manager.userinfo.tab.infos}">Infos</a>
+          <a class="role-link" th:href="@{/manager/users/{uid}/roles(uid=${managedUser.uid})}"
+             th:text="#{manager.userinfo.tab.roles}">Roles</a>
+          <a class="role-link" th:href="@{/manager/users/{uid}/messages(uid=${managedUser.uid})}"
+             th:text="#{manager.userinfo.tab.messages}">Messages</a>
+          <a class="role-link" th:href="@{/manager/users/{uid}/logs(uid=${managedUser.uid})}"
+             th:text="#{manager.userinfo.tab.logs}">Logs</a>
+          <a class="role-link is-active" href="#" th:text="#{manager.userinfo.tab.delegation}">Delegation</a>
+          <a class="role-link" th:href="@{/manager/users/{uid}/manage(uid=${managedUser.uid})}"
+             th:text="#{manager.userinfo.tab.manage}">Manage</a>
+        </nav>
+      </section>
+    </aside>
+  </div>
+</main>
+
+<script th:inline="javascript">
+  const delegationForm = document.getElementById('manager-delegation-form');
+  const delegationFeedback = document.getElementById('manager-delegation-feedback');
+  const deleteDelegationButton = document.getElementById('delete-delegation-button');
+  const creating = /*[[${creating}]]*/ true;
+  const listUrl = /*[[${returnUrl}]]*/ '/manager/delegations';
+  const baseApiUrl = /*[[@{/private/delegation/}]]*/ '/private/delegation/';
+  const saveError = /*[[#{manager.delegationinfo.saveError}]]*/ 'Unable to save the delegation.';
+  const deleteError = /*[[#{manager.delegationinfo.deleteError}]]*/ 'Unable to delete the delegation.';
+
+  const showDelegationFeedback = (message, type = 'error') => {
+    delegationFeedback.hidden = false;
+    delegationFeedback.className = `alert ${type === 'success' ? 'alert-success' : 'alert-error'}`;
+    delegationFeedback.textContent = message;
+  };
+
+  const selectedValues = (name) => Array.from(document.querySelectorAll(`input[name="${name}"]:checked`))
+    .map((input) => input.value);
+
+  const normalizeText = (value) => (value || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+
+  const initDelegationPicker = (picker) => {
+    const searchField = picker.querySelector('.delegation-picker-search');
+    const countNode = picker.querySelector('.delegation-picker-count');
+    const summaryNode = picker.querySelector('.delegation-picker-summary');
+    const panel = picker.querySelector('.delegation-picker-panel');
+    const toggleButton = picker.querySelector('.delegation-picker-toggle');
+    const clearSearchButton = picker.querySelector('.delegation-picker-clear-search');
+    const selectVisibleButton = picker.querySelector('.delegation-picker-select-visible');
+    const clearVisibleButton = picker.querySelector('.delegation-picker-clear-visible');
+    const emptyNode = picker.querySelector('.delegation-picker-empty');
+    const items = Array.from(picker.querySelectorAll('.selection-item'));
+    const selectedLabel = picker.dataset.selectedLabel || 'Selected';
+    const noneSelected = picker.dataset.noneSelected || 'No selection';
+    const showPickerLabel = picker.dataset.showPicker || 'Browse list';
+    const hidePickerLabel = picker.dataset.hidePicker || 'Hide list';
+    const clearSearchLabel = picker.dataset.clearSearch || 'Clear search';
+    const selectVisibleLabel = picker.dataset.selectVisible || 'Select visible';
+    const clearVisibleLabel = picker.dataset.clearVisible || 'Clear visible';
+    const noResultsLabel = picker.dataset.noResults || 'No results';
+    const removeSelectionLabel = picker.dataset.removeSelection || 'Remove';
+
+    const visibleItems = () => items.filter((item) => !item.hidden);
+
+    const setPanelOpen = (open) => {
+      if (panel) {
+        panel.hidden = !open;
+      }
+      picker.classList.toggle('is-open', open);
+      if (toggleButton) {
+        toggleButton.textContent = open ? hidePickerLabel : showPickerLabel;
+        toggleButton.setAttribute('aria-expanded', open ? 'true' : 'false');
+      }
+      if (open) {
+        searchField?.focus();
+      }
+    };
+
+    const renderSummary = () => {
+      const selectedItems = items.filter((item) => item.querySelector('input')?.checked);
+      countNode.textContent = `${selectedLabel}: ${selectedItems.length}`;
+      if (selectedItems.length === 0) {
+        summaryNode.classList.add('empty');
+        summaryNode.textContent = noneSelected;
+        return;
+      }
+      summaryNode.classList.remove('empty');
+      summaryNode.innerHTML = selectedItems
+        .map((item) => {
+          const input = item.querySelector('input');
+          const label = item.dataset.label || item.textContent.trim();
+          return `<button type="button" class="selection-chip selection-chip-button" data-value="${input?.value || ''}" aria-label="${removeSelectionLabel} ${label}">${label}</button>`;
+        })
+        .join('');
+    };
+
+    const applyFilter = () => {
+      const query = normalizeText(searchField.value);
+      items.forEach((item) => {
+        const label = normalizeText(item.dataset.label || item.textContent);
+        item.hidden = query.length > 0 && !label.includes(query);
+      });
+      if (emptyNode) {
+        emptyNode.hidden = visibleItems().length > 0;
+        emptyNode.textContent = noResultsLabel;
+      }
+    };
+
+    items.forEach((item) => {
+      item.querySelector('input')?.addEventListener('change', renderSummary);
+    });
+    searchField?.addEventListener('input', applyFilter);
+    searchField?.addEventListener('focus', () => setPanelOpen(true));
+    toggleButton?.addEventListener('click', () => setPanelOpen(panel?.hidden));
+    clearSearchButton?.addEventListener('click', () => {
+      searchField.value = '';
+      clearSearchButton.textContent = clearSearchLabel;
+      applyFilter();
+      searchField.focus();
+    });
+    selectVisibleButton?.addEventListener('click', () => {
+      visibleItems().forEach((item) => {
+        const input = item.querySelector('input');
+        if (input) {
+          input.checked = true;
+        }
+      });
+      selectVisibleButton.textContent = selectVisibleLabel;
+      renderSummary();
+    });
+    clearVisibleButton?.addEventListener('click', () => {
+      visibleItems().forEach((item) => {
+        const input = item.querySelector('input');
+        if (input) {
+          input.checked = false;
+        }
+      });
+      clearVisibleButton.textContent = clearVisibleLabel;
+      renderSummary();
+    });
+    summaryNode.addEventListener('click', (event) => {
+      const chip = event.target.closest('.selection-chip-button');
+      if (!chip) {
+        return;
+      }
+      const input = items
+        .map((item) => item.querySelector('input'))
+        .find((candidate) => candidate?.value === chip.dataset.value);
+      if (input) {
+        input.checked = false;
+        renderSummary();
+      }
+    });
+
+    renderSummary();
+    applyFilter();
+    setPanelOpen(false);
+  };
+
+  document.querySelectorAll('.delegation-picker').forEach(initDelegationPicker);
+
+  const delegationUid = () => {
+    if (creating) {
+      return document.getElementById('uid').value;
+    }
+    return document.getElementById('uidValue').value;
+  };
+
+  delegationForm?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const uid = delegationUid();
+    if (!uid) {
+      showDelegationFeedback(saveError);
+      return;
+    }
+    const payload = {
+      orgs: selectedValues('orgs'),
+      roles: selectedValues('roles')
+    };
+    try {
+      const response = await fetch(`${baseApiUrl}${encodeURIComponent(uid)}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify(payload)
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      window.location.assign(listUrl);
+    } catch (error) {
+      showDelegationFeedback(saveError);
+    }
+  });
+
+  deleteDelegationButton?.addEventListener('click', async () => {
+    if (deleteDelegationButton.disabled) {
+      return;
+    }
+    const uid = delegationUid();
+    try {
+      const response = await fetch(`${baseApiUrl}${encodeURIComponent(uid)}`, {
+        method: 'DELETE',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      deleteDelegationButton.disabled = true;
+      deleteDelegationButton.classList.add('is-disabled');
+      window.location.assign(listUrl);
+    } catch (error) {
+      showDelegationFeedback(deleteError);
+    }
+  });
+</script>
+</body>
+</html>

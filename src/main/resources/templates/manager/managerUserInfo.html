@@ -231,6 +231,8 @@
              th:text="#{manager.userinfo.tab.messages}">Messages</a>
           <a class="role-link" th:href="@{/manager/users/{uid}/logs(uid=${managedUser.uid})}"
              th:text="#{manager.userinfo.tab.logs}">Logs</a>
+          <a class="role-link" th:if="${isSuperuserView}" th:href="@{/manager/users/{uid}/delegation(uid=${managedUser.uid})}"
+             th:text="#{manager.userinfo.tab.delegation}">Delegation</a>
           <a class="role-link" th:href="@{/manager/users/{uid}/manage(uid=${managedUser.uid})}"
              th:text="#{manager.userinfo.tab.manage}">Manage</a>
         </nav>

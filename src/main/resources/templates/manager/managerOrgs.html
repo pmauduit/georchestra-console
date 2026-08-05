@@ -59,7 +59,9 @@
           <span th:text="#{manager.orgs.all}">All orgs</span>
           <span class="role-count" th:text="${allCount}">0</span>
         </a>
-        <a class="role-link" th:classappend="${scope == 'pending'} ? ' is-active'" th:href="@{/manager/orgs/pending}">
+        <a class="role-link"
+           th:classappend="${(scope == 'pending' ? ' is-active' : '') + (pendingCount > 0 ? ' role-link--attention' : '')}"
+           th:href="@{/manager/orgs/pending}">
           <span th:text="#{manager.orgs.pending}">Pending</span>
           <span class="role-count" th:text="${pendingCount}">0</span>
         </a>

@@ -22,7 +22,9 @@ import java.text.SimpleDateFormat;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -48,6 +50,7 @@ import org.georchestra.ds.orgs.Org;
 import org.georchestra.ds.orgs.OrgsDao;
 import org.georchestra.ds.roles.Role;
 import org.georchestra.ds.roles.RoleDao;
+import org.georchestra.ds.roles.RoleFactory;
 import org.georchestra.ds.users.Account;
 import org.georchestra.ds.users.AccountDao;
 import org.georchestra.ds.users.ProtectedUserFilter;
@@ -79,6 +82,9 @@ public class ManagerUsersController {
     private static final SimpleDateFormat LEGACY_DATE = new SimpleDateFormat("yyyy-MM-dd");
     private static final List<String> READONLY_ROLES = List.of("PENDING", "EXPIRED", "TEMPORARY", "ORGADMIN");
     private static final String TEMPORARY_ROLE = "TEMPORARY";
+    private static final String VIRTUAL_TEMPORARY_ROLE_DESCRIPTION = "Virtual role that contains all temporary users";
+    private static final String VIRTUAL_EXPIRED_ROLE_NAME = "EXPIRED";
+    private static final String VIRTUAL_EXPIRED_ROLE_DESCRIPTION = "Virtual role that contains all expired users";
 
     private static final List<String> ADMIN_ROLES = List.of(
             "SUPERUSER",
@@ -138,7 +144,8 @@ public class ManagerUsersController {
         List<SimpleAccount> visibleUsers = findVisibleUsers(auth, superuser);
         Set<String> visibleUserIds = visibleUsers.stream().map(SimpleAccount::getUid).collect(Collectors.toSet());
 
-        List<Role> roles = roleDao.findAll();
+        List<Role> roles = new ArrayList<>(roleDao.findAll());
+        roles.addAll(Arrays.asList(generateVirtualRoles()));
         Map<String, Set<String>> roleUsers = new LinkedHashMap<>();
         for (Role role : roles) {
             roleUsers.put(role.getName(), role.getUserList().stream()
@@ -403,6 +410,12 @@ public class ManagerUsersController {
         entries.add(new RoleEntry("pending", resolve("manager.users.pending"),
                 resolve("manager.users.scope.pending.description"),
                 (int) visibleUsers.stream().filter(SimpleAccount::isPending).count()));
+        entries.add(new RoleEntry("never_logged", resolve("manager.users.scope.neverLogged"),
+                resolve("manager.users.scope.neverLogged.description"),
+                (int) visibleUsers.stream()
+                        .filter(user -> !user.isPending())
+                        .filter(user -> user.getLastLogin() == null)
+                        .count()));
 
         for (Role role : roles) {
             if (!ADMIN_ROLES.contains(role.getName())) {
@@ -442,6 +455,12 @@ public class ManagerUsersController {
     private List<SimpleAccount> filterByScope(String scope, List<SimpleAccount> users, Map<String, Set<String>> roleUsers) {
         if ("pending".equals(scope)) {
             return users.stream().filter(SimpleAccount::isPending).collect(Collectors.toList());
+        }
+        if ("never_logged".equals(scope)) {
+            return users.stream()
+                    .filter(user -> !user.isPending())
+                    .filter(user -> user.getLastLogin() == null)
+                    .collect(Collectors.toList());
         }
         if ("all".equals(scope)) {
             return users.stream().filter(user -> !user.isPending()).collect(Collectors.toList());
@@ -495,6 +514,12 @@ public class ManagerUsersController {
                         .thenComparing(SimpleAccount::getSurname, stringComparator)
                         .thenComparing(SimpleAccount::getGivenName, stringComparator);
                 break;
+            case "lastLogin":
+                comparator = Comparator.comparing(SimpleAccount::getLastLogin, Comparator.nullsLast(Comparator.naturalOrder()))
+                        .thenComparing(SimpleAccount::getSurname, stringComparator)
+                        .thenComparing(SimpleAccount::getGivenName, stringComparator)
+                        .thenComparing(SimpleAccount::getUid, stringComparator);
+                break;
             case "user":
             default:
                 comparator = Comparator.comparing(SimpleAccount::getSurname, stringComparator)
@@ -515,7 +540,8 @@ public class ManagerUsersController {
             return "all";
         }
         String normalized = scope.toUpperCase();
-        if ("all".equalsIgnoreCase(scope) || "pending".equalsIgnoreCase(scope)) {
+        if ("all".equalsIgnoreCase(scope) || "pending".equalsIgnoreCase(scope)
+                || "never_logged".equalsIgnoreCase(scope)) {
             return scope.toLowerCase();
         }
         return browseRolesByCn.containsKey(normalized) ? normalized : "all";
@@ -526,7 +552,7 @@ public class ManagerUsersController {
             return "user";
         }
         return switch (sort) {
-            case "login", "organization", "email" -> sort;
+            case "login", "organization", "email", "lastLogin" -> sort;
             default -> "user";
         };
     }
@@ -560,6 +586,19 @@ public class ManagerUsersController {
 
     private boolean isExpired(Account account) throws DataServiceException {
         return roleDao.findAllForUser(account).stream().anyMatch(role -> "EXPIRED".equals(role.getName()));
+    }
+
+    private Role[] generateVirtualRoles() throws DataServiceException {
+        Role temporaryRole = RoleFactory.create(TEMPORARY_ROLE, VIRTUAL_TEMPORARY_ROLE_DESCRIPTION, false);
+        Role expiredRole = RoleFactory.create(VIRTUAL_EXPIRED_ROLE_NAME, VIRTUAL_EXPIRED_ROLE_DESCRIPTION, false);
+        Date today = Calendar.getInstance().getTime();
+        accountDao.findByShadowExpire().forEach(account -> {
+            if (account.getShadowExpire() != null && today.after(account.getShadowExpire())) {
+                expiredRole.addUser(account.getUid());
+            }
+            temporaryRole.addUser(account.getUid());
+        });
+        return new Role[] { temporaryRole, expiredRole };
     }
 
     private void checkAuthorization(String uid, Authentication auth, boolean superuser) {

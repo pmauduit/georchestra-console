@@ -26,6 +26,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -141,10 +142,11 @@ public class HomeController {
         organizations.sort(Comparator.comparing(Org::getName, Comparator.nullsLast(String::compareToIgnoreCase)));
         roles.sort(Comparator.comparing(Role::getName, Comparator.nullsLast(String::compareToIgnoreCase)));
 
-        Set<String> expiredUsers = roles.stream()
+        Date now = new Date();
+        Set<String> expiredUsers = users.stream()
                 .filter(Objects::nonNull)
-                .filter(role -> "EXPIRED".equals(role.getName()))
-                .flatMap(role -> safeUserList(role).stream())
+                .filter(user -> user.getShadowExpire() != null && now.after(user.getShadowExpire()))
+                .map(Account::getUid)
                 .collect(Collectors.toSet());
 
         List<AdminLogEntry> recentLogs = superuser
@@ -185,7 +187,4 @@ public class HomeController {
         return Arrays.stream(delegationEntry.getRoles()).collect(Collectors.toSet());
     }
 
-    private List<String> safeUserList(Role role) {
-        return role.getUserList() == null ? List.of() : role.getUserList();
-    }
 }

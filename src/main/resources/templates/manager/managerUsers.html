@@ -43,7 +43,7 @@
     <a class="manager-tab" th:href="@{/manager/logs}" th:text="#{manager.logs.title}">Logs</a>
   </nav>
 
-  <section class="manager-grid">
+  <section class="manager-grid manager-grid--compact-aside">
     <aside class="card manager-aside">
       <div class="manager-aside-header">
         <h2 th:text="#{manager.users.browse.title}">Browse</h2>
@@ -55,7 +55,7 @@
       <nav class="role-list">
         <a th:each="browseRole : ${browseRoles}"
            class="role-link"
-           th:classappend="${scope == browseRole.cn()} ? ' is-active' : ''"
+           th:classappend="${(scope == browseRole.cn() ? ' is-active' : '') + (((browseRole.cn() == 'pending') or (browseRole.cn() == 'EXPIRED')) and browseRole.count() > 0 ? ' role-link--attention' : '')}"
            th:href="@{/manager/browse/{scope}/users(scope=${browseRole.cn()})}"
            th:title="${browseRole.description()}">
           <span th:text="${browseRole.label()}">Role</span>
@@ -123,6 +123,13 @@
                 <span class="sort-indicator" th:if="${sort == 'email'}" th:text="${dir == 'asc' ? '↑' : '↓'}">↑</span>
               </a>
             </th>
+            <th th:attr="aria-sort=${sort == 'lastLogin' ? (dir == 'asc' ? 'ascending' : 'descending') : 'none'}">
+              <a class="table-sort"
+                 th:href="@{/manager/browse/{scope}/users(scope=${scope},q=${query},sort='lastLogin',dir=${sort == 'lastLogin' ? nextSortDir : 'asc'})}">
+                <span th:text="#{manager.userinfo.lastLogin}">Last login</span>
+                <span class="sort-indicator" th:if="${sort == 'lastLogin'}" th:text="${dir == 'asc' ? '↑' : '↓'}">↑</span>
+              </a>
+            </th>
           </tr>
           </thead>
           <tbody>
@@ -143,9 +150,10 @@
               <span th:if="${user.orgId == null}" th:text="${user.orgName}">Organization</span>
             </td>
             <td th:text="${user.email}">mail@example.org</td>
+            <td th:text="${user.lastLogin}">2026-08-05</td>
           </tr>
           <tr th:if="${#lists.isEmpty(users)}">
-            <td colspan="4" class="empty" th:text="#{manager.users.noresults}">No users found</td>
+            <td colspan="5" class="empty" th:text="#{manager.users.noresults}">No users found</td>
           </tr>
           </tbody>
         </table>
