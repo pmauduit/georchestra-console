@@ -28,6 +28,18 @@ Then:
 * direct access: `http://localhost:8081/console`
 * through the gateway: `http://localhost:8080/console`
 
+# Database bootstrap
+
+The project currently has no Flyway or Liquibase migration support.
+
+For a fresh installation, create the Console-specific PostgreSQL objects once with:
+
+```bash
+psql -f src/main/sql/console-bootstrap.sql
+```
+
+The script is intentionally kept outside `src/main/resources`, so it is not packaged in the application jar and is not auto-executed by Spring Boot.
+
 # TODOs
 
 * Get rid of the `org.georchestra.console.ws.backoffice.utils.ResponseUtil` class

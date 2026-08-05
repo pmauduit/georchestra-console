@@ -1,5 +1,9 @@
--- TODO: why not in the hibernate model / domain instead ?
--- stolen from https://github.com/georchestra/georchestra/blob/master/postgresql/docker-entrypoint-initdb.d/041-console-data.sql
+-- Bootstrap script for the Console-specific tables not managed by JPA.
+-- Execute this script once during the first installation of the application.
+--
+-- The application does not run this script automatically.
+-- It is intentionally stored outside src/main/resources so it is not packaged in the jar.
+
 CREATE TABLE console.admin_attachments (
   id bigserial,
   content oid,

@@ -56,6 +56,20 @@ For a deployment integrated into geOrchestra, keep the following principles:
 - configure LDAP, PostgreSQL and SMTP with dedicated technical accounts;
 - check that `publicUrl` matches the public URL used in mails.
 
+## Database Bootstrap
+
+The project currently does not provide an automatic schema migration mechanism.
+
+Besides the tables managed through JPA, some Console-specific PostgreSQL objects must be created manually during the first installation:
+
+```bash
+psql -f src/main/sql/console-bootstrap.sql
+```
+
+Run this script once against the target database before starting the application in a fresh environment.
+
+The script is stored outside `src/main/resources` on purpose, so it is not packaged in the application jar and is not executed automatically by Spring Boot.
+
 ## Debian Package and systemd Service
 
 The Console can be built as a Debian package. This package installs the Spring Boot application, the systemd unit file and the Debian scripts required to reload systemd.
