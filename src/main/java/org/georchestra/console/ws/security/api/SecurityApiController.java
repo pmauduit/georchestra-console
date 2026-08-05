@@ -22,6 +22,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.Setter;
@@ -52,6 +57,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
 @RestController
+@Tag(name = "Internal API", description = "Internal endpoints used by other geOrchestra components.")
 @RequestMapping(value = "/internal", produces = MediaType.APPLICATION_JSON_VALUE)
 public class SecurityApiController {
 
@@ -68,6 +74,7 @@ public class SecurityApiController {
      * <p>
      * This is the server-side counterpart of {@link UsersApi#findAll}
      */
+    @Operation(summary = "List users")
     @GetMapping(value = "/users")
     @ResponseBody
     public List<GeorchestraUser> findUsers() {
@@ -79,6 +86,7 @@ public class SecurityApiController {
      * <p>
      * This is the server-side counterpart of {@link UsersApi#findById}
      */
+    @Operation(summary = "Get a user by id")
     @GetMapping(value = "/users/id/{id}")
     public ResponseEntity<GeorchestraUser> findUserById(@PathVariable String id) {
         return toEntityOrNotFound(users.findById(id));
@@ -89,6 +97,7 @@ public class SecurityApiController {
      * <p>
      * This is the server-side counterpart of {@link UsersApi#findByUsername}
      */
+    @Operation(summary = "Get a user by username")
     @GetMapping(value = "/users/username/{name:.+}")
     public ResponseEntity<GeorchestraUser> findUserByUsername(@PathVariable String name) {
         return toEntityOrNotFound(users.findByUsername(name));
@@ -99,6 +108,7 @@ public class SecurityApiController {
      * <p>
      * This is the server-side counterpart of {@link OrganizationsApi#findAll}
      */
+    @Operation(summary = "List organizations")
     @GetMapping(value = "/organizations")
     @ResponseBody
     public List<Organization> findOrganizations() {
@@ -110,6 +120,7 @@ public class SecurityApiController {
      * <p>
      * This is the server-side counterpart of {@link OrganizationsApi#findById}
      */
+    @Operation(summary = "Get an organization by id")
     @GetMapping(value = "/organizations/id/{id}")
     public ResponseEntity<Organization> findOrganizationById(@PathVariable String id) {
         return toEntityOrNotFound(this.orgs.findById(id));
@@ -121,11 +132,13 @@ public class SecurityApiController {
      * This is the server-side counterpart of
      * {@link OrganizationsApi#findByShortName}
      */
+    @Operation(summary = "Get an organization by short name")
     @GetMapping(value = "/organizations/shortname/{name}")
     public ResponseEntity<Organization> findOrganizationByShortName(@PathVariable String name) {
         return toEntityOrNotFound(this.orgs.findByShortName(name));
     }
 
+    @Operation(summary = "Get an organization logo")
     @GetMapping(value = "/organizations/id/{id}/logo", produces = "application/octet-stream")
     public ResponseEntity<byte[]> getOrganizationLogo(@PathVariable String id) {
         return toEntityOrNotFound(this.orgs.getLogo(id));
@@ -136,6 +149,7 @@ public class SecurityApiController {
      * <p>
      * This is the server-side counterpart of {@link RolesApi#findAll}
      */
+    @Operation(summary = "List roles")
     @GetMapping(value = "/roles")
     @ResponseBody
     public List<Role> findRoles() {
@@ -147,11 +161,18 @@ public class SecurityApiController {
      * <p>
      * This is the server-side counterpart of {@link RolesApi#findByName}
      */
+    @Operation(summary = "Get a role by name")
     @GetMapping(value = "/roles/name/{name}")
     public ResponseEntity<Role> findRoleByName(@PathVariable String name) {
         return toEntityOrNotFound(roles.findByName(name));
     }
 
+    @Operation(
+            summary = "Notify account creation from an external identity provider",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Notification processed"),
+                    @ApiResponse(responseCode = "400", description = "Invalid payload", content = @Content)
+            })
     @PostMapping(value = "/events/accountcreated", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GeorchestraUser> createUser(HttpServletRequest request, @RequestBody String rawRequest) {
         JSONObject jsonObj = new JSONObject(rawRequest);

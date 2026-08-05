@@ -46,6 +46,17 @@ mkdocs serve
 
 Elle est ensuite accessible sur `http://127.0.0.1:8000/`.
 
+## Swagger de l'API interne
+
+Une interface Swagger UI est disponible pour l'API interne exposée sous `/internal/*`.
+
+URLs utiles en local :
+
+- Swagger UI direct : `http://localhost:8081/console/swagger-ui/index.html`
+- Swagger UI via gateway : `http://localhost:8080/console/swagger-ui/index.html`
+- spécification OpenAPI directe : `http://localhost:8081/console/v3/api-docs/internal`
+- spécification OpenAPI via gateway : `http://localhost:8080/console/v3/api-docs/internal`
+
 ## Déploiement
 
 Pour un déploiement intégré à geOrchestra, conservez les principes suivants :

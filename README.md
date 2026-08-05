@@ -83,6 +83,17 @@ psql -f src/main/sql/console-bootstrap.sql
 
 This script is not executed automatically by the application and is not packaged in the application jar.
 
+## API Documentation
+
+The application exposes Swagger UI for the internal API under `/internal/*`.
+
+Useful URLs in local development:
+
+- Direct Swagger UI: `http://localhost:8081/console/swagger-ui/index.html`
+- Gateway Swagger UI: `http://localhost:8080/console/swagger-ui/index.html`
+- Direct OpenAPI spec: `http://localhost:8081/console/v3/api-docs/internal`
+- Gateway OpenAPI spec: `http://localhost:8080/console/v3/api-docs/internal`
+
 ## Documentation
 
 Project documentation is maintained with MkDocs in [`docs`](docs).
