@@ -349,6 +349,7 @@ public class ManagerOrgsController {
             String note,
             String url,
             String mail,
+            String uuid,
             String orgUniqueId,
             List<String> cities,
             boolean pending,
@@ -364,6 +365,7 @@ public class ManagerOrgsController {
                     org.getNote(),
                     org.getUrl(),
                     org.getMail(),
+                    org.getUniqueIdentifier() == null ? "" : org.getUniqueIdentifier().toString(),
                     org.getOrgUniqueId(),
                     org.getCities() == null ? List.of() : List.copyOf(org.getCities()),
                     org.isPending(),
@@ -371,7 +373,7 @@ public class ManagerOrgsController {
         }
 
         static OrgInfoView blank() {
-            return new OrgInfoView("", "", "", "", "", "", "", "", "", "", List.of(), false, 0);
+            return new OrgInfoView("", "", "", "", "", "", "", "", "", "", "", List.of(), false, 0);
         }
     }
 

@@ -215,6 +215,7 @@
     orgFeedback.hidden = false;
     orgFeedback.className = `alert ${type === 'success' ? 'alert-success' : 'alert-error'}`;
     orgFeedback.textContent = message;
+    orgFeedback.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   };
 
   const autofillOrgShortName = () => {
@@ -248,6 +249,7 @@
     note: document.getElementById('note').value.trim(),
     url: document.getElementById('url').value.trim(),
     mail: document.getElementById('mail').value.trim(),
+    uuid: /*[[${managedOrg.uuid}]]*/ '',
     orgUniqueId: document.getElementById('orgUniqueId').value.trim(),
     cities: (document.getElementById('managerOrgCities')?.value || '')
       .split(',')
