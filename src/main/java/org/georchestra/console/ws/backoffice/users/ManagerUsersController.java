@@ -100,6 +100,22 @@ public class ManagerUsersController {
             "REFERENT",
             "TEMPORARY",
             "IMPORT");
+    private static final List<String> BROWSE_SCOPE_ORDER = List.of(
+            "all",
+            "pending",
+            "EXPIRED",
+            "never_logged",
+            "USER",
+            "SUPERUSER",
+            "ADMINISTRATOR",
+            "MAPSTORE_ADMIN",
+            "GN_ADMIN",
+            "GN_EDITOR",
+            "GN_REVIEWER",
+            "IMPORT",
+            "ORGADMIN",
+            "REFERENT",
+            "TEMPORARY");
 
     private final AccountDao accountDao;
     private final OrgsDao orgDao;
@@ -403,14 +419,17 @@ public class ManagerUsersController {
             List<SimpleAccount> visibleUsers, Map<String, Set<String>> roleUsers) {
         Set<String> delegatedRoles = delegatedRoles(auth, superuser);
 
-        List<RoleEntry> entries = new ArrayList<>();
-        entries.add(new RoleEntry("all", resolve("manager.users.scope.all"),
+        Map<String, RoleEntry> entriesByScope = new LinkedHashMap<>();
+        entriesByScope.put("all", new RoleEntry("all", resolve("manager.users.scope.all"),
                 resolve("manager.users.scope.all.description"),
                 (int) visibleUsers.stream().filter(user -> !user.isPending()).count()));
-        entries.add(new RoleEntry("pending", resolve("manager.users.pending"),
+        entriesByScope.put("pending", new RoleEntry("pending", resolve("manager.users.pending"),
                 resolve("manager.users.scope.pending.description"),
                 (int) visibleUsers.stream().filter(SimpleAccount::isPending).count()));
-        entries.add(new RoleEntry("never_logged", resolve("manager.users.scope.neverLogged"),
+        entriesByScope.put("EXPIRED", new RoleEntry("EXPIRED", resolve(roleLabelKey("EXPIRED")),
+                resolve("manager.users.scope.expired.description"),
+                roleUsers.getOrDefault("EXPIRED", Set.of()).size()));
+        entriesByScope.put("never_logged", new RoleEntry("never_logged", resolve("manager.users.scope.neverLogged"),
                 resolve("manager.users.scope.neverLogged.description"),
                 (int) visibleUsers.stream()
                         .filter(user -> !user.isPending())
@@ -424,10 +443,13 @@ public class ManagerUsersController {
             if (!superuser && !delegatedRoles.contains(role.getName())) {
                 continue;
             }
-            entries.add(new RoleEntry(role.getName(), resolve(roleLabelKey(role.getName())), role.getDescription(),
-                    roleUsers.getOrDefault(role.getName(), Set.of()).size()));
+            entriesByScope.put(role.getName(), new RoleEntry(role.getName(), resolve(roleLabelKey(role.getName())),
+                    role.getDescription(), roleUsers.getOrDefault(role.getName(), Set.of()).size()));
         }
-        return entries;
+        return BROWSE_SCOPE_ORDER.stream()
+                .map(entriesByScope::get)
+                .filter(entry -> entry != null)
+                .collect(Collectors.toList());
     }
 
     private Set<String> delegatedOrgs(Authentication auth) {

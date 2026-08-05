@@ -24,7 +24,7 @@
 </head>
 <body>
 <th:block th:replace="~{fragments/layout :: appHeader('console')}"></th:block>
-<main id="main-content" tabindex="-1" class="page">
+<main id="main-content" tabindex="-1" class="page page-wide">
   <section class="hero">
     <div class="hero-inline">
       <h1 class="hero-subtitle" th:text="#{manager.users.title}">Users</h1>
@@ -55,7 +55,7 @@
       <nav class="role-list">
         <a th:each="browseRole : ${browseRoles}"
            class="role-link"
-           th:classappend="${(scope == browseRole.cn() ? ' is-active' : '') + (((browseRole.cn() == 'pending') or (browseRole.cn() == 'EXPIRED')) and browseRole.count() > 0 ? ' role-link--attention' : '')}"
+           th:classappend="${(scope == browseRole.cn() ? ' is-active' : '') + (((browseRole.cn() == 'pending') or (browseRole.cn() == 'EXPIRED') or (browseRole.cn() == 'never_logged')) and browseRole.count() > 0 ? ' role-link--attention' : '')}"
            th:href="@{/manager/browse/{scope}/users(scope=${browseRole.cn()})}"
            th:title="${browseRole.description()}">
           <span th:text="${browseRole.label()}">Role</span>
