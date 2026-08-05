@@ -46,16 +46,31 @@ mkdocs serve
 
 It is then available at `http://127.0.0.1:8000/`.
 
-## Internal API Swagger
+## OpenAPI and Swagger
 
-Swagger UI is available for the internal API exposed under `/internal/*`.
+Swagger UI is available for the grouped APIs exposed under the main URL families:
+
+- `internal` for `/internal/*`
+- `public` for `/public/*`
+- `account` for `/account/*`
+- `private` for `/private/*`
 
 Useful local URLs:
 
 - direct Swagger UI: `http://localhost:8081/console/swagger-ui/index.html`
 - gateway Swagger UI: `http://localhost:8080/console/swagger-ui/index.html`
-- direct OpenAPI spec: `http://localhost:8081/console/v3/api-docs/internal`
-- gateway OpenAPI spec: `http://localhost:8080/console/v3/api-docs/internal`
+- direct OpenAPI specs:
+  - `http://localhost:8081/console/v3/api-docs/internal`
+  - `http://localhost:8081/console/v3/api-docs/public`
+  - `http://localhost:8081/console/v3/api-docs/account`
+  - `http://localhost:8081/console/v3/api-docs/private`
+- gateway OpenAPI specs:
+  - `http://localhost:8080/console/v3/api-docs/internal`
+  - `http://localhost:8080/console/v3/api-docs/public`
+  - `http://localhost:8080/console/v3/api-docs/account`
+  - `http://localhost:8080/console/v3/api-docs/private`
+
+Some `public` and `private` endpoints are legacy JSON contracts kept for compatibility. Their OpenAPI descriptions can mention that external consumers should be verified before removal or incompatible changes.
 
 ## Deployment
 
