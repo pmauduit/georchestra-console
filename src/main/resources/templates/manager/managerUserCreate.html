@@ -57,7 +57,7 @@
           <div class="field">
             <label for="uid" th:text="#{uid.label}">User ID</label>
             <input id="uid" name="uid" type="text" pattern="^[a-zA-Z][a-zA-Z0-9_.-]*$">
-            <p class="help-text" th:text="#{manager.usercreate.uidHelp}">Leave blank to generate it automatically.</p>
+            <p id="uid-help" class="help-text" th:text="#{manager.usercreate.uidHelp}">Leave blank to generate it automatically.</p>
           </div>
 
           <div class="field">
@@ -148,16 +148,90 @@
 <script th:inline="javascript">
   const userCreateForm = document.getElementById('manager-user-create-form');
   const userCreateFeedback = document.getElementById('manager-user-create-feedback');
+  const uidField = document.getElementById('uid');
+  const surnameField = document.getElementById('sn');
+  const givenNameField = document.getElementById('givenName');
+  const uidHelp = document.getElementById('uid-help');
   const createUserSuccess = /*[[#{manager.usercreate.createSuccess}]]*/ 'User created successfully.';
   const createUserError = /*[[#{manager.usercreate.createError}]]*/ 'Unable to create the user.';
+  const duplicatedUidError = /*[[#{manager.usercreate.uidExists}]]*/ 'This user ID already exists.';
+  const duplicatedEmailError = /*[[#{manager.usercreate.emailExists}]]*/ 'This e-mail address already exists.';
+  const suggestedUidMessage = /*[[#{manager.usercreate.uidSuggested('__UID__')}]]*/ 'Suggested user ID: __UID__.';
+  const uidHelpDefault = /*[[#{manager.usercreate.uidHelp}]]*/ 'Leave blank to generate it automatically.';
   const createUserUrl = /*[[@{/private/users}]]*/ '/private/users';
+  const suggestUidUrl = /*[[@{/private/users/suggestUid}]]*/ '/private/users/suggestUid';
   const userInfosBaseUrl = /*[[@{/manager/users/}]]*/ '/manager/users/';
+  let uidLocked = !!uidField?.value.trim();
+
+  const normalizeUidSource = (value) => (value || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^A-Za-z0-9]/g, '');
+
+  const buildUidCandidate = () => {
+    const givenName = normalizeUidSource(givenNameField?.value || '');
+    const surname = normalizeUidSource(surnameField?.value || '');
+    if (!givenName || !surname) {
+      return '';
+    }
+    return `${givenName.charAt(0)}${surname}`.toLowerCase();
+  };
+
+  const setUidSuggestionHelp = (uid) => {
+    if (!uidHelp) {
+      return;
+    }
+    if (!uid) {
+      uidHelp.textContent = uidHelpDefault;
+      return;
+    }
+    uidHelp.textContent = suggestedUidMessage.replace('__UID__', uid);
+  };
 
   const showUserCreateFeedback = (message, type) => {
     userCreateFeedback.hidden = false;
     userCreateFeedback.className = `alert ${type === 'success' ? 'alert-success' : 'alert-error'}`;
     userCreateFeedback.textContent = message;
+    userCreateFeedback.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   };
+
+  const autofillUid = () => {
+    if (!uidField || uidLocked) {
+      return;
+    }
+    uidField.value = buildUidCandidate();
+    setUidSuggestionHelp('');
+  };
+
+  const requestSuggestedUid = async () => {
+    const params = new URLSearchParams();
+    if (uidField?.value.trim()) {
+      params.set('uid', uidField.value.trim());
+    }
+    if (givenNameField?.value.trim()) {
+      params.set('givenName', givenNameField.value.trim());
+    }
+    if (surnameField?.value.trim()) {
+      params.set('surname', surnameField.value.trim());
+    }
+    const response = await fetch(`${suggestUidUrl}?${params.toString()}`, {
+      headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+    return response.json();
+  };
+
+  givenNameField?.addEventListener('input', autofillUid);
+  surnameField?.addEventListener('input', autofillUid);
+  uidField?.addEventListener('input', () => {
+    uidLocked = !!uidField.value.trim();
+    if (!uidLocked) {
+      setUidSuggestionHelp('');
+      autofillUid();
+    }
+  });
 
   userCreateForm?.addEventListener('submit', async (event) => {
     event.preventDefault();
@@ -179,6 +253,28 @@
         body: JSON.stringify(payload)
       });
       if (!response.ok) {
+        let responseBody = null;
+        try {
+          responseBody = await response.json();
+        } catch (error) {
+          responseBody = null;
+        }
+        if (response.status === 409 && responseBody?.error === 'duplicated_uid') {
+          const suggestedUid = responseBody.suggestedUid || (await requestSuggestedUid()).uid;
+          if (uidField && suggestedUid) {
+            uidField.value = suggestedUid;
+            uidLocked = true;
+            setUidSuggestionHelp(suggestedUid);
+            uidField.focus();
+            uidField.select();
+          }
+          showUserCreateFeedback(`${duplicatedUidError} ${suggestedUidMessage.replace('__UID__', suggestedUid || '')}`, 'error');
+          return;
+        }
+        if (response.status === 409 && responseBody?.error === 'duplicated_email') {
+          showUserCreateFeedback(duplicatedEmailError, 'error');
+          return;
+        }
         throw new Error(`HTTP ${response.status}`);
       }
       const createdUser = await response.json();
