@@ -71,6 +71,18 @@ Useful examples:
 ./mvnw -Dit.test=org.georchestra.console.boot.AxeCoreAccessibilityIT verify
 ```
 
+## Database Bootstrap
+
+The project currently has no schema migration tool such as Flyway or Liquibase.
+
+Some Console-specific PostgreSQL objects are not managed by JPA and must be created during the first installation with:
+
+```bash
+psql -f src/main/sql/console-bootstrap.sql
+```
+
+This script is not executed automatically by the application and is not packaged in the application jar.
+
 ## Documentation
 
 Project documentation is maintained with MkDocs in [`docs`](docs).
@@ -106,9 +118,6 @@ Please read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request.
 
 Project discussions and coordination happen in the geOrchestra community channels and issue tracker.
 
-## Code of Conduct
-
-This project follows the rules described in [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
 
 ## License
 
