@@ -2,7 +2,12 @@
 
 ## Application Logs
 
-The Console uses the Logback configuration embedded in `logback-spring.xml`.
+When started through the Debian service, the Console looks for an external Logback configuration in this order:
+
+1. `${georchestra.datadir}/console/logback-spring.xml`
+2. `${georchestra.datadir}/console/logback.xml`
+
+If none of these files exists, it falls back to the `logback-spring.xml` embedded in the jar.
 
 In development, logs are displayed in the console running:
 
@@ -16,6 +21,8 @@ To get more details, add Spring Boot log levels in the datadir or through startu
 logging.level.org.georchestra.console=DEBUG
 logging.level.org.springframework.security=DEBUG
 ```
+
+To fully customize formatting, appenders, or output files in production, prefer creating one of the external Logback files above.
 
 ## Check External Services
 
