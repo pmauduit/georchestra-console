@@ -369,8 +369,8 @@ public class UsersController {
             responses = @ApiResponse(responseCode = "200", description = "User created"))
     @PostMapping(value = REQUEST_MAPPING, produces = "application/json; charset=utf-8")
     @ResponseBody
-    public Account create(HttpServletRequest request)
-            throws IOException, DuplicatedEmailException, DataServiceException, DuplicatedUidException {
+    public ResponseEntity<?> create(HttpServletRequest request)
+            throws IOException, DataServiceException {
 
         final Account account = createAccountFromRequestBody(request.getInputStream());
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -387,19 +387,45 @@ public class UsersController {
             throw new AccessDeniedException("The user is protected: " + account.getUid());
         }
 
-        // Saves the user in the LDAP
-        accountDao.insert(account);
+        try {
+            // Saves the user in the LDAP
+            accountDao.insert(account);
 
-        roleDao.addUser(Role.USER, account);
+            roleDao.addUser(Role.USER, account);
 
-        roleDao.addUsersInRoles(roleDao.findAllForOrg(orgDao.findByCommonName(account.getOrg())).stream()
-                .map(Role::getName).collect(Collectors.toList()), List.of(account));
+            roleDao.addUsersInRoles(roleDao.findAllForOrg(orgDao.findByCommonName(account.getOrg())).stream()
+                    .map(Role::getName).collect(Collectors.toList()), List.of(account));
 
-        orgDao.linkUser(account);
+            orgDao.linkUser(account);
 
-        logUtils.createLog(account.getUid(), AdminLogType.USER_CREATED, null);
+            logUtils.createLog(account.getUid(), AdminLogType.USER_CREATED, null);
 
-        return account;
+            return ResponseEntity.ok(account);
+        } catch (DuplicatedEmailException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(ResponseUtil.failure("duplicated_email"));
+        } catch (DuplicatedUidException e) {
+            String suggestedUid = buildSuggestedUid(account.getUid(), account.getGivenName(), account.getSurname());
+            JSONObject response = new JSONObject();
+            response.put("success", false);
+            response.put("error", "duplicated_uid");
+            if (StringUtils.hasLength(suggestedUid)) {
+                response.put("suggestedUid", suggestedUid);
+            }
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(response.toMap());
+        }
+    }
+
+    @GetMapping(value = REQUEST_MAPPING + "/suggestUid", produces = "application/json; charset=utf-8")
+    @ResponseBody
+    public Map<String, Object> suggestUid(@RequestParam(required = false) String uid,
+            @RequestParam(required = false) String givenName,
+            @RequestParam(required = false) String surname) throws DataServiceException {
+        String suggestedUid = buildSuggestedUid(uid, givenName, surname);
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("success", true);
+        response.put("uid", suggestedUid == null ? "" : suggestedUid);
+        return response;
     }
 
     public boolean callerIsSuperUser() {
@@ -921,6 +947,16 @@ public class UsersController {
             return this.accountDao.generateUid(proposedUid);
         }
         return proposedUid;
+    }
+
+    private String buildSuggestedUid(String uid, String givenName, String surname) throws DataServiceException {
+        if (StringUtils.hasLength(uid)) {
+            return accountDao.exists(uid) ? accountDao.generateUid(uid) : uid;
+        }
+        if (!StringUtils.hasLength(givenName) || !StringUtils.hasLength(surname)) {
+            return null;
+        }
+        return createUid(givenName, surname);
     }
 
     /**

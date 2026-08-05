@@ -283,6 +283,7 @@
     feedback.hidden = false;
     feedback.className = `alert ${type === 'success' ? 'alert-success' : 'alert-error'}`;
     feedback.textContent = message;
+    feedback.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   };
 
   const updateFieldValidationState = (field) => {

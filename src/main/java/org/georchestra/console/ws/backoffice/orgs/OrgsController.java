@@ -606,7 +606,9 @@ public class OrgsController {
         org.setDescription(json.optString(Org.JSON_DESCRIPTION));
         org.setNote(json.optString(Org.JSON_NOTE));
         org.setUrl(json.optString(Org.JSON_URL));
-        org.setLogo(json.optString(Org.JSON_LOGO));
+        if (json.has(Org.JSON_LOGO) && !json.isNull(Org.JSON_LOGO)) {
+            org.setLogo(json.optString(Org.JSON_LOGO));
+        }
         org.setMail(json.optString(Org.JSON_MAIL));
         org.setOrgUniqueId(json.optString(Org.JSON_ORG_UNIQ_ID));
     }

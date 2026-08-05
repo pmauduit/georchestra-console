@@ -292,8 +292,11 @@ public class LogUtils {
             createAndLogDetails(id, Org.JSON_URL, org.getUrl(), json.optString(Org.JSON_URL), type);
         }
         // log logo changed
-        if (!org.getLogo().equals(json.get("logo"))) {
-            createAndLogDetails(id, Org.JSON_LOGO, org.getLogo(), json.getString("logo"), type);
+        if (json.has(Org.JSON_LOGO)) {
+            String newLogo = json.isNull(Org.JSON_LOGO) ? null : json.optString(Org.JSON_LOGO, null);
+            if (!java.util.Objects.equals(org.getLogo(), newLogo)) {
+                createAndLogDetails(id, Org.JSON_LOGO, org.getLogo(), newLogo, type);
+            }
         }
         // log note changed
         if (!org.getNote().equals(json.optString(Org.JSON_NOTE))) {
