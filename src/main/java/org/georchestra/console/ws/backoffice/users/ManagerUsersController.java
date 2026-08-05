@@ -215,6 +215,7 @@ public class ManagerUsersController {
         model.addAttribute("expired", isExpired(account));
         model.addAttribute("currentOrgPending", currentOrg != null && currentOrg.isPending());
         model.addAttribute("currentOrgName", currentOrg == null ? null : currentOrg.getName());
+        model.addAttribute("currentOrgId", currentOrg == null ? null : currentOrg.getId());
         model.addAttribute("canEditLogin", !account.getIsExternalAuth());
         model.addAttribute("canConfirm", account.isPending() && (currentOrg == null || !currentOrg.isPending()));
 
