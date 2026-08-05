@@ -38,3 +38,4 @@ venv_mkdocs/
 .venv_mkdocs/
 docs_modules/
 docs/tableofcontent.md
+site/
