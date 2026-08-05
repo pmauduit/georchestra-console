@@ -44,6 +44,30 @@ public class OpenApiConfiguration {
     }
 
     @Bean
+    GroupedOpenApi publicApi() {
+        return GroupedOpenApi.builder()
+                .group("public")
+                .pathsToMatch("/public/**")
+                .build();
+    }
+
+    @Bean
+    GroupedOpenApi accountApi() {
+        return GroupedOpenApi.builder()
+                .group("account")
+                .pathsToMatch("/account/**")
+                .build();
+    }
+
+    @Bean
+    GroupedOpenApi privateApi() {
+        return GroupedOpenApi.builder()
+                .group("private")
+                .pathsToMatch("/private/**")
+                .build();
+    }
+
+    @Bean
     OpenAPI consoleOpenApi() {
         return new OpenAPI().info(new Info()
                 .title("geOrchestra Console API")

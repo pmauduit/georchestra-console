@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009-2025 by the geOrchestra PSC
+ * Copyright (C) 2009-2026 by the geOrchestra PSC
  *
  * This file is part of geOrchestra.
  *
@@ -23,6 +23,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 
 import org.apache.commons.logging.Log;
@@ -47,6 +50,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
+@Tag(name = "Private API", description = "Private JSON endpoints used by backoffice features or legacy clients.")
 public class LogController {
 
     private static final Log LOG = LogFactory.getLog(LogController.class.getName());
@@ -92,6 +96,12 @@ public class LogController {
      * </pre>
      *
      */
+    @Operation(
+            summary = "List logs for one target",
+            description = "Returns administration logs for one target user.\n\n"
+                    + "Legacy note: the current Thymeleaf log screen uses a dedicated server-side controller instead of this endpoint. "
+                    + "Verify external consumers before changing or removing it.",
+            responses = @ApiResponse(responseCode = "200", description = "Log entries"))
     @GetMapping(value = REQUEST_MAPPING + "/{target}/{limit}/{page}", produces = "application/json; charset=utf-8")
     @ResponseBody
     public List<AdminLogEntry> find(@PathVariable String target, @PathVariable int limit, @PathVariable int page) {
@@ -113,6 +123,12 @@ public class LogController {
         return this.logDao.findByTarget(target, PageRequest.of(page, limit, Sort.by(Sort.Direction.DESC, "date")));
     }
 
+    @Operation(
+            summary = "List logs",
+            description = "Returns paginated administration logs.\n\n"
+                    + "Legacy note: the current Thymeleaf log screen uses a dedicated server-side controller instead of this endpoint. "
+                    + "Verify external consumers before changing or removing it.",
+            responses = @ApiResponse(responseCode = "200", description = "Log entries"))
     @GetMapping(value = REQUEST_MAPPING + "/{limit}/{page}", produces = "application/json; charset=utf-8")
     @ResponseBody
     public List<AdminLogEntry> find(HttpServletRequest request, @PathVariable int limit, @PathVariable int page) {

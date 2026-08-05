@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009-2025 by the geOrchestra PSC
+ * Copyright (C) 2009-2026 by the geOrchestra PSC
  *
  * This file is part of geOrchestra.
  *
@@ -23,6 +23,12 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.function.Supplier;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 
 import org.georchestra.console.bs.areas.AreasService;
@@ -48,6 +54,7 @@ import lombok.Setter;
  * @see AreasService
  */
 @Controller
+@Tag(name = "Account API", description = "Endpoints related to the current authenticated account.")
 public class AreaOfCompetenceController {
 
     private AccountDao accountDao;
@@ -85,6 +92,23 @@ public class AreaOfCompetenceController {
      * @throws DataServiceException
      * @throws IOException
      */
+    @Operation(
+            summary = "Get current user area of competence",
+            description = "Returns the geographic area of competence of the current authenticated user as a GeoJSON geometry. "
+                    + "The response can be null, empty, or a geometry such as a MultiPolygon.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "GeoJSON geometry",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(type = "string"),
+                                    examples = {
+                                            @ExampleObject(name = "No restriction", value = "null"),
+                                            @ExampleObject(name = "Geometry", value = "{\"type\":\"MultiPolygon\",\"coordinates\":[]}")
+                                    })),
+                    @ApiResponse(responseCode = "500", description = "Area computation failed")
+            })
     @GetMapping(value = "/account/areaofcompetence")
     public void getCurrentUserAreaOfCompetence(HttpServletResponse response) throws DataServiceException, IOException {
         final String accountId = usernameResolver.get();

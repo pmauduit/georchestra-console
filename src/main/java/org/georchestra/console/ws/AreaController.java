@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009-2025 by the geOrchestra PSC
+ * Copyright (C) 2009-2026 by the geOrchestra PSC
  *
  * This file is part of geOrchestra.
  *
@@ -28,6 +28,12 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 
 import org.json.JSONException;
@@ -45,6 +51,7 @@ import org.springframework.core.io.ClassPathResource;
  * A simple controller to serve an area.json file from your datadir.
  */
 @Controller
+@Tag(name = "Public API", description = "Public endpoints used by forms and widgets.")
 public class AreaController {
 
     @Value("${AreasUrl:area.geojson}")
@@ -60,6 +67,23 @@ public class AreaController {
      * @return json or rediurect to the resource if area is an URL
      * @throws IOException
      */
+    @Operation(
+            summary = "Get the area GeoJSON dataset",
+            description = "Returns the GeoJSON dataset used by the area selector widget. "
+                    + "If the configured source is an external HTTP URL, the endpoint redirects to it.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "GeoJSON payload",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(type = "string"),
+                                    examples = @ExampleObject(
+                                            value = "{\"type\":\"FeatureCollection\",\"features\":[]}"))),
+                    @ApiResponse(responseCode = "302", description = "Redirect to configured external GeoJSON URL"),
+                    @ApiResponse(responseCode = "404", description = "No GeoJSON file found"),
+                    @ApiResponse(responseCode = "500", description = "Configured file could not be parsed as JSON")
+            })
     @GetMapping(value = "/public/area.geojson", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public String serveArea(HttpServletResponse response) throws IOException {

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009-2025 by the geOrchestra PSC
+ * Copyright (C) 2009-2026 by the geOrchestra PSC
  *
  * This file is part of geOrchestra.
  *
@@ -37,6 +37,13 @@ import java.util.stream.StreamSupport;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -79,6 +86,7 @@ import org.springframework.util.StringUtils;
 import com.google.common.collect.Sets;
 
 @Controller
+@Tag(name = "Public API", description = "Public endpoints used by forms and widgets.")
 public class OrgsController {
 
     private static final Log LOG = LogFactory.getLog(OrgsController.class.getName());
@@ -137,6 +145,13 @@ public class OrgsController {
     /**
      * Return a list of available organization as json array
      */
+    @Operation(
+            summary = "List organizations",
+            description = "Returns organizations visible to the caller.\n\n"
+                    + "Legacy note: this private JSON endpoint does not appear to be used by the current Thymeleaf UI. "
+                    + "Verify external consumers before changing or removing it.",
+            tags = { "Private API" },
+            responses = @ApiResponse(responseCode = "200", description = "Organization list"))
     @GetMapping(value = REQUEST_MAPPING, produces = "application/json; charset=utf-8")
     @PostFilter("hasPermission(filterObject, 'read')")
     @ResponseBody
@@ -158,6 +173,13 @@ public class OrgsController {
      * 'address' * 'members' as json array ex: ["testadmin", "testuser"]
      *
      */
+    @Operation(
+            summary = "Get organization by common name",
+            description = "Returns one organization by common name.\n\n"
+                    + "Legacy note: this private JSON endpoint does not appear to be used by the current Thymeleaf UI. "
+                    + "Verify external consumers before changing or removing it.",
+            tags = { "Private API" },
+            responses = @ApiResponse(responseCode = "200", description = "Organization details"))
     @GetMapping(value = REQUEST_MAPPING + "/{cn:.+}", produces = "application/json; charset=utf-8")
     @ResponseBody
     public Org getOrgInfos(@PathVariable String cn) {
@@ -176,6 +198,13 @@ public class OrgsController {
      * 'address' * 'members' as json array ex: ["testadmin", "testuser"]
      *
      */
+    @Operation(
+            summary = "Get organization by unique organization id",
+            description = "Returns one organization by unique organization identifier.\n\n"
+                    + "Legacy note: this private JSON endpoint does not appear to be used by the current Thymeleaf UI. "
+                    + "Verify external consumers before changing or removing it.",
+            tags = { "Private API" },
+            responses = @ApiResponse(responseCode = "200", description = "Organization details"))
     @GetMapping(value = REQUEST_MAPPING + "/uoi/{orgUniqueId:.+}", produces = "application/json; charset=utf-8")
     @ResponseBody
     public Org getOrgInfosFromUniqueOrgId(@PathVariable String orgUniqueId) {
@@ -201,6 +230,13 @@ public class OrgsController {
      * plante, 73059 Chambrille", "members": [ "testadmin", "testuser" ] }
      *
      */
+    @Operation(
+            summary = "Update organization",
+            description = "Updates an organization.\n\n"
+                    + "Legacy note: this private JSON endpoint does not appear to be used by the current Thymeleaf UI. "
+                    + "Verify external consumers before changing or removing it.",
+            tags = { "Private API" },
+            responses = @ApiResponse(responseCode = "200", description = "Organization updated"))
     @PutMapping(value = REQUEST_MAPPING + "/{commonName:.+}", produces = "application/json; charset=utf-8")
     @ResponseBody
     public Org updateOrgInfos(@PathVariable String commonName, HttpServletRequest request)
@@ -289,6 +325,13 @@ public class OrgsController {
     @PostMapping(value = REQUEST_MAPPING, produces = "application/json; charset=utf-8")
     @ResponseBody
     @PreAuthorize("hasRole('SUPERUSER')")
+    @Operation(
+            summary = "Create organization",
+            description = "Creates an organization.\n\n"
+                    + "Legacy note: this private JSON endpoint does not appear to be used by the current Thymeleaf UI. "
+                    + "Verify external consumers before changing or removing it.",
+            tags = { "Private API" },
+            responses = @ApiResponse(responseCode = "200", description = "Organization created"))
     public Org createOrg(HttpServletRequest request) throws IOException, JSONException {
         // Parse Json
         JSONObject json = this.parseRequest(request);
@@ -334,6 +377,13 @@ public class OrgsController {
     /**
      * Delete one org
      */
+    @Operation(
+            summary = "Delete organization",
+            description = "Deletes an organization.\n\n"
+                    + "Legacy note: this private JSON endpoint does not appear to be used by the current Thymeleaf UI. "
+                    + "Verify external consumers before changing or removing it.",
+            tags = { "Private API" },
+            responses = @ApiResponse(responseCode = "200", description = "Organization deleted"))
     @DeleteMapping(REQUEST_MAPPING + "/{commonName:.+}")
     @PreAuthorize("hasRole('SUPERUSER')")
     public void deleteOrg(@PathVariable String commonName, HttpServletResponse response)
@@ -361,6 +411,16 @@ public class OrgsController {
         ResponseUtil.writeSuccess(response);
     }
 
+    @Operation(
+            summary = "Get required organization fields",
+            description = "Returns the set of required field names for organization creation forms.",
+            responses = @ApiResponse(
+                    responseCode = "200",
+                    description = "Required field names",
+                    content = @Content(
+                            mediaType = "application/json",
+                            array = @ArraySchema(schema = @Schema(type = "string")),
+                            examples = @ExampleObject(value = "[\"name\",\"shortName\"]"))))
     @GetMapping(value=PUBLIC_REQUEST_MAPPING + "/requiredFields", produces="application/json; charset=utf-8")
     @ResponseBody
     public Set<String> getRequiredFieldsForOrgCreation() {
@@ -373,6 +433,16 @@ public class OrgsController {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exception.getMessage());
     }
 
+    @Operation(
+            summary = "Get allowed organization types",
+            description = "Returns the list of allowed organization type values.",
+            responses = @ApiResponse(
+                    responseCode = "200",
+                    description = "Organization type values",
+                    content = @Content(
+                            mediaType = "application/json",
+                            array = @ArraySchema(schema = @Schema(type = "string")),
+                            examples = @ExampleObject(value = "[\"association\",\"company\",\"public\"]"))))
     @GetMapping(value=PUBLIC_REQUEST_MAPPING + "/orgTypeValues", produces="application/json; charset=utf-8")
     @ResponseBody
     public List<String> getOrganisationTypePossibleValues() {
@@ -386,6 +456,18 @@ public class OrgsController {
      * only needs the feature property names used for ids, labels and grouping.
      */
 
+    @Operation(
+            summary = "Get area selector configuration",
+            description = "Returns the property names used by the frontend to interpret the GeoJSON features "
+                    + "for identifiers, labels and grouping.",
+            responses = @ApiResponse(
+                    responseCode = "200",
+                    description = "Area selector metadata",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(type = "object"),
+                            examples = @ExampleObject(
+                                    value = "{\"areas\":{\"key\":\"INSEE_COM\",\"value\":\"NOM_COM\",\"group\":\"NOM_DEP\"}}"))))
     @GetMapping(value=PUBLIC_REQUEST_MAPPING + "/areaConfig.json", produces="application/json; charset=utf-8")
     @ResponseBody
     public Map<String, Object> getAreaConfig() {
@@ -408,6 +490,13 @@ public class OrgsController {
      * CSV contains two columns one for org type and second for count
      *
      */
+    @Operation(
+            summary = "Get organization type distribution",
+            description = "Returns the organization type distribution as CSV or JSON.\n\n"
+                    + "Legacy note: this endpoint does not appear to be used by the current Thymeleaf UI. "
+                    + "Verify external consumers before changing or removing it.",
+            tags = { "Private API" },
+            responses = @ApiResponse(responseCode = "200", description = "Distribution export"))
     @GetMapping(BASE_MAPPING + "/orgsTypeDistribution.{format:(?:csv|json)}")
     public void orgTypeDistribution(HttpServletResponse response, @PathVariable String format)
             throws IOException, JSONException {

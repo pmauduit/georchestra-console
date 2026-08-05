@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009-2025 by the geOrchestra PSC
+ * Copyright (C) 2009-2026 by the geOrchestra PSC
  *
  * This file is part of geOrchestra.
  *
@@ -27,6 +27,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
@@ -50,6 +53,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import lombok.NonNull;
 
 @Controller
+@Tag(name = "Account API", description = "Endpoints related to the current authenticated account.")
 public class UsersExport {
 
     private @Autowired GDPRAccountWorker gdprInfoExporter;
@@ -68,6 +72,14 @@ public class UsersExport {
      * <a href="https://eugdpr.org/">General Data Protection Regulation</a>)
      * relevant information available on the system.
      */
+    @Operation(
+            summary = "Download current user GDPR data",
+            description = "Generates a ZIP archive containing the GDPR-relevant data available for the current authenticated user.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "ZIP archive generated"),
+                    @ApiResponse(responseCode = "403", description = "Unauthorized access"),
+                    @ApiResponse(responseCode = "500", description = "Export generation failed")
+            })
     @GetMapping(value = "/account/gdpr/download", produces = "application/zip")
     public void downloadUserData(HttpServletResponse response)
             throws NameNotFoundException, DataServiceException, IOException {
@@ -97,6 +109,13 @@ public class UsersExport {
         }
     }
 
+    @Operation(
+            summary = "Export users as CSV",
+            description = "Exports the requested users as CSV.\n\n"
+                    + "Legacy note: this endpoint does not appear to be used by the current Thymeleaf UI. "
+                    + "Verify external consumers before changing or removing it.",
+            tags = { "Private API" },
+            responses = @ApiResponse(responseCode = "200", description = "CSV export"))
     @PostMapping(value = "/private/export/users.csv", consumes = MediaType.APPLICATION_JSON_VALUE, produces = "text/csv; charset=utf-8")
     @ResponseBody
     public String getUsersAsCsv(@RequestBody String users) throws Exception {
@@ -107,6 +126,13 @@ public class UsersExport {
         return csvUsers;
     }
 
+    @Operation(
+            summary = "Export users as vCard",
+            description = "Exports the requested users as vCard.\n\n"
+                    + "Legacy note: this endpoint does not appear to be used by the current Thymeleaf UI. "
+                    + "Verify external consumers before changing or removing it.",
+            tags = { "Private API" },
+            responses = @ApiResponse(responseCode = "200", description = "vCard export"))
     @PostMapping(value = "/private/export/users.vcf", consumes = MediaType.APPLICATION_JSON_VALUE, produces = "text/x-vcard; charset=utf-8")
     @ResponseBody
     public String getUsersAsVcard(@RequestBody String users) throws Exception {
