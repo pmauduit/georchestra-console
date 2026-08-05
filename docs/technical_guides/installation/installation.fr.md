@@ -100,10 +100,11 @@ Il est volontairement stocké hors de `src/main/resources`, afin de ne pas être
 
 La Console peut être construite sous forme de paquet Debian. Ce paquet installe l'application Spring Boot, le fichier d'unité systemd et les scripts Debian nécessaires au rechargement de systemd.
 
-Le paquet prépare un service `georchestra-console.service`. Celui-ci lance le jar avec le datadir geOrchestra :
+Le paquet prépare un service `georchestra-console.service`. Celui-ci lance le jar avec le datadir geOrchestra et, si présent, une configuration Logback externe prioritaire dans le datadir :
 
 ```ini
-ExecStart=/usr/bin/java -Dgeorchestra.datadir=/etc/georchestra -jar /srv/apps/georchestra-console/georchestra-console.jar
+Environment=GEORCHESTRA_DATADIR=/etc/georchestra
+ExecStart=/bin/sh -c '... -Dlogging.config=file:${georchestra.datadir}/logback-spring.xml ...'
 ```
 
 Le service est prévu pour s'exécuter avec l'utilisateur système `georchestra`. L'installation du paquet crée cet utilisateur s'il n'existe pas déjà.

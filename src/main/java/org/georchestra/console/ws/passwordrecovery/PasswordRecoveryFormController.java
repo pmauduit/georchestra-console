@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009-2025 by the geOrchestra PSC
+ * Copyright (C) 2009-2026 by the geOrchestra PSC
  *
  * This file is part of geOrchestra.
  *
@@ -27,8 +27,6 @@ import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.georchestra.console.bs.ReCaptchaParameters;
 import org.georchestra.console.ds.UserTokenDao;
 import org.georchestra.console.mailservice.EmailFactory;
@@ -50,6 +48,8 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.util.UriComponentsBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Manage the user interactions required to implement the lost password
@@ -73,7 +73,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 @SessionAttributes(types = PasswordRecoveryFormBean.class)
 public class PasswordRecoveryFormController {
 
-    protected static final Log LOG = LogFactory.getLog(PasswordRecoveryFormController.class.getName());
+    protected static final Logger LOG = LoggerFactory.getLogger(PasswordRecoveryFormController.class);
 
     // collaborations
     private final AccountDao accountDao;
@@ -211,7 +211,7 @@ public class PasswordRecoveryFormController {
                 .query("token={token}").buildAndExpand(token).toUriString();
 
         if (LOG.isDebugEnabled()) {
-            LOG.debug("generated url:" + url);
+            LOG.debug("generated url: {}", url);
         }
 
         return url;

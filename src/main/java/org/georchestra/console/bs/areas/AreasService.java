@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009-2025 by the geOrchestra PSC
+ * Copyright (C) 2009-2026 by the geOrchestra PSC
  *
  * This file is part of geOrchestra.
  *
@@ -18,8 +18,6 @@
  */
 package org.georchestra.console.bs.areas;
 
-import static java.lang.String.format;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -30,14 +28,14 @@ import java.util.Objects;
 
 import javax.annotation.PostConstruct;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.georchestra.commons.configuration.GeorchestraConfiguration;
 import org.georchestra.ds.orgs.Org;
 import org.georchestra.ds.orgs.OrgsDao;
 import org.georchestra.ds.users.Account;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Stopwatch;
@@ -48,7 +46,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AreasService {
 
-    private static final Log LOG = LogFactory.getLog(AreasService.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(AreasService.class);
     static {
         System.setProperty("org.geotools.referencing.forceXY", "true");
     }
@@ -79,9 +77,9 @@ public class AreasService {
 
     @PostConstruct
     void initialize() throws IOException {
-        LOG.info(format("Initializing %s from %s", getClass().getSimpleName(), areasURI));
+        LOG.info("Initializing {} from {}", getClass().getSimpleName(), areasURI);
         URL areasLocation = resolveAreasLocation();
-        LOG.info(format("Areas URI resolved to %s", areasLocation));
+        LOG.info("Areas URI resolved to {}", areasLocation);
         this.dataStore = new AreasDataStore(areasLocation);
     }
 
@@ -121,7 +119,7 @@ public class AreasService {
     public Geometry getAreaOfCompetence(@NonNull Account account) throws IOException {
         final List<String> cityIds = getCityIds(account);
         if (null == cityIds || cityIds.isEmpty()) {
-            LOG.debug(format("User %s has no area of competence set", account.getUid()));
+            LOG.debug("User {} has no area of competence set", account.getUid());
             return null;
         }
 
@@ -135,8 +133,7 @@ public class AreasService {
     private List<Geometry> getGeometries(List<String> cityIds) throws IOException {
         Stopwatch sw = Stopwatch.createStarted();
         List<Geometry> geometries = dataStore.findAreasById(cityIds);
-        String msg = String.format("Queried %,d geometries in %s", geometries.size(), sw.stop());
-        LOG.debug(msg);
+        LOG.debug("Queried {} geometries in {}", geometries.size(), sw.stop());
         return geometries;
     }
 
@@ -145,8 +142,7 @@ public class AreasService {
         Geometry union = geometries.stream().parallel().filter(Objects::nonNull).map(g -> g.buffer(0d)).reduce(EMPTY,
                 Geometry::union);
 
-        String msg = String.format("Unioned %,d geometries in %s", geometries.size(), sw.stop());
-        LOG.debug(msg);
+        LOG.debug("Unioned {} geometries in {}", geometries.size(), sw.stop());
         return union;
     }
 
@@ -156,7 +152,7 @@ public class AreasService {
             return null;
         }
 
-        LOG.debug(format("Computing area of competence for user %s, org %s", account.getUid(), org.getName()));
+        LOG.debug("Computing area of competence for user {}, org {}", account.getUid(), org.getName());
         return org.getCities();
     }
 

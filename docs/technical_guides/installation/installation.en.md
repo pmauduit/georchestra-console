@@ -100,10 +100,11 @@ The script is stored outside `src/main/resources` on purpose, so it is not packa
 
 The Console can be built as a Debian package. This package installs the Spring Boot application, the systemd unit file and the Debian scripts required to reload systemd.
 
-The package prepares a `georchestra-console.service` service. It starts the jar with the geOrchestra datadir:
+The package prepares a `georchestra-console.service` service. It starts the jar with the geOrchestra datadir and, when present, a higher-priority external Logback configuration from the datadir:
 
 ```ini
-ExecStart=/usr/bin/java -Dgeorchestra.datadir=/etc/georchestra -jar /srv/apps/georchestra-console/georchestra-console.jar
+Environment=GEORCHESTRA_DATADIR=/etc/georchestra
+ExecStart=/bin/sh -c '... -Dlogging.config=file:${georchestra.datadir}/logback-spring.xml ...'
 ```
 
 The service is intended to run with the `georchestra` system user. The package installation creates this user if it does not already exist.

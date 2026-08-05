@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009-2025 by the geOrchestra PSC
+ * Copyright (C) 2009-2026 by the geOrchestra PSC
  *
  * This file is part of geOrchestra.
  *
@@ -39,14 +39,14 @@ import jakarta.mail.internet.MimeMessage;
 import jakarta.servlet.ServletContext;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.georchestra.commons.configuration.GeorchestraConfiguration;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Email {
 
-    protected static final Log LOG = LogFactory.getLog(Email.class.getName());
+    protected static final Logger LOG = LoggerFactory.getLogger(Email.class);
 
     private String smtpHost;
     private int smtpPort;
@@ -118,41 +118,41 @@ public class Email {
         Locale locale = LocaleContextHolder.getLocale();
         List<String> candidateTemplates = resolveTemplateCandidates(fileName, locale);
         if (LOG.isDebugEnabled()) {
-            LOG.debug("Resolving mail template '" + fileName + "' for locale " + locale
-                    + ", candidates=" + candidateTemplates);
+            LOG.debug("Resolving mail template '{}' for locale {}, candidates={}", fileName, locale,
+                    candidateTemplates);
         }
 
         if ((georConfig != null) && (georConfig.activated())) {
             for (String candidate : candidateTemplates) {
                 File fileTmpl = Paths.get(georConfig.getContextDataDir(), "templates", candidate).toFile();
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("Trying mail template from datadir: " + fileTmpl.getAbsolutePath());
+                    LOG.debug("Trying mail template from datadir: {}", fileTmpl.getAbsolutePath());
                 }
                 if (fileTmpl.isFile()) {
                     try {
                         if (LOG.isDebugEnabled()) {
-                            LOG.debug("Using mail template from datadir: " + fileTmpl.getAbsolutePath());
+                            LOG.debug("Using mail template from datadir: {}", fileTmpl.getAbsolutePath());
                         }
                         return FileUtils.readFileToString(fileTmpl, templateEncoding);
                     } catch (IOException e) {
-                        LOG.error("Unable to get the template '" + candidate + "' from geOrchestra datadir.", e);
+                        LOG.error("Unable to get the template '{}' from geOrchestra datadir.", candidate, e);
                     }
                 }
             }
         }
         for (String candidate : candidateTemplates) {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Trying mail template from classpath: /mail-templates/" + candidate);
+                LOG.debug("Trying mail template from classpath: /mail-templates/{}", candidate);
             }
             try (InputStream classpathTemplate = Email.class.getResourceAsStream("/mail-templates/" + candidate)) {
                 if (classpathTemplate != null) {
                     if (LOG.isDebugEnabled()) {
-                        LOG.debug("Using mail template from classpath: /mail-templates/" + candidate);
+                        LOG.debug("Using mail template from classpath: /mail-templates/{}", candidate);
                     }
                     return new String(classpathTemplate.readAllBytes(), Charset.forName(templateEncoding));
                 }
             } catch (IOException e) {
-                LOG.error("Unable to load the template '" + candidate + "' from classpath resources.", e);
+                LOG.error("Unable to load the template '{}' from classpath resources.", candidate, e);
             }
         }
         /* Trying to resolve the templates from inside the webapp */
@@ -163,27 +163,27 @@ public class Email {
             String tmplFromWebapp = this.servletContext.getRealPath(Paths.get("/WEB-INF", "templates", candidate).toString());
             if (tmplFromWebapp == null) {
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("Mail template not resolvable from webapp path for candidate: " + candidate);
+                    LOG.debug("Mail template not resolvable from webapp path for candidate: {}", candidate);
                 }
                 continue;
             }
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Trying mail template from webapp: " + tmplFromWebapp);
+                LOG.debug("Trying mail template from webapp: {}", tmplFromWebapp);
             }
             try {
                 File templateFile = new File(tmplFromWebapp);
                 if (templateFile.isFile()) {
                     if (LOG.isDebugEnabled()) {
-                        LOG.debug("Using mail template from webapp: " + tmplFromWebapp);
+                        LOG.debug("Using mail template from webapp: {}", tmplFromWebapp);
                     }
                     return FileUtils.readFileToString(templateFile, templateEncoding);
                 }
             } catch (IOException e) {
-                LOG.error("Unable to load the template '" + candidate + "' from webapp resources.", e);
+                LOG.error("Unable to load the template '{}' from webapp resources.", candidate, e);
             }
         }
-        LOG.warn("No mail template found for '" + fileName + "' and locale " + locale
-                + ". Tried candidates " + candidateTemplates);
+        LOG.warn("No mail template found for '{}' and locale {}. Tried candidates {}", fileName, locale,
+                candidateTemplates);
         throw new IllegalStateException("Mail template '" + fileName + "' not found for locale "
                 + locale);
     }
@@ -215,7 +215,7 @@ public class Email {
         // Replace {publicUrl} token with the configured public URL
         this.emailBody = this.emailBody.replaceAll("\\{publicUrl\\}", publicUrl);
         this.emailBody = this.emailBody.replaceAll("\\{instanceName\\}", instanceName);
-        LOG.debug("body: " + this.emailBody);
+        LOG.debug("body: {}", this.emailBody);
 
         final Session session = Session.getInstance(System.getProperties(), null);
         session.getProperties().setProperty("mail.smtp.host", smtpHost);
@@ -252,7 +252,7 @@ public class Email {
         // Finally send the message
         if (reallySend)
             Transport.send(message);
-        LOG.debug("email has been sent to:\n" + recipients.stream().collect(Collectors.joining(",")));
+        LOG.debug("email has been sent to:\n{}", recipients.stream().collect(Collectors.joining(",")));
         return message;
     }
 

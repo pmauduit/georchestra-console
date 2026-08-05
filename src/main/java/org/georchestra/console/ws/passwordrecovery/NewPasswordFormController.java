@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009-2025 by the geOrchestra PSC
+ * Copyright (C) 2009-2026 by the geOrchestra PSC
  *
  * This file is part of geOrchestra.
  *
@@ -19,12 +19,12 @@
 
 package org.georchestra.console.ws.passwordrecovery;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.georchestra.console.ds.UserTokenDao;
 import org.georchestra.console.ws.utils.PasswordUtils;
 import org.georchestra.ds.DataServiceException;
 import org.georchestra.ds.users.AccountDao;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ldap.NameNotFoundException;
 import org.springframework.stereotype.Controller;
@@ -48,7 +48,7 @@ import java.io.IOException;
 @SessionAttributes(types = NewPasswordFormBean.class)
 public class NewPasswordFormController {
 
-    private static final Log LOG = LogFactory.getLog(NewPasswordFormController.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(NewPasswordFormController.class);
 
     @Autowired
     protected PasswordUtils passwordUtils;
@@ -105,7 +105,7 @@ public class NewPasswordFormController {
             return "redirect:/account/passwordRecovery";
         } catch (DataServiceException e) {
 
-            LOG.error("cannot insert the setup the passwordRecoveryForm. " + e.getMessage());
+            LOG.error("Cannot set up the password recovery form", e);
 
             throw new IOException(e);
         }
@@ -149,7 +149,7 @@ public class NewPasswordFormController {
             return "account/passwordUpdated";
 
         } catch (DataServiceException e) {
-            LOG.error("cannot set the the new password. " + e.getMessage());
+            LOG.error("Cannot set the new password", e);
 
             throw new IOException(e);
 

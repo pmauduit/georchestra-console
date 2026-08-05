@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009-2025 by the geOrchestra PSC
+ * Copyright (C) 2009-2026 by the geOrchestra PSC
  *
  * This file is part of geOrchestra.
  *
@@ -29,11 +29,11 @@ import java.util.Map;
 import javax.sql.DataSource;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.georchestra.ds.DataServiceException;
 import org.georchestra.lib.sqlcommand.DataCommand;
 import org.georchestra.lib.sqlcommand.DataCommandException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ldap.NameNotFoundException;
 import org.springframework.util.ObjectUtils;
@@ -46,7 +46,7 @@ import org.springframework.util.ObjectUtils;
 @RequiredArgsConstructor
 public class UserTokenDao {
 
-    private static final Log LOG = LogFactory.getLog(UserTokenDao.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(UserTokenDao.class);
 
     private final DataSource dataSource;
 
