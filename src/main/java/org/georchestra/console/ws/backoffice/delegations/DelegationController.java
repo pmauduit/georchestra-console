@@ -160,8 +160,19 @@ public class DelegationController {
             throws JSONException, IOException, DataServiceException {
 
         // TODO deny if request came from delegated admin
-        this.delegationDao.deleteById(uid);
-        this.roleDao.deleteUser("ORGADMIN", accountDao.findByUID(uid));
+        DelegationEntry delegation = this.delegationDao.findFirstByUid(uid);
+        if (delegation != null) {
+            this.delegationDao.deleteById(uid);
+        }
+
+        Account account = accountDao.findByUID(uid);
+        if (account != null) {
+            try {
+                this.roleDao.deleteUser("ORGADMIN", account);
+            } catch (RuntimeException e) {
+                LOG.warn("Unable to remove ORGADMIN from user {} while deleting delegation", uid, e);
+            }
+        }
         return new JSONObject().put("result", "ok").toString();
     }
 

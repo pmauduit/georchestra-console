@@ -65,9 +65,13 @@
 
       <div id="manager-user-feedback" class="alert" hidden aria-live="polite"></div>
 
-      <div class="alert alert-error" th:if="${managedUser.pending and currentOrgPending}"
-           th:text="#{manager.userinfo.pendingOrgWarning}">
-        This account cannot be confirmed until its organization is validated.
+      <div class="alert alert-error" th:if="${managedUser.pending and currentOrgPending}">
+        <span th:text="#{manager.userinfo.pendingOrgWarning}">This account cannot be confirmed until its organization is validated.</span>
+        <a th:if="${currentOrgId != null}"
+           th:href="@{/manager/org/{id}/infos(id=${currentOrgId})}"
+           th:text="${currentOrgName != null ? currentOrgName : managedUser.org}">
+          Organization
+        </a>
       </div>
 
       <form id="manager-user-info-form" class="manager-user-form">
@@ -231,6 +235,8 @@
              th:text="#{manager.userinfo.tab.messages}">Messages</a>
           <a class="role-link" th:href="@{/manager/users/{uid}/logs(uid=${managedUser.uid})}"
              th:text="#{manager.userinfo.tab.logs}">Logs</a>
+          <a class="role-link" th:if="${isSuperuserView}" th:href="@{/manager/users/{uid}/delegation(uid=${managedUser.uid})}"
+             th:text="#{manager.userinfo.tab.delegation}">Delegation</a>
           <a class="role-link" th:href="@{/manager/users/{uid}/manage(uid=${managedUser.uid})}"
              th:text="#{manager.userinfo.tab.manage}">Manage</a>
         </nav>

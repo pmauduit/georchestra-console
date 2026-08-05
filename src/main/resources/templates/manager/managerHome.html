@@ -44,34 +44,16 @@
   </nav>
 
   <section class="manager-dashboard-grid">
-    <a class="card dashboard-card" th:href="@{/manager/browse/all/users}">
-      <span class="dashboard-label" th:text="#{nav.users}">Users</span>
-      <strong class="dashboard-value" th:text="${userCount}">0</strong>
-      <span class="muted" th:text="#{manager.home.users.caption}">Active accounts</span>
-    </a>
-
-    <a class="card dashboard-card" th:href="@{/manager/browse/pending/users}">
-      <span class="dashboard-label" th:text="#{manager.home.pendingUsers}">Pending users</span>
-      <strong class="dashboard-value" th:text="${pendingUserCount}">0</strong>
-      <span class="muted" th:text="#{manager.home.pendingUsers.caption}">Waiting for moderation</span>
-    </a>
-
-    <a class="card dashboard-card" th:href="@{/manager/browse/EXPIRED/users}">
-      <span class="dashboard-label" th:text="#{manager.home.expiredUsers}">Expired users</span>
-      <strong class="dashboard-value" th:text="${expiredUserCount}">0</strong>
-      <span class="muted" th:text="#{manager.home.expiredUsers.caption}">Accounts to review</span>
-    </a>
-
     <a class="card dashboard-card" th:href="@{/manager/orgs/}">
       <span class="dashboard-label" th:text="#{nav.orgs}">Orgs</span>
       <strong class="dashboard-value" th:text="${orgCount}">0</strong>
       <span class="muted" th:text="#{manager.home.orgs.caption}">Validated organizations</span>
     </a>
 
-    <a class="card dashboard-card" th:href="@{/manager/orgs/pending}">
-      <span class="dashboard-label" th:text="#{manager.home.pendingOrgs}">Pending orgs</span>
-      <strong class="dashboard-value" th:text="${pendingOrgCount}">0</strong>
-      <span class="muted" th:text="#{manager.home.pendingOrgs.caption}">Organizations awaiting approval</span>
+    <a class="card dashboard-card" th:href="@{/manager/browse/all/users}">
+      <span class="dashboard-label" th:text="#{nav.users}">Users</span>
+      <strong class="dashboard-value" th:text="${userCount}">0</strong>
+      <span class="muted" th:text="#{manager.home.users.caption}">Active accounts</span>
     </a>
 
     <a class="card dashboard-card" th:href="@{/manager/roles/all}">
@@ -86,10 +68,28 @@
       <span class="muted" th:text="#{manager.home.delegations.caption}">Configured delegations</span>
     </a>
 
-    <a class="card dashboard-card" th:href="@{/manager/logs}">
-      <span class="dashboard-label" th:text="#{manager.logs.title}">Logs</span>
-      <strong class="dashboard-value" th:text="${#lists.size(recentLogs)}">0</strong>
-      <span class="muted" th:text="#{manager.home.logs.caption}">Recent entries loaded</span>
+    <a class="card dashboard-card"
+       th:classappend="${pendingOrgCount > 0} ? ' dashboard-card--attention' : ''"
+       th:href="@{/manager/orgs/pending}">
+      <span class="dashboard-label" th:text="#{manager.home.pendingOrgs}">Pending orgs</span>
+      <strong class="dashboard-value" th:text="${pendingOrgCount}">0</strong>
+      <span class="muted" th:text="#{manager.home.pendingOrgs.caption}">Organizations awaiting approval</span>
+    </a>
+
+    <a class="card dashboard-card"
+       th:classappend="${pendingUserCount > 0} ? ' dashboard-card--attention' : ''"
+       th:href="@{/manager/browse/pending/users}">
+      <span class="dashboard-label" th:text="#{manager.home.pendingUsers}">Pending users</span>
+      <strong class="dashboard-value" th:text="${pendingUserCount}">0</strong>
+      <span class="muted" th:text="#{manager.home.pendingUsers.caption}">Waiting for moderation</span>
+    </a>
+
+    <a class="card dashboard-card"
+       th:classappend="${expiredUserCount > 0} ? ' dashboard-card--attention' : ''"
+       th:href="@{/manager/browse/{scope}/users(scope='EXPIRED')}">
+      <span class="dashboard-label" th:text="#{manager.home.expiredUsers}">Expired users</span>
+      <strong class="dashboard-value" th:text="${expiredUserCount}">0</strong>
+      <span class="muted" th:text="#{manager.home.expiredUsers.caption}">Accounts to review</span>
     </a>
   </section>
 
