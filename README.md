@@ -83,6 +83,32 @@ psql -f src/main/sql/console-bootstrap.sql
 
 This script is not executed automatically by the application and is not packaged in the application jar.
 
+## API Documentation
+
+The application exposes Swagger UI and grouped OpenAPI specs for the main URL families:
+
+- `internal` for `/internal/*`
+- `public` for `/public/*`
+- `account` for `/account/*`
+- `private` for `/private/*`
+
+Useful URLs in local development:
+
+- Direct Swagger UI: `http://localhost:8081/console/swagger-ui/index.html`
+- Gateway Swagger UI: `http://localhost:8080/console/swagger-ui/index.html`
+- Direct OpenAPI specs:
+  - `http://localhost:8081/console/v3/api-docs/internal`
+  - `http://localhost:8081/console/v3/api-docs/public`
+  - `http://localhost:8081/console/v3/api-docs/account`
+  - `http://localhost:8081/console/v3/api-docs/private`
+- Gateway OpenAPI specs:
+  - `http://localhost:8080/console/v3/api-docs/internal`
+  - `http://localhost:8080/console/v3/api-docs/public`
+  - `http://localhost:8080/console/v3/api-docs/account`
+  - `http://localhost:8080/console/v3/api-docs/private`
+
+Some `private` and `public` endpoints are legacy JSON contracts. When applicable, their OpenAPI descriptions explicitly mention that their usage outside the current Thymeleaf UI should be verified before removal or incompatible changes.
+
 ## Documentation
 
 Project documentation is maintained with MkDocs in [`docs`](docs).

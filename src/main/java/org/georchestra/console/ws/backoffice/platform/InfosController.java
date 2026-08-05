@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009-2025 by the geOrchestra PSC
+ * Copyright (C) 2009-2026 by the geOrchestra PSC
  *
  * This file is part of geOrchestra.
  *
@@ -19,6 +19,9 @@
 
 package org.georchestra.console.ws.backoffice.platform;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.Getter;
 import lombok.Setter;
 import org.json.JSONObject;
@@ -31,6 +34,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import java.util.HashMap;
 
 @Controller
+@Tag(name = "Private API", description = "Private JSON endpoints used by backoffice features or legacy clients.")
 public class InfosController {
     /**
      * Brings general information about geOrchestra or console.
@@ -79,6 +83,12 @@ public class InfosController {
     @Value("${headerConfigFile:}")
     private String headerConfigFile;
 
+    @Operation(
+            summary = "Get platform information",
+            description = "Returns configuration flags and header-related platform settings.\n\n"
+                    + "Legacy note: this endpoint does not appear to be used by the current Thymeleaf UI. "
+                    + "Verify external consumers before changing or removing it.",
+            responses = @ApiResponse(responseCode = "200", description = "Platform information"))
     @GetMapping(value = BASE_MAPPING + "/platform/infos", produces = "application/json; charset=utf-8")
     @PreAuthorize(value = "hasAnyRole('SUPERUSER', 'ORGADMIN')")
     @ResponseBody

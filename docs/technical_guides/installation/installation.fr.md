@@ -46,6 +46,32 @@ mkdocs serve
 
 Elle est ensuite accessible sur `http://127.0.0.1:8000/`.
 
+## OpenAPI et Swagger
+
+Une interface Swagger UI est disponible pour les groupes d'API organisés selon les grandes familles d'URL :
+
+- `internal` pour `/internal/*`
+- `public` pour `/public/*`
+- `account` pour `/account/*`
+- `private` pour `/private/*`
+
+URLs utiles en local :
+
+- Swagger UI direct : `http://localhost:8081/console/swagger-ui/index.html`
+- Swagger UI via gateway : `http://localhost:8080/console/swagger-ui/index.html`
+- spécifications OpenAPI directes :
+  - `http://localhost:8081/console/v3/api-docs/internal`
+  - `http://localhost:8081/console/v3/api-docs/public`
+  - `http://localhost:8081/console/v3/api-docs/account`
+  - `http://localhost:8081/console/v3/api-docs/private`
+- spécifications OpenAPI via gateway :
+  - `http://localhost:8080/console/v3/api-docs/internal`
+  - `http://localhost:8080/console/v3/api-docs/public`
+  - `http://localhost:8080/console/v3/api-docs/account`
+  - `http://localhost:8080/console/v3/api-docs/private`
+
+Certains endpoints `public` et `private` correspondent à des contrats JSON hérités, conservés pour compatibilité. Leur description OpenAPI indique qu'il faut vérifier les consommateurs externes avant suppression ou changement incompatible.
+
 ## Déploiement
 
 Pour un déploiement intégré à geOrchestra, conservez les principes suivants :

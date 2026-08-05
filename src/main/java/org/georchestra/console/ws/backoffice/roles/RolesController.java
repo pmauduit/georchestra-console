@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009-2025 by the geOrchestra PSC
+ * Copyright (C) 2009-2026 by the geOrchestra PSC
  *
  * This file is part of geOrchestra.
  *
@@ -32,6 +32,9 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.ServletInputStream;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -84,6 +87,7 @@ import org.springframework.web.bind.annotation.*;
  */
 
 @Controller
+@Tag(name = "Private API", description = "Private JSON endpoints used by backoffice features or legacy clients.")
 public class RolesController {
 
     private static final Log LOG = LogFactory.getLog(RolesController.class.getName());
@@ -146,6 +150,12 @@ public class RolesController {
      *
      * @throws IOException
      */
+    @Operation(
+            summary = "List roles",
+            description = "Returns all roles visible to the caller.\n\n"
+                    + "Legacy note: verify external consumers if you plan to change this contract. "
+                    + "The current Thymeleaf UI mostly relies on server-rendered pages and a subset of the private role endpoints.",
+            responses = @ApiResponse(responseCode = "200", description = "Role list"))
     @GetMapping(value = REQUEST_MAPPING, produces = "application/json; charset=utf-8")
     @PostFilter("hasPermission(filterObject, 'read')")
     @ResponseBody
@@ -176,6 +186,11 @@ public class RolesController {
      * @param cn Comon name of role
      * @throws IOException
      */
+    @Operation(
+            summary = "Get role by common name",
+            description = "Returns one role by common name.\n\n"
+                    + "Legacy note: verify external consumers if you plan to change this contract.",
+            responses = @ApiResponse(responseCode = "200", description = "Role details"))
     @GetMapping(value = REQUEST_MAPPING + "/{cn:.+}", produces = "application/json; charset=utf-8")
     @ResponseBody
     public Role findByCN(@PathVariable String cn) throws DataServiceException {
@@ -247,6 +262,10 @@ public class RolesController {
      * @param response
      * @throws IOException
      */
+    @Operation(
+            summary = "Create role",
+            description = "Creates a new role. This endpoint is still used by the current Thymeleaf manager UI.",
+            responses = @ApiResponse(responseCode = "200", description = "Role created"))
     @PostMapping(REQUEST_MAPPING)
     @PreAuthorize("hasRole('SUPERUSER')")
     public void create(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -294,6 +313,10 @@ public class RolesController {
      * @param cn       Common name of role to delete
      * @throws IOException
      */
+    @Operation(
+            summary = "Delete role",
+            description = "Deletes a role. This endpoint is still used by the current Thymeleaf manager UI.",
+            responses = @ApiResponse(responseCode = "200", description = "Role deleted"))
     @DeleteMapping(REQUEST_MAPPING + "/{cn:.+}")
     @PreAuthorize("hasRole('SUPERUSER')")
     public void delete(HttpServletResponse response, @PathVariable String cn) throws IOException {
@@ -368,6 +391,10 @@ public class RolesController {
      * @throws IOException if the uid does not exist or fails to access to the LDAP
      *                     store.
      */
+    @Operation(
+            summary = "Update role",
+            description = "Updates a role. This endpoint is still used by the current Thymeleaf manager UI.",
+            responses = @ApiResponse(responseCode = "200", description = "Role updated"))
     @PutMapping(REQUEST_MAPPING + "/{cn:.+}")
     @PreAuthorize("hasRole('SUPERUSER')")
     public void update(HttpServletRequest request, HttpServletResponse response, @PathVariable String cn)
@@ -431,6 +458,10 @@ public class RolesController {
      * @param response
      * @throws IOException
      */
+    @Operation(
+            summary = "Update user-role assignments",
+            description = "Adds or removes roles for the given users. This endpoint is still used by the current Thymeleaf manager UI.",
+            responses = @ApiResponse(responseCode = "200", description = "Assignments updated"))
     @PostMapping(BASE_MAPPING + "/roles_users")
     public void updateUsers(HttpServletRequest request, HttpServletResponse response)
             throws AccessDeniedException, IOException, JSONException, DataServiceException {
@@ -469,6 +500,12 @@ public class RolesController {
         ResponseUtil.writeSuccess(response);
     }
 
+    @Operation(
+            summary = "Update organization-role assignments",
+            description = "Adds or removes roles for the users of the given organizations.\n\n"
+                    + "Legacy note: this endpoint does not appear to be used by the current Thymeleaf UI. "
+                    + "Verify external consumers before changing or removing it.",
+            responses = @ApiResponse(responseCode = "200", description = "Assignments updated"))
     @PostMapping(BASE_MAPPING + "/roles_orgs")
     public void updateOrgs(HttpServletRequest request, HttpServletResponse response)
             throws AccessDeniedException, IOException, JSONException, DataServiceException {

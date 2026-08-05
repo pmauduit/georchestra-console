@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009-2025 by the geOrchestra PSC
+ * Copyright (C) 2009-2026 by the geOrchestra PSC
  *
  * This file is part of geOrchestra.
  *
@@ -28,6 +28,12 @@ import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.ServletInputStream;
 import jakarta.servlet.http.HttpServletRequest;
@@ -91,6 +97,7 @@ import lombok.Setter;
  *
  */
 @Controller
+@Tag(name = "Account API", description = "Endpoints related to the current authenticated account.")
 public class UsersController {
 
     private static final Log LOG = LogFactory.getLog(UsersController.class.getName());
@@ -183,6 +190,13 @@ public class UsersController {
      *
      * @throws IOException
      */
+    @Operation(
+            summary = "List users",
+            description = "Returns the users visible to the caller.\n\n"
+                    + "Legacy note: this private JSON endpoint does not appear to be used by the current Thymeleaf UI. "
+                    + "Verify external consumers before changing or removing it.",
+            tags = { "Private API" },
+            responses = @ApiResponse(responseCode = "200", description = "User list"))
     @GetMapping(value = REQUEST_MAPPING, produces = "application/json; charset=utf-8")
     @ResponseBody
     @PostFilter("hasPermission(filterObject, 'read')")
@@ -225,6 +239,13 @@ public class UsersController {
      * </p>
      *
      */
+    @Operation(
+            summary = "Get user by uid",
+            description = "Returns one user by uid.\n\n"
+                    + "Legacy note: this private JSON endpoint does not appear to be used by the current Thymeleaf UI. "
+                    + "Verify external consumers before changing or removing it.",
+            tags = { "Private API" },
+            responses = @ApiResponse(responseCode = "200", description = "User details"))
     @GetMapping(value = REQUEST_MAPPING + "/{uid:.+}", produces = "application/json; charset=utf-8")
     @ResponseBody
     public Account findByUid(@PathVariable String uid)
@@ -258,6 +279,12 @@ public class UsersController {
      * }
      * </pre>
      */
+    @Operation(
+            summary = "Get current private profile",
+            description = "Returns the current user profile in the historical private API format.\n\n"
+                    + "Legacy note: verify external consumers if you plan to change this contract.",
+            tags = { "Private API" },
+            responses = @ApiResponse(responseCode = "200", description = "Current user profile"))
     @GetMapping(value = REQUEST_MAPPING + "/profile", produces = "application/json; charset=utf-8")
     @ResponseBody
     public String myProfile(HttpServletRequest request) throws JSONException, DataServiceException {
@@ -333,6 +360,13 @@ public class UsersController {
      * @param request HTTP POST data contains the user data
      * @throws IOException
      */
+    @Operation(
+            summary = "Create user",
+            description = "Creates a user.\n\n"
+                    + "Legacy note: this private JSON endpoint does not appear to be used by the current Thymeleaf UI. "
+                    + "Verify external consumers before changing or removing it.",
+            tags = { "Private API" },
+            responses = @ApiResponse(responseCode = "200", description = "User created"))
     @PostMapping(value = REQUEST_MAPPING, produces = "application/json; charset=utf-8")
     @ResponseBody
     public Account create(HttpServletRequest request)
@@ -414,6 +448,13 @@ public class UsersController {
      *                               the LDAP store.
      * @throws NameNotFoundException
      */
+    @Operation(
+            summary = "Update user",
+            description = "Updates one user.\n\n"
+                    + "Legacy note: this private JSON endpoint does not appear to be used by the current Thymeleaf UI. "
+                    + "Verify external consumers before changing or removing it.",
+            tags = { "Private API" },
+            responses = @ApiResponse(responseCode = "200", description = "User updated"))
     @PutMapping(value = REQUEST_MAPPING + "/{uid:.+}", produces = "application/json; charset=utf-8")
     @ResponseBody
     public Account update(@PathVariable String uid, HttpServletRequest request)
@@ -505,6 +546,13 @@ public class UsersController {
      * [BASE_MAPPING]/users/{uid}
      * </pre>
      */
+    @Operation(
+            summary = "Delete user",
+            description = "Deletes one user.\n\n"
+                    + "Legacy note: this private JSON endpoint does not appear to be used by the current Thymeleaf UI. "
+                    + "Verify external consumers before changing or removing it.",
+            tags = { "Private API" },
+            responses = @ApiResponse(responseCode = "200", description = "User deleted"))
     @DeleteMapping(value = REQUEST_MAPPING + "/{uid:.+}", produces = "application/json")
     public void delete(@PathVariable String uid, HttpServletRequest request, HttpServletResponse response)
             throws IOException, DataServiceException, NameNotFoundException {
@@ -544,6 +592,21 @@ public class UsersController {
      *
      * @return summary of records anonymized as a result
      */
+    @Operation(
+            summary = "Delete current user account and anonymize GDPR data",
+            description = "Deletes the currently authenticated account and anonymizes related GDPR-sensitive records.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Deletion and anonymization summary",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(implementation = DeletedUserDataInfo.class),
+                                    examples = @ExampleObject(
+                                            value = "{\"account\":\"testuser\",\"metadata\":12,\"ogcStats\":3}"))),
+                    @ApiResponse(responseCode = "403", description = "Protected account or unauthorized operation"),
+                    @ApiResponse(responseCode = "404", description = "Endpoint disabled by configuration")
+            })
     @PostMapping(value = "/account/gdpr/delete", produces = "application/json")
     public ResponseEntity<DeletedUserDataInfo> deleteCurrentUserAndGDPRData(HttpServletResponse response)
             throws DataServiceException {
@@ -584,7 +647,20 @@ public class UsersController {
         return responseValue;
     }
 
-    @GetMapping(PUBLIC_REQUEST_MAPPING + "/requiredFields")
+    @Operation(
+            summary = "Get required user fields",
+            description = "Returns the list of required field names for public user creation forms.\n\n"
+                    + "Legacy note: this endpoint is not used by the current Thymeleaf UI. "
+                    + "Verify whether external applications still depend on it before changing or removing it.",
+            tags = { "Public API" },
+            responses = @ApiResponse(
+                    responseCode = "200",
+                    description = "Required field names",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(type = "string"),
+                            examples = @ExampleObject(value = "[\"uid\",\"mail\",\"sn\",\"givenName\"]"))))
+    @GetMapping(value = PUBLIC_REQUEST_MAPPING + "/requiredFields", produces = "application/json; charset=utf-8")
     public void getUserCreationRequiredFields(HttpServletResponse response) throws IOException {
         try {
             JSONArray fields = new JSONArray();

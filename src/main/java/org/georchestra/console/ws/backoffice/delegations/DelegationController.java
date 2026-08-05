@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009-2025 by the geOrchestra PSC
+ * Copyright (C) 2009-2026 by the geOrchestra PSC
  *
  * This file is part of geOrchestra.
  *
@@ -23,6 +23,9 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -51,6 +54,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @Controller
+@Tag(name = "Private API", description = "Private JSON endpoints used by backoffice features or legacy clients.")
 public class DelegationController {
 
     private static final Log LOG = LogFactory.getLog(DelegationController.class.getName());
@@ -75,6 +79,12 @@ public class DelegationController {
         throw new IOException(e);
     }
 
+    @Operation(
+            summary = "List delegations",
+            description = "Returns all delegation entries.\n\n"
+                    + "Legacy note: this endpoint does not appear to be used by the current Thymeleaf UI. "
+                    + "Verify external consumers before changing or removing it.",
+            responses = @ApiResponse(responseCode = "200", description = "Delegation list"))
     @GetMapping(value = REQUEST_MAPPING + "/delegations", produces = "application/json; charset=utf-8")
     @ResponseBody
     public String findAll() throws JSONException {
@@ -89,6 +99,12 @@ public class DelegationController {
         return res.toString();
     }
 
+    @Operation(
+            summary = "Get delegation by user id",
+            description = "Returns one delegation entry by user id.\n\n"
+                    + "Legacy note: this endpoint does not appear to be used by the current Thymeleaf UI. "
+                    + "Verify external consumers before changing or removing it.",
+            responses = @ApiResponse(responseCode = "200", description = "Delegation entry"))
     @GetMapping(value = REQUEST_MAPPING + "/{uid:.*}", produces = "application/json; charset=utf-8")
     @ResponseBody
     public String findByUid(@PathVariable String uid) throws JSONException {
@@ -98,6 +114,12 @@ public class DelegationController {
         return this.delegationDao.findFirstByUid(uid).toJSON().toString();
     }
 
+    @Operation(
+            summary = "Create or replace delegation",
+            description = "Creates or replaces a delegation entry for the given user id.\n\n"
+                    + "Legacy note: this endpoint does not appear to be used by the current Thymeleaf UI. "
+                    + "Verify external consumers before changing or removing it.",
+            responses = @ApiResponse(responseCode = "200", description = "Delegation saved"))
     @PostMapping(value = REQUEST_MAPPING + "/{uid:.*}", produces = "application/json; charset=utf-8")
     @ResponseBody
     public String add(HttpServletRequest request, @PathVariable String uid)
@@ -126,6 +148,12 @@ public class DelegationController {
         return res.toArray(new String[res.size()]);
     }
 
+    @Operation(
+            summary = "Delete delegation",
+            description = "Deletes the delegation entry for the given user id.\n\n"
+                    + "Legacy note: this endpoint does not appear to be used by the current Thymeleaf UI. "
+                    + "Verify external consumers before changing or removing it.",
+            responses = @ApiResponse(responseCode = "200", description = "Delegation deleted"))
     @DeleteMapping(value = REQUEST_MAPPING + "/{uid:.*}", produces = "application/json; charset=utf-8")
     @ResponseBody
     public String delete(HttpServletRequest request, @PathVariable String uid)
